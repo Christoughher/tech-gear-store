@@ -16,11 +16,12 @@
     box-shadow: 0 3px 16px rgba(0, 0, 0, 0.1);
     position: sticky;
     align-items: center;
+    padding: 35px 20px;
 }
 
 .logo img { 
-    height: 150px;
-    margin: -30px 0 -30px 35px;
+    height: 25px;
+    margin-left: 20px;
 }
 
 .navbar ul {
@@ -47,6 +48,15 @@
 
 .nav-links a:hover {
     background-color: #e0e0e0;
+}
+
+.nav-links .login-btn {
+    background-color: #000000;
+    color: white;
+}
+
+.nav-links .login-btn:hover {
+    background-color: #4c4a4a;
 }
 
 
