@@ -26,6 +26,8 @@
         </ul>
     </nav>
     <main class="page-content"> 
+
+        <!-- ---------------------Dashboard Header---------------------- -->
         <div class="page-header">
             <div class="header-left">
                 <div class="header-icon">
@@ -45,6 +47,100 @@
                 </button>
             </div>
         </div>
+
+        <!-- -----------------Dashboard Content--------------------- -->
+
+        <!-- -------- Stats Cards -------- -->
+        <div class="stats-cards">
+            <div class="stat-card revenue">
+                <div>
+                    <h1>DOANH THU</h1>
+                    <p class>$43.287</p>
+                </div>
+                <div class="card-icon-dollar">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+
+            <div class="stat-card orders">
+                <div>
+                    <h1>ĐƠN HÀNG</h1>
+                    <p>3.980</p>
+                </div>
+                <div class="card-icon-invoice">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+
+            <div class="stat-card customers">
+                <div>
+                    <h1>KHÁCH HÀNG</h1>
+                    <p>363.678</p>
+                </div>
+                <div class="card-icon-users">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+
+            <div class="stat-card products">
+                <div>
+                    <h1>SẢN PHẨM</h1>
+                    <p>15.977</p>
+                </div>
+                <div class="card-icon-laptop">
+                    <i class="fa-solid fa-laptop"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th colspan="5" class="orders-title">Đơn hàng gần đây</th>
+                </tr>
+                <tr class="header-row">
+                    <th>ID Đơn</th>
+                    <th>Tổng tiền</th>
+                    <th>Hình thức giao</th>
+                    <th>Ngày giao hàng</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody> 
+                <tr>
+                    <td>#LAP1001</td>
+                    <td>$1050</td>
+                    <td>Tiêu chuẩn</td>
+                    <td>12-06-2026</td>
+                    <td><span class="badge completed">Hoàn thành</span></td>
+                </tr>
+
+                <tr>
+                    <td>#LAP1002</td>
+                    <td>$1120</td>
+                    <td>Hỏa tốc</td>
+                    <td>12-06-2026</td>
+                    <td><span class="badge cancel">Đã hủy</span></td>
+                </tr>
+
+                <tr> 
+                    <td>#LAP1003</td>
+                    <td>$1333</td>
+                    <td>Hỏa tốc</td>
+                    <td>12-06-2026</td>
+                    <td><span class="badge completed">Hoàn thành</span></td>
+                </tr>
+
+                <tr>
+                    <td>#PC2001</td>
+                    <td>$2049</td>
+                    <td>Hỏa tốc</td>
+                    <td>12-06-2026</td>
+                    <td><span class="badge pending">Chờ duyệt</span></td>
+                </tr>
+            </tbody>
+        </table>
     </main>
 </body>
 </html>
