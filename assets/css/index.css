@@ -1,0 +1,54 @@
+.container {
+    max-width: 1200px; 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.banner-section {
+    display: flex;
+    width: 100%;
+    gap: 10px;  
+}
+
+.banner-section img {
+    width: 50%;
+    object-fit: cover;
+    display: block; 
+    cursor: pointer;
+}
+
+.shop-section {
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+}
+
+.btn-filter {
+    margin-left: 15px;
+    margin-top: 5px;
+    display: inline-flex;
+    align-items: center;    
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: transparent;
+    border: 1px solid #288ad6;
+    color: #288ad6;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-filter:hover {
+    background-color: #e4f1fb;
+    cursor: pointer;
+}
+
+.btn-filter i {
+    font-size: 17px;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px #288ad6;
+}
