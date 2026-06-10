@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - tech.no</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <a href="../index.html" class="sidebar-logo">
+            <span class="sidebar-logo-text">tech.no</span>
+        </a>
+        <ul class="sidebar-links">
+            <li><a href="admin-profile.html"><i class="fa-solid fa-user-gear"></i>Trang cá nhân</a></li>
+            <li><a href="admin-tongquan.html"><i class="fa-solid fa-chart-pie"></i>Tổng quan</a></li>
+            <li><a href="admin-qly-sanpham.html"><i class="fa-solid fa-laptop"></i>Quản lý sản phẩm</a></li>
+            <li><a href="admin-qly-donhang.html"><i class="fa-solid fa-file-invoice-dollar"></i>Quản lý đơn hàng</a></li>
+            <li><a href="../index.html"><i class="fa-solid fa-globe"></i>Xem Website</a></li>
+            <li>
+                <a href="#" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="page-content">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-left">
+                <div class="header-icon" style="background: linear-gradient(135deg,#059669,#10b981);">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div>
+                    <h1>Quản lý đơn hàng</h1>
+                    <p>Theo dõi, xử lý và cập nhật trạng thái đơn hàng</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary"><i class="fa-solid fa-download"></i> Xuất file</button>
+                <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tạo đơn hàng</button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div><h1>TỔNG ĐƠN HÀNG</h1><p>3,980</p></div>
+                <div class="card-icon-invoice"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>HOÀN THÀNH</h1><p>2,841</p></div>
+                <div class="card-icon-laptop" style="background:#d1fae5;color:#059669;"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>CHỜ DUYỆT</h1><p>864</p></div>
+                <div class="card-icon-users" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-clock"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>ĐÃ HỦY</h1><p>275</p></div>
+                <div class="card-icon-dollar" style="background:#fee2e2;color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i></div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-wrapper">
+            <div class="table-toolbar">
+                <span class="table-toolbar-title">Danh sách đơn hàng</span>
+                <div class="toolbar-right">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Tìm theo ID, khách hàng...">
+                    </div>
+                    <select class="filter-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option>Hoàn thành</option>
+                        <option>Chờ duyệt</option>
+                        <option>Đang giao</option>
+                        <option>Đã hủy</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="">Hình thức giao</option>
+                        <option>Tiêu chuẩn</option>
+                        <option>Hỏa tốc</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="orders-mgmt-table">
+                <thead>
+                    <tr class="header-row">
+                        <th><input type="checkbox"></th>
+                        <th>ID Đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Hình thức</th>
+                        <th>Ngày giao</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><strong>#LAP1001</strong></td>
+                        <td>
+                            <div style="font-weight:600;font-size:14px;">Nguyễn Văn A</div>
+                            <div style="font-size:12px;color:#9ca3af;">nguyenvana@gmail.com</div>
+                        </td>
+                        <td>MacBook Pro 14" M3</td>
+                        <td><strong>$1,050</strong></td>
+                        <td>Tiêu chuẩn</td>
+                        <td>12-06-2026</td>
+                        <td><span class="badge completed">Hoàn thành</span></td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon edit" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><strong>#LAP1002</strong></td>
+                        <td>
+                            <div style="font-weight:600;font-size:14px;">Trần Thị B</div>
+                            <div style="font-size:12px;color:#9ca3af;">tranthib@gmail.com</div>
+                        </td>
+                        <td>Dell XPS 15 9530</td>
+                        <td><strong>$1,120</strong></td>
+                        <td>Hỏa tốc</td>
+                        <td>12-06-2026</td>
+                        <td><span class="badge cancel">Đã hủy</span></td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><strong>#LAP1003</strong></td>
+                        <td>
+                            <div style="font-weight:600;font-size:14px;">Lê Minh C</div>
+                            <div style="font-size:12px;color:#9ca3af;">leminhc@gmail.com</div>
+                        </td>
+                        <td>LG UltraWide 34"</td>
+                        <td><strong>$1,333</strong></td>
+                        <td>Hỏa tốc</td>
+                        <td>12-06-2026</td>
+                        <td><span class="badge completed">Hoàn thành</span></td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><strong>#PC2001</strong></td>
+                        <td>
+                            <div style="font-weight:600;font-size:14px;">Phạm Đức D</div>
+                            <div style="font-size:12px;color:#9ca3af;">phamducd@gmail.com</div>
+                        </td>
+                        <td>PC Gaming RTX 4080</td>
+                        <td><strong>$2,049</strong></td>
+                        <td>Hỏa tốc</td>
+                        <td>12-06-2026</td>
+                        <td><span class="badge pending">Chờ duyệt</span></td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><strong>#PC2002</strong></td>
+                        <td>
+                            <div style="font-weight:600;font-size:14px;">Hoàng Thị E</div>
+                            <div style="font-size:12px;color:#9ca3af;">hoangthie@gmail.com</div>
+                        </td>
+                        <td>Keychron K8 Pro</td>
+                        <td><strong>$198</strong></td>
+                        <td>Tiêu chuẩn</td>
+                        <td>13-06-2026</td>
+                        <td><span class="badge shipping">Đang giao</span></td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">...</button>
+                <button class="page-btn">8</button>
+                <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

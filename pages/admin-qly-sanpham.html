@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm - tech.no</title>
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <a href="../index.html" class="sidebar-logo">
+            <img src="../assets/images/logo-techno.png" alt="Tech.no Logo">
+        </a>
+        <ul class="sidebar-links">
+            <li><a href="admin-profile.html"><i class="fa-solid fa-user-gear"></i>Trang cá nhân</a></li>
+            <li><a href="admin-tongquan.html"><i class="fa-solid fa-chart-pie"></i>Tổng quan</a></li>
+            <li><a href="admin-qly-sanpham.html"><i class="fa-solid fa-laptop"></i>Quản lý sản phẩm</a></li>
+            <li><a href="admin-qly-donhang.html"><i class="fa-solid fa-file-invoice-dollar"></i>Quản lý đơn hàng</a></li>
+            <li><a href="../index.html"><i class="fa-solid fa-globe"></i>Xem Website</a></li>
+            <li>
+                <a href="#" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="page-content">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-left">
+                <div class="header-icon" style="background: linear-gradient(135deg,#ea580c,#f97316);">
+                    <i class="fa-solid fa-laptop"></i>
+                </div>
+                <div>
+                    <h1>Quản lý sản phẩm</h1>
+                    <p>Thêm, chỉnh sửa và quản lý danh mục sản phẩm</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary"><i class="fa-solid fa-download"></i> Xuất file</button>
+                <button class="btn btn-primary" id="btnAddProduct">
+                    <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div><h1>TỔNG SẢN PHẨM</h1><p>15,977</p></div>
+                <div class="card-icon-laptop"><i class="fa-solid fa-laptop"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>CÒN HÀNG</h1><p>14,230</p></div>
+                <div class="card-icon-invoice"><i class="fa-solid fa-box-open"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>SắP HẾT HÀNG</h1><p>1,420</p></div>
+                <div class="card-icon-users" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>HẾT HÀNG</h1><p>327</p></div>
+                <div class="card-icon-dollar" style="background:#fee2e2;color:#ef4444;"><i class="fa-solid fa-ban"></i></div>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-wrapper">
+            <div class="table-toolbar">
+                <span class="table-toolbar-title">Danh sách sản phẩm</span>
+                <div class="toolbar-right">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Tìm kiếm sản phẩm...">
+                    </div>
+                    <select class="filter-select">
+                        <option value="">Tất cả danh mục</option>
+                        <option>Laptop</option>
+                        <option>PC / Desktop</option>
+                        <option>Màn hình</option>
+                        <option>Phụ kiện</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option>Còn hàng</option>
+                        <option>Sắp hết</option>
+                        <option>Hết hàng</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="products-table">
+                <thead>
+                    <tr class="header-row">
+                        <th><input type="checkbox"></th>
+                        <th>Sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá bán</th>
+                        <th>Tồn kho</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày thêm</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="product-cell">
+                                <div class="product-img" style="background:#dbeafe;display:flex;align-items:center;justify-content:center;color:#2563eb;font-size:18px;">
+                                    <i class="fa-solid fa-laptop"></i>
+                                </div>
+                                <div>
+                                    <div class="product-name">MacBook Pro 14" M3</div>
+                                    <div class="product-sku">SKU: MBP-M3-14</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Laptop</td>
+                        <td>$1,999</td>
+                        <td>45</td>
+                        <td><span class="badge instock">Còn hàng</span></td>
+                        <td>01-06-2026</td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="product-cell">
+                                <div class="product-img" style="background:#ede9fe;display:flex;align-items:center;justify-content:center;color:#7c3aed;font-size:18px;">
+                                    <i class="fa-solid fa-laptop"></i>
+                                </div>
+                                <div>
+                                    <div class="product-name">Dell XPS 15 9530</div>
+                                    <div class="product-sku">SKU: XPS-9530</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Laptop</td>
+                        <td>$1,599</td>
+                        <td>12</td>
+                        <td><span class="badge lowstock">Sắp hết</span></td>
+                        <td>28-05-2026</td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="product-cell">
+                                <div class="product-img" style="background:#d1fae5;display:flex;align-items:center;justify-content:center;color:#059669;font-size:18px;">
+                                    <i class="fa-solid fa-desktop"></i>
+                                </div>
+                                <div>
+                                    <div class="product-name">PC Gaming RTX 4080</div>
+                                    <div class="product-sku">SKU: PCG-4080</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>PC / Desktop</td>
+                        <td>$2,499</td>
+                        <td>0</td>
+                        <td><span class="badge outstock">Hết hàng</span></td>
+                        <td>20-05-2026</td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="product-cell">
+                                <div class="product-img" style="background:#ffedd5;display:flex;align-items:center;justify-content:center;color:#ea580c;font-size:18px;">
+                                    <i class="fa-solid fa-display"></i>
+                                </div>
+                                <div>
+                                    <div class="product-name">LG UltraWide 34"</div>
+                                    <div class="product-sku">SKU: LG-UW34</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Màn hình</td>
+                        <td>$749</td>
+                        <td>88</td>
+                        <td><span class="badge instock">Còn hàng</span></td>
+                        <td>15-05-2026</td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="product-cell">
+                                <div class="product-img" style="background:#fce7f3;display:flex;align-items:center;justify-content:center;color:#db2777;font-size:18px;">
+                                    <i class="fa-solid fa-keyboard"></i>
+                                </div>
+                                <div>
+                                    <div class="product-name">Keychron K8 Pro</div>
+                                    <div class="product-sku">SKU: KCH-K8P</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Phụ kiện</td>
+                        <td>$99</td>
+                        <td>210</td>
+                        <td><span class="badge instock">Còn hàng</span></td>
+                        <td>10-05-2026</td>
+                        <td><div class="action-btns">
+                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
+                        </div></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">...</button>
+                <button class="page-btn">12</button>
+                <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Add Product Modal (hidden by default) -->
+        <div id="modalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:16px;padding:32px;width:480px;max-width:95vw;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                    <h2 style="font-size:18px;font-weight:700;">Thêm sản phẩm mới</h2>
+                    <button id="closeModal" style="border:none;background:none;font-size:20px;cursor:pointer;color:#6b7280;">&times;</button>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Tên sản phẩm</label>
+                        <input type="text" placeholder="Nhập tên sản phẩm..." style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                        <div>
+                            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Danh mục</label>
+                            <select style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;">
+                                <option>Laptop</option><option>PC / Desktop</option><option>Màn hình</option><option>Phụ kiện</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Giá bán ($)</label>
+                            <input type="number" placeholder="0" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Số lượng tồn kho</label>
+                        <input type="number" placeholder="0" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end;">
+                    <button id="cancelModal" class="btn btn-secondary">Hủy</button>
+                    <button class="btn btn-primary">Thêm sản phẩm</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const btnAdd = document.getElementById('btnAddProduct');
+        const overlay = document.getElementById('modalOverlay');
+        const closeModal = document.getElementById('closeModal');
+        const cancelModal = document.getElementById('cancelModal');
+
+        btnAdd.addEventListener('click', () => { overlay.style.display = 'flex'; });
+        closeModal.addEventListener('click', () => { overlay.style.display = 'none'; });
+        cancelModal.addEventListener('click', () => { overlay.style.display = 'none'; });
+        overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.style.display = 'none'; });
+    </script>
+</body>
+</html>
