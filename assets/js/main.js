@@ -18,10 +18,10 @@ fetch('/components/navbar.html')
 
 const brandData = {
     laptop: ['asus', 'hp', 'dell', 'acer', 'macbook', 'lenovo', 'msi', 'gigabyte'],
-    phone: ['samsung', 'apple', 'xiaomi'],
+    phone: ['iphone', 'samsung', 'oppo', 'xiaomi', 'realme', 'vivo'],
     pc: ['msi', 'gigabyte'],
-    watch: ['apple', 'samsung'],
-    phukien: ['airpods', 'loa'] 
+    watch: ['casio', 'g-shock', 'citizen', 'baby-g', 'nakzen', 'lacoste', 'ferrari'],
+    phukien: ['airpods', 'loa', 'camera', 'sạc'] 
 };
 
 const brandContainer = document.getElementById('brand-filter-container');
@@ -43,12 +43,14 @@ function renderBrands(category) {
 
     if (brands.length === 0) return;
 
-    // Render các nút logo...
+    // Render các nút logo
     brands.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'btn-brand';
-        btn.innerHTML = `<img src="assets/images/${brand}.png" alt="${brand}" 
-                         onerror="this.style.display='none'; this.nextSibling.textContent='${brand.toUpperCase()}'">
+
+        const imagePath = `assets/images/brand-logo/${category}/${brand}.png`;
+        btn.innerHTML = `<img src="${imagePath}" alt="${brand}" 
+                            onerror="this.style.display='none'; this.nextSibling.textContent='${brand.toUpperCase()}'">
                          <span></span>`;
         brandContainer.appendChild(btn);
     });
@@ -58,12 +60,29 @@ function renderBrands(category) {
     closeBtn.className = 'btn-close-filter';
     closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
     
-    // Sự kiện đóng
     closeBtn.addEventListener('click', () => {
         brandContainer.innerHTML = '';
-        // Bỏ active của các nút danh mục nếu cần
         document.querySelectorAll('.btn-cat').forEach(btn => btn.classList.remove('active'));
     });
     
     brandContainer.appendChild(closeBtn);
 }
+
+const stars = document.querySelectorAll('.stars i');
+const ratingInput = document.getElementById('rating-value');
+
+stars.forEach(star => {
+    star.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        ratingInput.value = value;  /* ratingInput sẽ được gửi lên backend */
+
+        stars.forEach(s => s.classList.remove('selected'));  /* xóa class 'selected' cũ */
+
+        this.classList.add('selected');   /* thêm class 'selected' mới vào ptử đang chọn */
+        let nextSibling = this.nextElementSibling;
+        while (nextSibling) {
+            nextSibling.classList.add('selected');
+            nextSibling = nextSibling.nextElementSibling;
+        }
+    });
+});

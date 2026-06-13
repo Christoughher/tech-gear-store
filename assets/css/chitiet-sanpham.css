@@ -212,3 +212,38 @@
     border-top: 1px solid #eee;
     padding-top: 20px;
 }
+
+.rating-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stars {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.stars i {
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0 2px;
+}
+
+.stars i:hover,
+.stars i:hover ~ i {
+    color: #ffc107;
+}
+
+.stars i.selected,
+.stars i.selected ~ i {
+    color: #ffc107;
+}
+
+.stars i.active {
+    color: #ffc107; 
+}
