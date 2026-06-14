@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/chitiet-sanpham.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     
 <body>
     <div id="navbar-container"></div>
@@ -17,7 +18,15 @@
     
     <div class="box-main">
         <div class="box-left">
-            <img src="../assets/images/products/ssga36-details.jpg" alt="Samsung Galaxy A36">
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
 
             <div class="policy">
                 <div class="exchange-policy">
@@ -91,5 +100,16 @@
     <div id="footer-container"></div>
 
     <script src="/assets/js/main.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".mySwiper", {
+            loop: true,             
+            navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+            },
+        });
+        </script>
 </body>
 </html>
