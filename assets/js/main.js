@@ -16,6 +16,14 @@ fetch('/components/navbar.html')
         }
     });
 
+fetch('/components/admin-sidebar.html')
+    .then(response => response.text())
+    .then(data => {
+        const container = document.getElementById('admin-sidebar-container');
+        if (container) {
+            container.innerHTML = data;
+        }
+    })
 const brandData = {
     laptop: ['asus', 'hp', 'dell', 'acer', 'macbook', 'lenovo', 'msi', 'gigabyte'],
     phone: ['iphone', 'samsung', 'oppo', 'xiaomi', 'realme', 'vivo'],
