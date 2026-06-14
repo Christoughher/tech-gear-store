@@ -86,3 +86,31 @@ stars.forEach(star => {
         }
     });
 });
+
+// Hàm để load một file HTML vào một phần tử có ID cho trước
+async function loadComponent(id, file) {
+    const element = document.getElementById(id);
+    if (element) {
+        try {
+            const response = await fetch(`/components/${file}`);
+            const data = await response.text();
+            element.innerHTML = data;
+        } catch (error) {
+            console.error(`Lỗi khi load component ${file}:`, error);
+        }
+    }
+}
+
+// Chạy khi trang web tải xong
+document.addEventListener('DOMContentLoaded', () => {
+    loadComponent('pagination-container', 'pagination.html'); 
+});
+
+function focusOnSearchBar() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.focus();
+    }
+}
+
+ 

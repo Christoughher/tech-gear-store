@@ -272,17 +272,5 @@
             </div>
         </div>
     </main>
-
-    <script>
-        const btnAdd = document.getElementById('btnAddProduct');
-        const overlay = document.getElementById('modalOverlay');
-        const closeModal = document.getElementById('closeModal');
-        const cancelModal = document.getElementById('cancelModal');
-
-        btnAdd.addEventListener('click', () => { overlay.style.display = 'flex'; });
-        closeModal.addEventListener('click', () => { overlay.style.display = 'none'; });
-        cancelModal.addEventListener('click', () => { overlay.style.display = 'none'; });
-        overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.style.display = 'none'; });
-    </script>
 </body>
 </html>
