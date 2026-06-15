@@ -1,29 +1,3 @@
-fetch('/components/footer.html')
-    .then(response => response.text())
-    .then(data => {
-        const container = document.getElementById('footer-container');
-        if (container) {
-            container.innerHTML = data;
-        }
-    });
-
-fetch('/components/navbar.html')
-    .then(response => response.text())
-    .then(data => {
-        const container = document.getElementById('navbar-container');
-        if (container) {
-            container.innerHTML = data;
-        }
-    });
-
-fetch('/components/admin-sidebar.html')
-    .then(response => response.text())
-    .then(data => {
-        const container = document.getElementById('admin-sidebar-container');
-        if (container) {
-            container.innerHTML = data;
-        }
-    })
 const brandData = {
     laptop: ['asus', 'hp', 'dell', 'acer', 'macbook', 'lenovo', 'msi', 'gigabyte'],
     phone: ['iphone', 'samsung', 'oppo', 'xiaomi', 'realme', 'vivo'],
@@ -112,6 +86,9 @@ async function loadComponent(id, file) {
 // Chạy khi trang web tải xong
 document.addEventListener('DOMContentLoaded', () => {
     loadComponent('pagination-container', 'pagination.html'); 
+    loadComponent('footer-container', 'footer.html'); 
+    loadComponent('navbar-container', 'navbar.html'); 
+    loadComponent('admin-sidebar-container', 'admin-sidebar.html'); 
 });
 
 function focusOnSearchBar() {
