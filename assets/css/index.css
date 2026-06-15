@@ -16,8 +16,6 @@
 
 .banner-section img {
     width: 100%;
-    object-fit: cover;
-    display: block; 
     cursor: pointer;
 }
 
@@ -30,9 +28,6 @@
 .btn-filter-main {
     margin-left: 15px;
     margin-top: 10px;
-    display: inline-flex;
-    align-items: center;    
-    gap: 4px;
     padding: 10px 12px;
     border-radius: 8px;
     background-color: transparent;
@@ -59,7 +54,6 @@
 
 .filter-logo-list {
     display: flex;
-    list-style: none;
     margin-top: 8px;
     margin-left: 10px;
     gap: 10px;
@@ -68,24 +62,16 @@
 .btn-brand {
     width: 80px;     
     height: 38px;
-    border: 1px solid #f0f0f0;
     background-color: #f7f5ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     cursor: pointer;
     padding: 4px;
     transition: all 0.2s ease;
-}
-
-.filter-logo-list button {
     border-radius: 8px; 
     border: none;
     gap: 10px;
 }
 
 .filter-logo-list .btn-brand:hover {
-    border-color: #288ad6;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -214,5 +200,54 @@
     background-color: #e7f4ff; 
 }
 
+.filter-section {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.category-buttons {
+    display: flex;
+    gap: 20px;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.btn-cat {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fffbfb;
+    cursor: pointer;
+    font-size: 14px;
+    width: 80px;     
+    height: 39px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-cat:hover, .btn-cat.active {
+    background-color: #edf7ff;
+    color: black;
+    border-color: #288ad6;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.btn-close-filter {
+    border: none;
+    background-color: #ffffff;
+    margin-left: 5px;
+    font-size: 20px;
+    padding: 3px 5px;
+    border-radius: 2px;
+}
+
+.btn-close-filter:hover {
+    background-color: #ebebeb;
+    transition: background-color 0.2s ease;
+}
 
 

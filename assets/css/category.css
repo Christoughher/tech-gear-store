@@ -1,7 +1,7 @@
 /* CSS riêng cho các trang danh mục: Laptop, PC Gaming, Phụ kiện */
 
 .category-main {
-    padding: 40px 8%;
+    padding: 50px 10%;
     background-color: #f5f7fb;
     min-height: 100vh;
 }
@@ -12,6 +12,7 @@
     padding: 48px 40px;
     border-radius: 18px;
     margin-bottom: 32px;
+    margin-top: 60px;
 }
 
 .category-hero h1 {

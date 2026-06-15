@@ -1,243 +1,232 @@
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Tech.no - Cửa hàng công nghệ cao cấp</title>
-        <link rel="stylesheet" href="assets/css/style.css">
-        <link rel="stylesheet" href="assets/css/index.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    </head>
-    <body>  
-        <nav class="navbar">
-            <a href="index.html" class="logo">
-                <img src="assets/images/logo-techno.png" alt="Tech.no Logo">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech.no - Cửa hàng công nghệ cao cấp</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>  
+    <div id="navbar-container"></div>
+    
+    <main class="container"> 
+        <section class="banner-section">
+            <a href="chitiet-sanpham.html">
+                <img src="assets/images/banner1.png">
             </a>
+            
+            <a href="chitiet-sanpham.html">
+                <img src="assets/images/banner2.png">
+            </a>
+        </section>
 
-            <ul class="nav-links">
-                <li><a href="pages/admin.html">Admin</a></li>
-                <li><a href="index.html" class="active">Trang chủ</a></li>
-                <li><a href="pages/laptop.html">Laptop</a></li>
-                <li><a href="pages/pc-gaming.html">PC Gaming</a></li>
-                <li><a href="pages/phu-kien.html">Phụ kiện</a></li>
-                <li><a href="pages/gio-hang.html">Giỏ hàng</a></li>
-                <li><a href="pages/login.html" class="login-btn">Đăng nhập</a></li>
-            </ul>
-        </nav>
-
-        <main class="container"> 
-            <section class="banner-section">
-                <a href="chitiet-sanpham.html">
-                    <img src="assets/images/banner1.png">
-                </a>
+        <section class ="shop-section">
+            <div class="filter-section">
+                <button class="btn-filter-main"><i class="fa-solid fa-filter"></i> Lọc</button>
                 
-                <a href="chitiet-sanpham.html">
-                    <img src="assets/images/banner2.png">
-                </a>
-            </section>
+                <div class="category-buttons">
+                    <button class="btn-cat" data-cat="phone">Điện thoại</button>
+                    <button class="btn-cat" data-cat="laptop">Laptop</button>
+                    <button class="btn-cat" data-cat="pc">PC</button>
+                    <button class="btn-cat" data-cat="watch">Đồng hồ</button>
+                    <button class="btn-cat" data-cat="phukien">Phụ kiện</button>
+                </div>
+            </div>
 
-            <section class ="shop-section">
-                <div class="filter-section">
-                    <button class="btn-filter-main">
-                        <i class="fa-solid fa-filter"></i> Lọc  
-                    </button>
+            <div id="brand-filter-container" class="filter-logo-list"></div>
 
-                    <div class="filter-logo-list">
-                        <button class="btn-brand" data-brand="asus"><img src="assets/images/asus.png" alt="Asus"></button>
-                        <button class="btn-brand" data-brand="hp"><img src="assets/images/hp.png" alt="HP"></button>
-                        <button class="btn-brand" data-brand="dell"><img src="assets/images/dell.png" alt="Dell"></button>
-                        <button class="btn-brand" data-brand="acer"><img src="assets/images/acer.png" alt="Acer"></button>
-                        <button class="btn-brand" data-brand="macbook"><img src="assets/images/macbook.png" alt="Macbook"></button>
-                        <button class="btn-brand" data-brand="lenovo"><img src="assets/images/lenovo.png" alt="Lenovo"></button>
-                        <button class="btn-brand" data-brand="msi"><img src="assets/images/msi.png" alt="MSI"></button>
-                        <button class="btn-brand" data-brand="gigabyte"><img src="assets/images/gigabyte.png" alt="Gigabyte"></button>
+            <div class="products-section">
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/samsunggalaxya36.png">
+                    </div>
+
+                    <div class="product-name">
+                        <h3>
+                            <a href="pages/chitiet-sanpham.html">Samsung Galaxy A36 5G 12GB/256GB</a>
+                        </h3>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
                     </div>
                 </div>
 
-                <div class="products-section">
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/samsunggalaxya36.png">
-                        </div>
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/aceraspirelite.jpg">
+                    </div>
 
-                        <div class="product-name">
-                            <h3>
-                                <a href="pages/chitiet-sanpham.html">Samsung Galaxy A36 5G 12GB/256GB</a>
-                            </h3>
-                        </div>
+                    <div class="product-name">
+                        <h3>
+                            <a href="chitiet-sanpham.html">Acer Aspire Lite 15 AL15 41P R3QL R7 5700U (NX.J54SV.001)</a>
+                        </h3>
+                    </div>
 
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
                         </div>
                     </div>
 
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/aceraspirelite.jpg">
-                        </div>
-
-                        <div class="product-name">
-                            <h3>
-                                <a href="chitiet-sanpham.html">Acer Aspire Lite 15 AL15 41P R3QL R7 5700U (NX.J54SV.001)</a>
-                            </h3>
-                        </div>
-
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/applewatch.jpg">
-                        </div>
-
-                        <div class="product-name">
-                            <h3>
-                                <a href="chitiet-sanpham.html">Apple Watch Ultra 3 GPS + Cellular 49mm viền Titanium dây Milan</a>
-                            </h3>
-                        </div>
-
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/ipadair.jpg">
-                        </div>
-
-                        <div class="product-name">
-                            <h3>
-                                <a href="chitiet-sanpham.html">iPad Air M3 13 inch WiFi 128GB</a>
-                            </h3>
-                        </div>
-
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/chuotrazer.jpg">
-                        </div>
-
-                        <div class="product-name">
-                            <h3>
-                                <a href="chitiet-sanpham.html">Chuột sạc Bluetooth Gaming Razer Basilisk V3 Pro 35K</a>
-                            </h3>
-                        </div>
-
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/manmsi.jpg">
-                        </div>
-
-                        <div class="product-name">
-                            <h3>
-                                <a href="chitiet-sanpham.html">Màn hình MSI MAG 274QF X24 27" Rapid IPS 2K 240Hz</a>
-                            </h3>
-                        </div>
-
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="product-item">
-                        <div class="product-img">
-                            <img src="assets/images/pc.jpg">
-                        </div>
-
-                        <div class="product-name">
-                            <h3>
-                                <a href="chitiet-sanpham.html">Bộ PC Gaming Ryzen 7 7800X3D, Ram 32GB, SSD 256GB, RX 9070 XT 16GB</a>
-                            </h3>
-                        </div>
-
-                        <div class="product-price">
-                            <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
-                            <div class="discount-badge">
-                                <i class="fa-solid fa-certificate"></i>
-                                <span>-10%</span>
-                            </div>
-                        </div>
-
-                        <div class="btn-product-buy">
-                            <a href="gio-hang.html">
-                                <button class="btn-buy">Mua ngay</button>   
-                            </a>
-                        </div>
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
                     </div>
                 </div>
-            </section>
-        </main>
-    </body>
-    </html>
+
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/applewatch.jpg">
+                    </div>
+
+                    <div class="product-name">
+                        <h3>
+                            <a href="chitiet-sanpham.html">Apple Watch Ultra 3 GPS + Cellular 49mm viền Titanium dây Milan</a>
+                        </h3>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
+                    </div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/ipadair.jpg">
+                    </div>
+
+                    <div class="product-name">
+                        <h3>
+                            <a href="chitiet-sanpham.html">iPad Air M3 13 inch WiFi 128GB</a>
+                        </h3>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
+                    </div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/chuotrazer.jpg">
+                    </div>
+
+                    <div class="product-name">
+                        <h3>
+                            <a href="chitiet-sanpham.html">Chuột sạc Bluetooth Gaming Razer Basilisk V3 Pro 35K</a>
+                        </h3>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
+                    </div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/manmsi.jpg">
+                    </div>
+
+                    <div class="product-name">
+                        <h3>
+                            <a href="chitiet-sanpham.html">Màn hình MSI MAG 274QF X24 27" Rapid IPS 2K 240Hz</a>
+                        </h3>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
+                    </div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-img">
+                        <img src="assets/images/products/pc.jpg">
+                    </div>
+
+                    <div class="product-name">
+                        <h3>
+                            <a href="chitiet-sanpham.html">Bộ PC Gaming Ryzen 7 7800X3D, Ram 32GB, SSD 256GB, RX 9070 XT 16GB</a>
+                        </h3>
+                    </div>
+
+                    <div class="product-price">
+                        <span class="price-amount">8.610.000<sup><u>đ</u></sup></span>
+                        <div class="discount-badge">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>-10%</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-product-buy">
+                        <a href="pages/gio-hang.html">
+                            <button class="btn-buy">Mua ngay</button>   
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="pagination-container"></div>
+
+    <div id="footer-container"></div>
+
+    <script src="/assets/js/main.js"></script>
+</body>
+</html>

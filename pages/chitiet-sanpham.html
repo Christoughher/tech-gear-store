@@ -6,22 +6,11 @@
     <title>Chi tiết sản phẩm - Tech.no</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/chitiet-sanpham.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     
 <body>
-    <nav class="navbar">
-        <a href="../index.html" class="logo">
-            <img src="../assets/images/logo-techno.png" alt="Tech.no Logo">
-        </a>
-
-        <ul class="nav-links">
-            <li><a href="index.html" class="active">Trang chủ</a></li>
-            <li><a href="laptop.html">Laptop</a></li>
-            <li><a href="pc-gaming.html">PC Gaming</a></li>
-            <li><a href="phu-kien.html">Phụ kiện</a></li>
-            <li><a href="#">Giỏ hàng</a></li>
-            <li><a href="#" class="login-btn">Đăng nhập</a></li>
-        </ul>
-    </nav>
+    <div id="navbar-container"></div>
 
     <div class="product-name">
         <h1>Điện thoại Samsung Galaxy A36 5G 12GB/256GB</h1>
@@ -29,7 +18,15 @@
     
     <div class="box-main">
         <div class="box-left">
-            <img src="../assets/images/ssga36-details.jpg" alt="Samsung Galaxy A36">
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
 
             <div class="policy">
                 <div class="exchange-policy">
@@ -65,6 +62,18 @@
     <section class="comment-section">
         <h3>Đánh giá sản phẩm</h3>
 
+        <div class="rating-input">
+            <span>Đánh giá của bạn:</span>
+            <div class="stars" id="star-rating">
+                <i class="fa-solid fa-star" data-value="1"></i>
+                <i class="fa-solid fa-star" data-value="2"></i>
+                <i class="fa-solid fa-star" data-value="3"></i>
+                <i class="fa-solid fa-star" data-value="4"></i>
+                <i class="fa-solid fa-star" data-value="5"></i>
+            </div>
+            <input type="hidden" id="rating-value" value="0"> </div>
+        </div>
+
         <div class="comment-input-group">
             <textarea placeholder="Viết đánh giá của bạn về sản phẩm..." rows="4"></textarea>
             <button class="btn-submit-comment">Gửi bình luận</button>
@@ -87,5 +96,20 @@
         </div>
         
     </section>
+
+    <div id="footer-container"></div>
+
+    <script src="/assets/js/main.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".mySwiper", {
+            loop: true,             
+            navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+            },
+        });
+        </script>
 </body>
 </html>

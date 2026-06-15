@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm sản phẩm - tech.no</title>
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .add-product-wrapper {
+            margin-left: 265px;
+            margin-right: 40px;
+            margin-bottom: 40px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .form-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .form-header h2 {
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .form-header p {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .product-form {
+            padding: 28px;
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 28px;
+        }
+
+        .form-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 22px;
+            background: #ffffff;
+        }
+
+        .form-section + .form-section {
+            margin-top: 20px;
+        }
+
+        .form-section-title {
+            color: #111827;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            color: #374151;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            color: #111827;
+            font-size: 14px;
+            padding: 11px 12px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group textarea {
+            min-height: 130px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #111827;
+            box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        .upload-box i {
+            color: #111827;
+            font-size: 34px;
+            margin-bottom: 12px;
+        }
+
+        .upload-box strong {
+            display: block;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .upload-box:hover {
+            cursor: pointer;
+        }
+
+        .form-actions {
+            padding: 22px 28px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        .btn-link {
+            text-decoration: none;
+        }
+
+        @media (max-width: 1024px) {
+            .product-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-sidebar-container"></div>
+
+    <main class="page-content">
+        <div class="page-header">
+            <div class="header-left">
+                <div class="header-icon" style="background: linear-gradient(135deg,#111827,#334155); color: #ffffff;">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <div>
+                    <h1>Thêm sản phẩm</h1>
+                    <p>Tạo sản phẩm mới cho cửa hàng tech.no</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <a class="btn btn-secondary btn-link" href="admin-tongquan.html">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+
+        <div class="add-product-wrapper">
+            <div class="form-header">
+                <div>
+                    <h2>Thông tin sản phẩm</h2>
+                    <p>Nhập đầy đủ thông tin để hiển thị sản phẩm trên website</p>
+                </div>
+            </div>
+
+            <form class="product-form">
+                <div>
+                    <section class="form-section">
+                        <h3 class="form-section-title">Thông tin cơ bản</h3>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label for="productName">Tên sản phẩm</label>
+                                <input type="text" id="productName" placeholder="VD: MacBook Pro 14 M3">
+                            </div>
+                            <div class="form-group">
+                                <label for="productSku">Mã sản phẩm</label>
+                                <input type="text" id="productSku" placeholder="VD: MBP-M3-14">
+                            </div>
+                            <div class="form-group">
+                                <label for="productCategory">Danh mục</label>
+                                <select id="productCategory">
+                                    <option value="">Chọn danh mục</option>
+                                    <option>Laptop</option>
+                                    <option>PC / Desktop</option>
+                                    <option>Màn hình</option>
+                                    <option>Phụ kiện</option>
+                                </select>
+                            </div>
+                            <div class="form-group full">
+                                <label for="productDescription">Mô tả sản phẩm</label>
+                                <textarea id="productDescription" placeholder="Nhập mô tả, cấu hình nổi bật, bảo hành..."></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h3 class="form-section-title">Giá và kho</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="productPrice">Giá bán</label>
+                                <input type="number" id="productPrice" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="productSalePrice">Giá khuyến mãi</label>
+                                <input type="number" id="productSalePrice" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="productStock">Số lượng tồn kho</label>
+                                <input type="number" id="productStock" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="productStatus">Trạng thái</label>
+                                <select id="productStatus">
+                                    <option>Còn hàng</option>
+                                    <option>Sắp hết hàng</option>
+                                    <option>Hết hàng</option>
+                                    <option>Ẩn sản phẩm</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <aside>
+                    <section class="form-section">
+                        <h3 class="form-section-title">Hình ảnh</h3>
+                        <label class="upload-box" for="productImage">
+                            <span>
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <strong>Tải ảnh sản phẩm</strong>
+                                Chọn ảnh từ máy tính
+                            </span>
+                        </label>
+                        <input type="file" id="productImage" accept="image/*" hidden>
+                    </section>
+
+                    <section class="form-section">
+                        <h3 class="form-section-title">Thông tin bổ sung</h3>
+                        <div class="form-group">
+                            <label for="productBrand">Thương hiệu</label>
+                            <input type="text" id="productBrand" placeholder="VD: Apple, Dell, Asus">
+                        </div>
+                    </section>
+                </aside>
+            </form>
+
+            <div class="form-actions">
+                <a class="btn btn-secondary btn-link" href="admin-tongquan.html">Hủy</a>
+                <button class="btn btn-primary" type="button">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu sản phẩm
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="/assets/js/main.js"></script>
+</body>
+</html>

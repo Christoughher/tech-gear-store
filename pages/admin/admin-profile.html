@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang cá nhân | Tech.no</title>
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-wrapper {
+            margin-left: 265px;
+            margin-right: 40px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            gap: 24px;
+        }
+
+        .profile-card,
+        .profile-content {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .profile-card {
+            overflow: hidden;
+            height: fit-content;
+        }
+
+        .profile-cover {
+            height: 96px;
+            background: linear-gradient(135deg, #111827, #475569);
+        }
+
+        .profile-summary {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .avatar-wrap {
+            margin: 0 auto 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .user-avatar {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            object-fit: cover;
+            background: #e5e7eb;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+            cursor: pointer;
+        }
+
+        .avatar-upload-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #111827;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+        }
+
+        #avatar-input {
+            display: none;
+        }
+
+        .profile-summary h2 {
+            font-size: 20px;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .profile-summary p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 18px 20px;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat strong {
+            display: block;
+            color: #111827;
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .profile-stat span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .profile-tabs {
+            list-style: none;
+            padding: 18px;
+        }
+
+        .profile-tabs li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #475569;
+            padding: 13px 14px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .profile-tabs li i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .profile-tabs li:hover,
+        .profile-tabs li.active {
+            background: #111827;
+            color: #ffffff;
+        }
+
+        .profile-content {
+            padding: 28px;
+            min-height: 560px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-head h2 {
+            color: #111827;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .section-head p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            color: #374151;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            color: #111827;
+            font-size: 14px;
+            outline: none;
+            background: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #111827;
+            box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+        }
+
+        .panel-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .profile-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 11px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .profile-btn.primary {
+            background: #111827;
+            color: #ffffff;
+        }
+
+        .profile-btn.primary:hover {
+            background: #334155;
+        }
+
+        .profile-btn.secondary {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        .profile-btn.secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .order-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .order-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .order-item h3 {
+            color: #111827;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .order-item p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .saved-products-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 18px;
+        }
+
+        .product-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            position: relative;
+            background: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .product-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .product-thumb {
+            height: 122px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #111827;
+            font-size: 36px;
+            margin-bottom: 14px;
+        }
+
+        .product-item h3 {
+            color: #111827;
+            font-size: 15px;
+            line-height: 1.4;
+            min-height: 42px;
+            margin-bottom: 8px;
+        }
+
+        .product-item .price {
+            color: #dc2626;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .remove-saved {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #dc2626;
+            background: #fee2e2;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 42px 20px;
+            text-align: center;
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #111827;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 1024px) {
+            .profile-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-wrapper {
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+
+            .page-header {
+                margin-left: 0;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .form-grid,
+            .order-item {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-sidebar-container"></div>
+
+    <main class="page-content">
+        <div class="page-header">
+            <div class="header-left">
+                <div class="header-icon" style="background: linear-gradient(135deg,#0f172a,#334155); color: #ffffff;">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+                <div>
+                    <h1>Trang cá nhân</h1>
+                    <p>Quản lý thông tin tài khoản, bảo mật và hoạt động của quản trị viên</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary">
+                    <i class="fa-solid fa-download"></i> Xuất hồ sơ
+                </button>
+            </div>
+        </div>
+
+        <div class="profile-wrapper">
+            <aside class="profile-card">
+                <div class="profile-cover"></div>
+                <div class="profile-summary">
+                    <div class="avatar-wrap">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='60' fill='%23d8dde6'/%3E%3Ccircle cx='60' cy='45' r='23' fill='%23ffffff'/%3E%3Cpath d='M18 116c7-27 25-42 42-42s35 15 42 42' fill='%23ffffff'/%3E%3C/svg%3E" alt="Avatar" class="user-avatar" id="user-avatar">
+                        <button class="avatar-upload-btn" id="upload-trigger" type="button" title="Thay đổi ảnh">
+                            <i class="fa-solid fa-camera"></i>
+                        </button>
+                        <input type="file" id="avatar-input" accept="image/*">
+                    </div>
+                    <h2>Nguyễn Văn A</h2>
+                    <p>admin@techno.vn</p>
+                    <span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Quản trị viên</span>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <strong>24</strong>
+                        <span>Đơn xử lý</span>
+                    </div>
+                    <div class="profile-stat">
+                        <strong>18</strong>
+                        <span>Sản phẩm</span>
+                    </div>
+                    <div class="profile-stat">
+                        <strong>4.9</strong>
+                        <span>Đánh giá</span>
+                    </div>
+                </div>
+
+                <ul class="profile-tabs">
+                    <li class="active" data-tab="thong-tin"><i class="fa-solid fa-user"></i>Thông tin tài khoản</li>
+                    <li data-tab="don-hang"><i class="fa-solid fa-bag-shopping"></i>Đơn hàng của tôi</li>
+                    <li data-tab="san-pham-da-luu"><i class="fa-solid fa-heart"></i>Sản phẩm đã lưu</li>
+                    <li data-tab="bao-mat"><i class="fa-solid fa-lock"></i>Bảo mật</li>
+                </ul>
+            </aside>
+
+            <section class="profile-content">
+                <div id="thong-tin" class="tab-panel active">
+                    <div class="section-head">
+                        <div>
+                            <h2>Thông tin tài khoản</h2>
+                            <p>Cập nhật thông tin hiển thị và địa chỉ liên hệ của bạn</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên</label>
+                            <input type="text" id="fullName" value="Nguyễn Văn A">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="tel" id="phone" value="0987654321" placeholder="Nhập số điện thoại">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" value="admin@techno.vn">
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Vai trò</label>
+                            <input type="text" id="role" value="Quản trị viên" readonly>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Địa chỉ nhận hàng</label>
+                            <input type="text" id="address" value="123 Đường ABC, Phường X, Quận Y, TP. Hồ Chí Minh" placeholder="Nhập địa chỉ của bạn">
+                        </div>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button class="profile-btn secondary" type="button">Hủy</button>
+                        <button class="profile-btn primary" type="button">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
+
+                <div id="don-hang" class="tab-panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>Đơn hàng của tôi</h2>
+                            <p>Theo dõi các đơn hàng đang xử lý gần đây</p>
+                        </div>
+                    </div>
+
+                    <div class="order-list">
+                        <div class="order-item">
+                            <div>
+                                <h3>#LAP1001 - MacBook Pro 14 M3</h3>
+                                <p>Ngày đặt: 12-06-2026 · Giao tiêu chuẩn</p>
+                            </div>
+                            <span class="badge completed">Hoàn thành</span>
+                        </div>
+                        <div class="order-item">
+                            <div>
+                                <h3>#PC2001 - PC Gaming RTX 4080</h3>
+                                <p>Ngày đặt: 12-06-2026 · Giao hỏa tốc</p>
+                            </div>
+                            <span class="badge pending">Chờ duyệt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="san-pham-da-luu" class="tab-panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>Sản phẩm đã lưu</h2>
+                            <p>Các sản phẩm bạn muốn xem lại hoặc nhập hàng sau</p>
+                        </div>
+                    </div>
+
+                    <div class="saved-products-list">
+                        <div class="product-item">
+                            <button class="remove-saved" type="button" title="Xóa khỏi danh sách">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            <div class="product-thumb"><i class="fa-solid fa-laptop"></i></div>
+                            <h3>MacBook Air M3 2024</h3>
+                            <div class="price">27.490.000đ</div>
+                        </div>
+                        <div class="product-item">
+                            <button class="remove-saved" type="button" title="Xóa khỏi danh sách">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            <div class="product-thumb"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                            <h3>iPhone 15 Pro Max 256GB</h3>
+                            <div class="price">29.990.000đ</div>
+                        </div>
+                        <div class="product-item">
+                            <button class="remove-saved" type="button" title="Xóa khỏi danh sách">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            <div class="product-thumb"><i class="fa-solid fa-keyboard"></i></div>
+                            <h3>Keychron K8 Pro</h3>
+                            <div class="price">2.490.000đ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bao-mat" class="tab-panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>Bảo mật</h2>
+                            <p>Đổi mật khẩu định kỳ để bảo vệ tài khoản quản trị</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="oldPassword">Mật khẩu cũ</label>
+                            <input type="password" id="oldPassword" placeholder="Nhập mật khẩu hiện tại">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Mật khẩu mới</label>
+                            <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Xác nhận mật khẩu</label>
+                            <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới">
+                        </div>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button class="profile-btn primary" type="button">
+                            <i class="fa-solid fa-key"></i> Cập nhật mật khẩu
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="/assets/js/main.js"></script>
+    <script>
+        const menuItems = document.querySelectorAll('.profile-tabs li');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const activeMenu = document.querySelector('.profile-tabs li.active');
+                const activePanel = document.querySelector('.tab-panel.active');
+
+                if (activeMenu) activeMenu.classList.remove('active');
+                if (activePanel) activePanel.classList.remove('active');
+
+                item.classList.add('active');
+                const tabId = item.getAttribute('data-tab');
+                const targetPanel = document.getElementById(tabId);
+                if (targetPanel) targetPanel.classList.add('active');
+            });
+        });
+
+        const avatarInput = document.getElementById('avatar-input');
+        const userAvatar = document.getElementById('user-avatar');
+        const uploadTrigger = document.getElementById('upload-trigger');
+
+        if (avatarInput && userAvatar && uploadTrigger) {
+            const openSelector = () => avatarInput.click();
+            uploadTrigger.addEventListener('click', openSelector);
+            userAvatar.addEventListener('click', openSelector);
+
+            avatarInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn một file hình ảnh!');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (readerEvent) => {
+                    userAvatar.src = readerEvent.target.result;
+                };
+                reader.onerror = () => {
+                    alert('Có lỗi xảy ra khi đọc file ảnh này.');
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+</html>
