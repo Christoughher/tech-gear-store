@@ -267,113 +267,6 @@
             background: #e2e8f0;
         }
 
-        .order-list {
-            display: grid;
-            gap: 14px;
-        }
-
-        .order-item {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 18px;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .order-item h3 {
-            color: #111827;
-            font-size: 16px;
-            margin-bottom: 6px;
-        }
-
-        .order-item p {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .saved-products-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-            gap: 18px;
-        }
-
-        .product-item {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 18px;
-            position: relative;
-            background: #ffffff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .product-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
-        }
-
-        .product-thumb {
-            height: 122px;
-            border-radius: 8px;
-            background: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #111827;
-            font-size: 36px;
-            margin-bottom: 14px;
-        }
-
-        .product-item h3 {
-            color: #111827;
-            font-size: 15px;
-            line-height: 1.4;
-            min-height: 42px;
-            margin-bottom: 8px;
-        }
-
-        .product-item .price {
-            color: #dc2626;
-            font-size: 15px;
-            font-weight: 800;
-        }
-
-        .remove-saved {
-            width: 32px;
-            height: 32px;
-            border: none;
-            border-radius: 8px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #dc2626;
-            background: #fee2e2;
-            cursor: pointer;
-        }
-
-        .empty-state {
-            border: 1px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 42px 20px;
-            text-align: center;
-            background: #f8fafc;
-            color: #64748b;
-        }
-
-        .empty-state i {
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            color: #111827;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            margin-bottom: 14px;
-        }
-
         @media (max-width: 1024px) {
             .profile-wrapper {
                 grid-template-columns: 1fr;
@@ -453,8 +346,6 @@
 
                 <ul class="profile-tabs">
                     <li class="active" data-tab="thong-tin"><i class="fa-solid fa-user"></i>Thông tin tài khoản</li>
-                    <li data-tab="don-hang"><i class="fa-solid fa-bag-shopping"></i>Đơn hàng của tôi</li>
-                    <li data-tab="san-pham-da-luu"><i class="fa-solid fa-heart"></i>Sản phẩm đã lưu</li>
                     <li data-tab="bao-mat"><i class="fa-solid fa-lock"></i>Bảo mật</li>
                 </ul>
             </aside>
@@ -496,68 +387,6 @@
                         <button class="profile-btn primary" type="button">
                             <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
                         </button>
-                    </div>
-                </div>
-
-                <div id="don-hang" class="tab-panel">
-                    <div class="section-head">
-                        <div>
-                            <h2>Đơn hàng của tôi</h2>
-                            <p>Theo dõi các đơn hàng đang xử lý gần đây</p>
-                        </div>
-                    </div>
-
-                    <div class="order-list">
-                        <div class="order-item">
-                            <div>
-                                <h3>#LAP1001 - MacBook Pro 14 M3</h3>
-                                <p>Ngày đặt: 12-06-2026 · Giao tiêu chuẩn</p>
-                            </div>
-                            <span class="badge completed">Hoàn thành</span>
-                        </div>
-                        <div class="order-item">
-                            <div>
-                                <h3>#PC2001 - PC Gaming RTX 4080</h3>
-                                <p>Ngày đặt: 12-06-2026 · Giao hỏa tốc</p>
-                            </div>
-                            <span class="badge pending">Chờ duyệt</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="san-pham-da-luu" class="tab-panel">
-                    <div class="section-head">
-                        <div>
-                            <h2>Sản phẩm đã lưu</h2>
-                            <p>Các sản phẩm bạn muốn xem lại hoặc nhập hàng sau</p>
-                        </div>
-                    </div>
-
-                    <div class="saved-products-list">
-                        <div class="product-item">
-                            <button class="remove-saved" type="button" title="Xóa khỏi danh sách">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                            <div class="product-thumb"><i class="fa-solid fa-laptop"></i></div>
-                            <h3>MacBook Air M3 2024</h3>
-                            <div class="price">27.490.000đ</div>
-                        </div>
-                        <div class="product-item">
-                            <button class="remove-saved" type="button" title="Xóa khỏi danh sách">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                            <div class="product-thumb"><i class="fa-solid fa-mobile-screen-button"></i></div>
-                            <h3>iPhone 15 Pro Max 256GB</h3>
-                            <div class="price">29.990.000đ</div>
-                        </div>
-                        <div class="product-item">
-                            <button class="remove-saved" type="button" title="Xóa khỏi danh sách">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                            <div class="product-thumb"><i class="fa-solid fa-keyboard"></i></div>
-                            <h3>Keychron K8 Pro</h3>
-                            <div class="price">2.490.000đ</div>
-                        </div>
                     </div>
                 </div>
 
