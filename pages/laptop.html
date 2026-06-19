@@ -7,21 +7,10 @@
 
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/category.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <nav class="navbar">
-        <a href="../index.html" class="logo">
-            <img src="../assets/images/logo-techno.png" alt="Tech.no Logo">
-        </a>
-
-        <ul class="nav-links">
-            <li><a href="../index.html">Trang chủ</a></li>
-            <li><a href="./laptop.html" class="active">Laptop</a></li>
-            <li><a href="./pc-gaming.html">PC Gaming</a></li>
-            <li><a href="./phu-kien.html">Phụ kiện</a></li>
-            <li><a href="#" class="login-btn">Đăng nhập</a></li>
-        </ul>
-    </nav>
+<body> 
+    <div id="navbar-container"></div>
 
     <main class="category-main">
         <section class="category-hero">
@@ -78,7 +67,7 @@
             <div class="product-grid">
                 <article class="product-card">
                     <div class="product-image">
-                        <img src="../assets/images/products/laptop-1.jpg" alt="ASUS Vivobook 15">
+                        <img src="../assets/images/products/laptop-1.png" alt="ASUS Vivobook 15">
                     </div>
 
                     <div class="product-info">
@@ -98,7 +87,7 @@
 
                 <article class="product-card">
                     <div class="product-image">
-                        <img src="../assets/images/products/laptop-2.jpg" alt="Dell Inspiron 14">
+                        <img src="../assets/images/products/laptop-2.png" alt="Dell Inspiron 14">
                     </div>
 
                     <div class="product-info">
@@ -118,7 +107,7 @@
 
                 <article class="product-card">
                     <div class="product-image">
-                        <img src="../assets/images/products/laptop-3.jpg" alt="Lenovo IdeaPad Slim">
+                        <img src="../assets/images/products/laptop-3.png" alt="Lenovo IdeaPad Slim">
                     </div>
 
                     <div class="product-info">
@@ -138,10 +127,13 @@
             </div>
         </section>
 
-        <p class="category-note">
-            Hình ảnh sản phẩm đang dùng đường dẫn chờ. Bạn có thể thêm ảnh vào thư mục
-            <strong>assets/images/products/</strong> sau.
-        </p>
     </main>
+
+    <div id="pagination-container"></div>   
+
+    <div id="footer-container"></div>
+
+    <script src="/assets/js/cart.js"></script>
+    <script src="/assets/js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết sản phẩm - Tech.no</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/chitiet-sanpham.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="product-name">
+        <h1>Điện thoại Samsung Galaxy A36 5G 12GB/256GB</h1>
+    </div>
+    
+    <div class="box-main">
+        <div class="box-left">
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+
+            <div class="policy">
+                <div class="exchange-policy">
+                    <img src="../assets/images/exchange.png">
+                    <span>Hư gì đổi nấy 12 tháng tại 2992 siêu thị toàn quốc (miễn phí tháng đầu)</span>
+                </div>
+
+                <div class="warranty-policy">
+                    <img src="../assets/images/warranty.png">
+                    <span>Bảo hành chính hãng 1 năm tại các trung tâm bảo hành hãng</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-right">
+            <h2>Thông số kỹ thuật</h2>
+            <ul class="specs-list">
+                <li><span>Màn hình:</span> Super AMOLED 6.7"</li>
+                <li><span>Camera:</span> 50MP</li>
+                <li><span>Chip:</span> Snapdragon 6 Gen 3</li>
+                <li><span>Pin:</span> 5000mAh, 45W</li>
+                <li><span>Hệ điều hành:</span> One UI 7</li>
+            </ul>
+            <div class="price-box">8.610.000<sup><u>đ</u></sup></div>
+            <button class="btn-buy">Mua ngay</button>
+            <button class="add-to-cart">
+                <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
+            </button>
+        </div>
+
+    </div>
+
+    <section class="comment-section">
+        <h3>Đánh giá sản phẩm</h3>
+
+        <div class="rating-input">
+            <span>Đánh giá của bạn:</span>
+            <div class="stars" id="star-rating">
+                <i class="fa-solid fa-star" data-value="1"></i>
+                <i class="fa-solid fa-star" data-value="2"></i>
+                <i class="fa-solid fa-star" data-value="3"></i>
+                <i class="fa-solid fa-star" data-value="4"></i>
+                <i class="fa-solid fa-star" data-value="5"></i>
+            </div>
+            <input type="hidden" id="rating-value" value="0"> </div>
+        </div>
+
+        <div class="comment-input-group">
+            <textarea placeholder="Viết đánh giá của bạn về sản phẩm..." rows="4"></textarea>
+            <button class="btn-submit-comment">Gửi bình luận</button>
+        </div>
+
+        <div class="comment-list">
+            <div class="comment-item">
+                <div class="user-info">
+                    <strong>Nguyễn Văn A</strong>
+                </div>
+                <p>Sản phẩm rất tốt, thiết kế đẹp và cầm rất chắc tay. Giao hàng nhanh!</p>
+            </div>
+            
+            <div class="comment-item">
+                <div class="user-info">
+                    <strong>Trần Thị B</strong>
+                </div>
+                <p>Màn hình sắc nét, pin dùng khá ổn trong tầm giá này.</p>
+            </div>
+        </div>
+        
+    </section>
+
+    <div id="footer-container"></div>
+
+    <script src="/assets/js/cart.js"></script>
+    <script src="/assets/js/main.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".mySwiper", {
+            loop: true,             
+            navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+            },
+        });
+        </script>
+</body>
+</html>
