@@ -147,15 +147,15 @@
     <div class="auth-container">
         <div id="login-box">
             <h2>Đăng nhập</h2>
-            <form>
+            <form id="login-form">
                 <div class="input-group">
                     <label>Email</label>
-                    <input type="email" placeholder="Nhập email">
+                    <input type="email" placeholder="Nhập email" id="email">
                 </div>
 
                 <div class="input-group">
                     <label>Mật khẩu</label>
-                    <input type="password" placeholder="Nhập mật khẩu">
+                    <input type="password" placeholder="Nhập mật khẩu" id="password">
                 </div>
 
                 <button type="submit" class="login-submit">
@@ -174,25 +174,25 @@
 
         <div id="register-box">
             <h2>Đăng ký</h2>
-            <form>
+            <form id="register-form">
                 <div class="input-group">
                     <label>Email</label>
-                    <input type="email" placeholder="Nhập email">
+                    <input type="email" id="register-email" placeholder="Nhập email">
                 </div>
 
                 <div class="input-group">
                     <label>Tên tài khoản</label>
-                    <input type="text" placeholder="Nhập tên tài khoản">
+                    <input type="text" id="register-fullname" placeholder="Nhập tên tài khoản">
                 </div>
 
                 <div class="input-group">
                     <label>Mật khẩu</label>
-                    <input type="password" placeholder="Nhập mật khẩu">
+                    <input type="password" id="register-password" placeholder="Nhập mật khẩu">
                 </div>
 
                 <div class="input-group">
                     <label>Nhập lại mật khẩu</label>
-                    <input type="password" placeholder="Nhập lại mật khẩu">
+                    <input type="password" id="register-confirm-password" placeholder="Nhập lại mật khẩu">
                 </div>
 
                 <button type="submit" class="register-submit">
@@ -214,7 +214,12 @@
 
     <div id="footer-container"></div>
 
-    <script src="/assets/js/main.js"></script>
+    <!-- Supabase Library từ CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Config & Auth Scripts -->
+    <script src="/assets/js/supabase-config.js"></script>
     <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/main.js"></script>
 </body>
 </html>
