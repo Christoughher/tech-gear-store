@@ -74,9 +74,15 @@ async function loadComponent(id, file) {
     const element = document.getElementById(id);
     if (element) {
         try {
-            const response = await fetch(`/components/${file}`);
+            const response = await fetch(window.location.origin + '/components/' + file);
             const data = await response.text();
             element.innerHTML = data;
+            // NẾU ĐÃ LOAD XONG NAVBAR, THÌ GỌI HÀM KIỂM TRA ĐĂNG NHẬP
+            if (file === 'navbar.html') {
+                console.log("Navbar đã được nạp, đang phát tín hiệu 'navbarLoaded'...");
+                const event = new CustomEvent('navbarLoaded');
+                window.dispatchEvent(event);  
+            }
         } catch (error) {
             console.error(`Lỗi khi load component ${file}:`, error);
         }
@@ -145,9 +151,9 @@ function showNotification(message) {
 
 // Chạy khi trang web tải xong
 document.addEventListener('DOMContentLoaded', () => {
+    loadComponent('navbar-container', 'navbar.html'); 
     loadComponent('pagination-container', 'pagination.html'); 
     loadComponent('footer-container', 'footer.html'); 
-    loadComponent('navbar-container', 'navbar.html'); 
     loadComponent('admin-sidebar-container', 'admin-sidebar.html');
     
     // Thiết lập sự kiện cho nút "Thêm giỏ"
