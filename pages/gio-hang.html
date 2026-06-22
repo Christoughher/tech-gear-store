@@ -3,152 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Giỏ hàng - Tech.no</title>
 
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/cart.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-
-        .cart-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 50px 20px;
-        }
-
-        .cart-box {
-            background: white;
-            width: 700px;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.1);
-            margin-top: 100px;
-        }
-
-        .cart-box h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #222;
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 0;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .item-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .item-name {
-            font-size: 17px;
-            font-weight: 600;
-            color: #222;
-        }
-
-        .item-price {
-            color: #666;
-            margin-top: 5px;
-            font-size: 14px;
-        }
-
-        .item-quantity input {
-            width: 60px;
-            padding: 8px;
-            border: 1px solid #dcdcdc;
-            border-radius: 5px;
-            outline: none;
-            text-align: center;
-        }
-
-        .cart-total {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #222;
-        }
-
-        .checkout-btn {
-            width: 100%;
-            margin-top: 25px;
-            padding: 14px;
-            border: none;
-            background: black;
-            color: white;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .checkout-btn:hover {
-            background: #444;
-        }
-
-        .back-home {
-            display: block;
-            text-align: center;
-            margin-top: 18px;
-            text-decoration: none;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .back-home:hover {
-            color: black;
-        }
-
-    </style>
 </head>
 <body>
-
     <div id="navbar-container"></div>
 
-    <!-- CART -->
-    <div class="cart-container">
+    <main class="cart-main">
+        <!-- CART HERO SECTION -->
+        <section class="cart-hero">
+            <h1>Giỏ hàng của bạn</h1>
+            <p>Quản lý, chỉnh sửa và thanh toán các sản phẩm đã chọn</p>
+        </section>
 
-        <div class="cart-box">
+        <!-- CART CONTAINER -->
+        <div class="cart-container">
+            <!-- CART ITEMS SECTION -->
+            <section class="cart-items-section">
+                <!-- CART ITEMS CONTAINER -->
+                <div id="cart-items-container">
+                    <!-- Sản phẩm sẽ được render tại đây -->
+                </div>
 
-            <h2>Giỏ hàng của bạn</h2>
+                <!-- EMPTY CART MESSAGE -->
+                <div id="empty-cart-message" style="display: none;">
+                    <div class="empty-cart-message">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <p>Giỏ hàng của bạn trống</p>
+                        <a href="../index.html">Tiếp tục mua sắm</a>
+                    </div>
+                </div>
+            </section>
 
-            <!-- CART ITEMS CONTAINER -->
-            <div id="cart-items-container">
-                <!-- Sản phẩm sẽ được render tại đây -->
-            </div>
+            <!-- CART SUMMARY SIDEBAR -->
+            <aside class="cart-summary" id="cart-summary-section" style="display: none;">
+                <div class="summary-title">Tóm tắt đơn hàng</div>
+                
+                <div class="summary-row">
+                    <span>Tạm tính:</span>
+                    <span id="subtotal-price">0đ</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span>Phí vận chuyển:</span>
+                    <span id="shipping-price">0đ</span>
+                </div>
+                
+                <div class="summary-row total">
+                    <span>Tổng cộng:</span>
+                    <span id="total-price">0đ</span>
+                </div>
 
-            <!-- EMPTY CART MESSAGE -->
-            <div id="empty-cart-message" style="display: none; text-align: center; padding: 40px 0; color: #999;">
-                <p style="font-size: 16px; margin-bottom: 20px;">Giỏ hàng của bạn trống</p>
-                <a href="../index.html" class="back-home">← Tiếp tục mua sắm</a>
-            </div>
+                <button class="checkout-btn" id="checkout-btn">
+                    <i class="fa-solid fa-check"></i> Tiến hành thanh toán
+                </button>
 
-            <!-- TOTAL -->
-            <div class="cart-total" id="cart-total-section" style="display: none;">
-                <span>Tổng cộng:</span>
-                <span id="total-price">0đ</span>
-            </div>
-
-            <!-- CHECKOUT BUTTON -->
-            <button class="checkout-btn" id="checkout-btn" style="display: none;">
-                Thanh toán
-            </button>
-
-            <!-- BACK -->
-            <a href="../index.html" class="back-home" id="back-home-link" style="display: none;">
-                ← Tiếp tục mua sắm
-            </a>
-
+                <a href="../index.html" class="continue-shopping">
+                    <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i>
+                    Tiếp tục mua sắm
+                </a>
+            </aside>
         </div>
-
-    </div>
+    </main>
     
     <div id="footer-container"></div>
 
@@ -164,9 +83,8 @@
         function renderCart() {
             const container = document.getElementById('cart-items-container');
             const emptyMessage = document.getElementById('empty-cart-message');
-            const totalSection = document.getElementById('cart-total-section');
+            const cartSummary = document.getElementById('cart-summary-section');
             const checkoutBtn = document.getElementById('checkout-btn');
-            const backHomeLink = document.getElementById('back-home-link');
             const cartItems = shopCart.getCart();
 
             container.innerHTML = ''; // Xóa nội dung cũ
@@ -174,50 +92,69 @@
             if (cartItems.length === 0) {
                 // Hiển thị thông báo giỏ hàng trống
                 emptyMessage.style.display = 'block';
-                totalSection.style.display = 'none';
-                checkoutBtn.style.display = 'none';
-                backHomeLink.style.display = 'block';
+                cartSummary.style.display = 'none';
                 return;
             }
 
             // Ẩn thông báo giỏ hàng trống
             emptyMessage.style.display = 'none';
-            totalSection.style.display = 'flex';
-            checkoutBtn.style.display = 'block';
-            backHomeLink.style.display = 'block';
+            cartSummary.style.display = 'block';
 
             // Render từng sản phẩm
             cartItems.forEach(item => {
                 const itemElement = document.createElement('div');
                 itemElement.className = 'cart-item';
+                const itemTotal = item.price * item.quantity;
+                
                 itemElement.innerHTML = `
-                    <div class="item-info">
-                        <span class="item-name">${item.name}</span>
-                        <span class="item-price">${formatCurrency(item.price)}</span>
+                    <div class="item-image">
+                        <img src="../assets/images/products/default-product.png" alt="${item.name}">
+                    </div>
+
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">${formatCurrency(item.price)}</div>
                     </div>
 
                     <div class="item-quantity">
+                        <button class="qty-btn qty-minus" data-product-id="${item.id}">−</button>
                         <input type="number" value="${item.quantity}" min="1" data-product-id="${item.id}">
+                        <button class="qty-btn qty-plus" data-product-id="${item.id}">+</button>
                     </div>
 
-                    <div style="margin-left: 20px;">
-                        <button class="btn-remove" data-product-id="${item.id}" style="
-                            background: #ff4444;
-                            color: white;
-                            border: none;
-                            padding: 8px 12px;
-                            border-radius: 5px;
-                            cursor: pointer;
-                            font-size: 13px;
-                        ">Xóa</button>
-                    </div>
+                    <div class="item-total">${formatCurrency(itemTotal)}</div>
+
+                    <button class="item-remove" data-product-id="${item.id}" title="Xóa">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 `;
 
                 container.appendChild(itemElement);
             });
 
-            // Cập nhật tổng tiền
-            updateCartTotal();
+            // Cập nhật tóm tắt đơn hàng
+            updateCartSummary();
+
+            // Gắn sự kiện cho nút +/-
+            document.querySelectorAll('.qty-plus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const productId = e.target.getAttribute('data-product-id');
+                    const currentQty = parseInt(document.querySelector(`input[data-product-id="${productId}"]`).value);
+                    shopCart.updateQuantity(productId, currentQty + 1);
+                    renderCart();
+                });
+            });
+
+            document.querySelectorAll('.qty-minus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const productId = e.target.getAttribute('data-product-id');
+                    const currentQty = parseInt(document.querySelector(`input[data-product-id="${productId}"]`).value);
+                    if (currentQty > 1) {
+                        shopCart.updateQuantity(productId, currentQty - 1);
+                        renderCart();
+                    }
+                });
+            });
 
             // Gắn sự kiện cho input quantity
             document.querySelectorAll('.item-quantity input').forEach(input => {
@@ -226,24 +163,29 @@
                     const newQuantity = parseInt(e.target.value);
                     if (newQuantity > 0) {
                         shopCart.updateQuantity(productId, newQuantity);
-                        renderCart(); // Render lại để cập nhật tổng tiền
+                        renderCart();
                     }
                 });
             });
 
             // Gắn sự kiện cho nút xóa
-            document.querySelectorAll('.btn-remove').forEach(btn => {
+            document.querySelectorAll('.item-remove').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const productId = e.target.getAttribute('data-product-id');
                     shopCart.removeProduct(productId);
-                    renderCart(); // Render lại giỏ hàng
+                    renderCart();
                 });
             });
         }
 
-        // Hàm cập nhật tổng tiền
-        function updateCartTotal() {
-            const total = shopCart.getTotal();
+        // Hàm cập nhật tóm tắt đơn hàng
+        function updateCartSummary() {
+            const subtotal = shopCart.getTotal();
+            const shipping = subtotal > 1000000 ? 0 : 30000; // Miễn phí vận chuyển từ 1 triệu
+            const total = subtotal + shipping;
+
+            document.getElementById('subtotal-price').textContent = formatCurrency(subtotal);
+            document.getElementById('shipping-price').textContent = shipping === 0 ? 'Miễn phí' : formatCurrency(shipping);
             document.getElementById('total-price').textContent = formatCurrency(total);
         }
 
