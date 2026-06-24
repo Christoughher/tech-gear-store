@@ -324,24 +324,9 @@
                         </button>
                         <input type="file" id="avatar-input" accept="image/*">
                     </div>
-                    <h2>Nguyễn Văn A</h2>
-                    <p>admin@techno.vn</p>
+                    <h2 id="card-display-name">Đang tải...</h2>
+                    <p id="card-email">đang tải...</p>
                     <span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> Quản trị viên</span>
-                </div>
-
-                <div class="profile-stats">
-                    <div class="profile-stat">
-                        <strong>24</strong>
-                        <span>Đơn xử lý</span>
-                    </div>
-                    <div class="profile-stat">
-                        <strong>18</strong>
-                        <span>Sản phẩm</span>
-                    </div>
-                    <div class="profile-stat">
-                        <strong>4.9</strong>
-                        <span>Đánh giá</span>
-                    </div>
                 </div>
 
                 <ul class="profile-tabs">
@@ -362,29 +347,25 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="fullName">Họ và tên</label>
-                            <input type="text" id="fullName" value="Nguyễn Văn A">
+                            <input type="text" id="fullName" value="" placeholder="Đang tải dữ liệu...">
                         </div>
                         <div class="form-group">
                             <label for="phone">Số điện thoại</label>
-                            <input type="tel" id="phone" value="0987654321" placeholder="Nhập số điện thoại">
+                            <input type="tel" id="phone" value="" placeholder="Nhập số điện thoại">
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" value="admin@techno.vn">
-                        </div>
-                        <div class="form-group">
-                            <label for="role">Vai trò</label>
-                            <input type="text" id="role" value="Quản trị viên" readonly>
+                            <input type="email" id="email" value="" disabled style="background-color: #f3f4f6; cursor: not-allowed;">
                         </div>
                         <div class="form-group full-width">
                             <label for="address">Địa chỉ nhận hàng</label>
-                            <input type="text" id="address" value="123 Đường ABC, Phường X, Quận Y, TP. Hồ Chí Minh" placeholder="Nhập địa chỉ của bạn">
+                            <input type="text" id="address" value="" placeholder="Nhập địa chỉ của bạn">
                         </div>
                     </div>
 
                     <div class="panel-actions">
-                        <button class="profile-btn secondary" type="button">Hủy</button>
-                        <button class="profile-btn primary" type="button">
+                        <button class="profile-btn secondary" type="button" id="btn-cancel-profile">Hủy</button>
+                        <button class="profile-btn primary" type="button" id="btn-save-profile">
                             <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
                         </button>
                     </div>
@@ -414,7 +395,7 @@
                     </div>
 
                     <div class="panel-actions">
-                        <button class="profile-btn primary" type="button">
+                        <button class="profile-btn primary" type="button" id="btn-update-password">
                             <i class="fa-solid fa-key"></i> Cập nhật mật khẩu
                         </button>
                     </div>
@@ -423,8 +404,12 @@
         </div>
     </main>
 
-    <script src="/assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../assets/js/supabase-config.js"></script>
+    <script src="../../assets/js/main.js"></script>
+    
     <script>
+        // Xử lý chuyển đổi qua lại giữa các Tab chức năng độc lập
         const menuItems = document.querySelectorAll('.profile-tabs li');
 
         menuItems.forEach(item => {
@@ -442,6 +427,7 @@
             });
         });
 
+        // Xử lý sự kiện xem trước hình ảnh Avatar tải lên cục bộ
         const avatarInput = document.getElementById('avatar-input');
         const userAvatar = document.getElementById('user-avatar');
         const uploadTrigger = document.getElementById('upload-trigger');
@@ -456,7 +442,7 @@
                 if (!file) return;
 
                 if (!file.type.startsWith('image/')) {
-                    alert('Vui lòng chọn một file hình ảnh!');
+                    alert('Vui lòng chọn một file hình ảnh đúng định dạng!');
                     return;
                 }
 
@@ -465,11 +451,209 @@
                     userAvatar.src = readerEvent.target.result;
                 };
                 reader.onerror = () => {
-                    alert('Có lỗi xảy ra khi đọc file ảnh này.');
+                    alert('Có lỗi xảy ra khi đọc dữ liệu file ảnh này.');
                 };
                 reader.readAsDataURL(file);
             });
         }
+
+        // ==========================================
+        // LOGIC KẾT NỐI VÀ THAO TÁC VỚI SUPABASE
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Kiểm tra xem thực thể client Supabase đã tồn tại trên window hay chưa
+            if (!window.supabaseClient) {
+                console.error("Không tìm thấy window.supabaseClient. Hãy kiểm tra lại thứ tự nạp thẻ script hoặc file supabase-config.js.");
+                alert("Lỗi hệ thống: Không thể kết nối tới máy chủ Supabase.");
+                return;
+            }
+
+            const client = window.supabaseClient;
+
+            // DOM Elements quản lý form dữ liệu cá nhân Admin
+            const fullNameInput = document.getElementById('fullName');
+            const phoneInput = document.getElementById('phone');
+            const emailInput = document.getElementById('email');
+            const addressInput = document.getElementById('address');
+
+            const cardDisplayName = document.getElementById('card-display-name');
+            const cardEmail = document.getElementById('card-email');
+
+            const btnSaveProfile = document.getElementById('btn-save-profile');
+            const btnCancelProfile = document.getElementById('btn-cancel-profile');
+
+            // DOM Elements quản lý Đổi mật khẩu
+            const oldPasswordInput = document.getElementById('oldPassword');
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const btnUpdatePassword = document.getElementById('btn-update-password');
+
+            // Biến cục bộ lưu trữ bản ghi gốc phục vụ tính năng 'Hủy' không lưu
+            let originalProfileData = null;
+
+            // Bước 1: Lấy thông tin phiên đăng nhập của User hiện tại từ hệ thống Auth Supabase
+            const { data: { user }, error: authError } = await client.auth.getUser();
+
+            if (authError || !user) {
+                alert('Phiên làm việc đã hết hạn hoặc bạn chưa đăng nhập. Hệ thống sẽ chuyển hướng về trang đăng nhập.');
+                window.location.href = '../login.html';
+                return;
+            }
+
+            // Bước 2: Truy vấn dữ liệu thực tế từ bảng công khai `public.users` theo `id` để xác thực quyền Admin
+            async function fetchAndPopulateAdminProfile() {
+                try {
+                    const { data: profile, error: dbError } = await client
+                        .from('users')
+                        .select('*')
+                        .eq('id', user.id)
+                        .maybeSingle();
+
+                    if (dbError) throw dbError;
+
+                    if (!profile) {
+                        alert('Không tìm thấy thông tin cấu hình tài khoản của bạn trong cơ sở dữ liệu hệ thống.');
+                        return;
+                    }
+
+                    // Kiểm tra nghiêm ngặt phân quyền Role. Phải là 'admin' mới được ở lại quản trị vùng này.
+                    if (profile.role !== 'admin') {
+                        alert('Cảnh báo bảo mật: Tài khoản của bạn không có đặc quyền truy cập khu vực dành cho Quản trị viên!');
+                        window.location.href = '../../index.html';
+                        return;
+                    }
+
+                    // Lưu dữ liệu gốc để khôi phục khi nhấn hủy
+                    originalProfileData = profile;
+
+                    // Thực hiện map dữ liệu vào giao diện form và thẻ summary bên góc trái
+                    fullNameInput.value = profile.display_name || '';
+                    phoneInput.value = profile.phone || '';
+                    emailInput.value = profile.email || user.email || '';
+                    addressInput.value = profile.address || '';
+
+                    cardDisplayName.textContent = profile.display_name || 'Quản trị viên';
+                    cardEmail.textContent = profile.email || user.email || '';
+
+                } catch (err) {
+                    console.error('Lỗi khi tải thông tin hồ sơ Admin:', err.message);
+                    alert('Hệ thống lỗi phân quyền toàn cục gặp sự cố nghiêm trọng: ' + err.message);
+                }
+            }
+
+            // Thực thi việc nạp dữ liệu ban đầu
+            await fetchAndPopulateAdminProfile();
+
+            // Tính năng nút Hủy: Khôi phục lại trạng thái dữ liệu trước khi chỉnh sửa từ bản lưu cục bộ
+            if (btnCancelProfile) {
+                btnCancelProfile.addEventListener('click', () => {
+                    if (originalProfileData) {
+                        fullNameInput.value = originalProfileData.display_name || '';
+                        phoneInput.value = originalProfileData.phone || '';
+                        addressInput.value = originalProfileData.address || '';
+                        alert('Đã hủy bỏ các thay đổi vừa nhập.');
+                    }
+                });
+            }
+
+            // Bước 3: Đăng ký sự kiện lưu thông tin cập nhật tài khoản cá nhân Admin
+            if (btnSaveProfile) {
+                btnSaveProfile.addEventListener('click', async () => {
+                    const updatedName = fullNameInput.value.trim();
+                    const updatedPhone = phoneInput.value.trim();
+                    const updatedAddress = addressInput.value.trim();
+
+                    if (!updatedName) {
+                        alert('Trường Họ và tên bắt buộc phải điền thông tin hiển thị!');
+                        return;
+                    }
+
+                    // Chuyển nút sang trạng thái Loading chặn click trùng lặp dữ liệu
+                    btnSaveProfile.disabled = true;
+                    btnSaveProfile.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+
+                    try {
+                        // Đồng bộ dữ liệu cập nhật thẳng vào các trường `display_name`, `phone`, `address`
+                        const { error: updateError } = await client
+                            .from('users')
+                            .update({
+                                display_name: updatedName,
+                                phone: updatedPhone,
+                                address: updatedAddress
+                            })
+                            .eq('id', user.id);
+
+                        if (updateError) throw updateError;
+
+                        alert('Chúc mừng! Đã cập nhật thành công hồ sơ tài khoản Quản trị viên của bạn.');
+
+                        // Cập nhật lại UI text hiển thị tức thì trên thanh thông tin tóm tắt bên cạnh
+                        cardDisplayName.textContent = updatedName;
+                        
+                        // Cập nhật lại đối tượng gốc để tránh lỗi khi ấn Hủy sau đó
+                        originalProfileData.display_name = updatedName;
+                        originalProfileData.phone = updatedPhone;
+                        originalProfileData.address = updatedAddress;
+
+                    } catch (err) {
+                        console.error('Lỗi cập nhật dữ liệu public.users:', err.message);
+                        alert('Không thể lưu dữ liệu cập nhật: ' + err.message);
+                    } finally {
+                        btnSaveProfile.disabled = false;
+                        btnSaveProfile.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi';
+                    }
+                });
+            }
+
+            // Bước 4: Đăng ký sự kiện đổi mật khẩu cho tài khoản Admin
+            if (btnUpdatePassword) {
+                btnUpdatePassword.addEventListener('click', async () => {
+                    const newPassword = newPasswordInput.value;
+                    const confirmPassword = confirmPasswordInput.value;
+
+                    if (!newPassword || !confirmPassword) {
+                        alert('Vui lòng nhập đầy đủ thông tin vào cả hai ô mật khẩu mới và ô xác nhận.');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        alert('Mật khẩu xác nhận nhập lại không khớp với mật khẩu mới!');
+                        return;
+                    }
+
+                    if (newPassword.length < 6) {
+                        alert('Để bảo mật, mật khẩu quản trị viên mới của bạn tối thiểu phải có chiều dài 6 ký tự.');
+                        return;
+                    }
+
+                    btnUpdatePassword.disabled = true;
+                    btnUpdatePassword.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang cập nhật...';
+
+                    try {
+                        // Gọi API cập nhật mật khẩu trực tiếp từ Supabase Auth
+                        const { error: pwdError } = await client.auth.updateUser({
+                            password: newPassword
+                        });
+
+                        if (pwdError) throw pwdError;
+
+                        alert('Cập nhật thay đổi mật khẩu hệ thống tài khoản thành công!');
+                        
+                        // Reset sạch các trường mật khẩu vừa nhập
+                        if (oldPasswordInput) oldPasswordInput.value = '';
+                        newPasswordInput.value = '';
+                        confirmPasswordInput.value = '';
+
+                    } catch (err) {
+                        console.error('Lỗi cập nhật mật khẩu Auth:', err.message);
+                        alert('Cập nhật mật khẩu thất bại: ' + err.message);
+                    } finally {
+                        btnUpdatePassword.disabled = false;
+                        btnUpdatePassword.innerHTML = '<i class="fa-solid fa-key"></i> Cập nhật mật khẩu';
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
