@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ Sơ Cá Nhân - TECH.NO</title>
+    
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/index.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* =========================================================================
+           CSS TÙY CHỈNH RIÊNG CHO KHỐI CONTAINER HỒ SƠ KHÁCH HÀNG (CUSTOMER PROFILE)
+           ========================================================================= */
+        
+        .profile-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .profile-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-top: 150px;
+            
+        }
+
+        /* Khối Sidebar tóm tắt thông tin tài khoản ở phía bên trái */
+        .profile-sidebar {
+            flex: 1;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border: 1px solid #eef2f5;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+
+        /* Vùng hiển thị chữ cái đầu tiên của người dùng thay thế ảnh đại diện avatar */
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #2563eb;
+            color: #ffffff;
+            font-size: 48px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(37, 99, 233, 0.3);
+        }
+
+        .profile-sidebar h3 {
+            margin: 10px 0 5px;
+            color: #1e293b;
+            font-size: 20px;
+            word-wrap: break-word;
+        }
+
+        .profile-sidebar .user-role {
+            display: inline-block;
+            background-color: #eff6ff;
+            color: #2563eb;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-menu-info {
+            text-align: left;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 20px;
+        }
+
+        .info-item-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .info-item-row i {
+            width: 25px;
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        /* Khối nội dung chính chứa Form nhập liệu ở phía bên phải */
+        .profile-main-content {
+            flex: 2.5;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef2f5;
+        }
+
+        .profile-main-content h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #1e293b;
+            font-size: 22px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        .form-profile-group {
+            margin-bottom: 20px;
+        }
+
+        .form-profile-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Cấu hình các ô nhập liệu Input và Textarea */
+        .form-profile-group input[type="text"],
+        .form-profile-group input[type="email"],
+        .form-profile-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            color: #334155;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-profile-group input:focus,
+        .form-profile-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 233, 0.15);
+        }
+
+        /* Định dạng trạng thái ô Email bị khóa, không cho phép sửa đổi */
+        .form-profile-group input:disabled {
+            background-color: #f8fafc;
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+
+        .form-profile-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Định dạng nút Lưu thay đổi */
+        .btn-update-profile {
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-update-profile:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-update-profile:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Thiết lập thông báo trạng thái cập nhật dữ liệu */
+        .alert-message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+
+        /* Thiết lập giao diện Responsive thích ứng với thiết bị di động */
+        @media (max-width: 768px) {
+            .profile-container {
+                flex-direction: column;
+            }
+            .profile-sidebar, .profile-main-content {
+                width: 100%;
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="profile-wrapper">
+        <div class="profile-container">
+            
+            <div class="profile-sidebar">
+                <div class="avatar-container">
+                    <div id="user-avatar-letter" class="avatar-placeholder">U</div>
+                </div>
+                <h3 id="sidebar-display-name">Đang tải...</h3>
+                <span id="sidebar-user-role" class="user-role">Thành viên</span>
+                
+                <div class="sidebar-menu-info">
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span id="sidebar-email">Đang tải...</span>
+                    </div>
+                    <div class="info-item-row">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Tham gia: <span id="sidebar-created-at">Đang tải...</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-main-content">
+                <h2>Thông Tin Tài Khoản</h2>
+                
+                <div id="profile-alert" class="alert-message"></div>
+
+                <form id="form-customer-profile" onsubmit="event.preventDefault();">
+                    
+                    <div class="form-profile-group">
+                        <label for="profile-email">Địa chỉ Email</label>
+                        <input type="email" id="profile-email" disabled>
+                    </div>
+
+                    <div class="form-profile-group">
+                        <label for="profile-display-name">Tên hiển thị</label>
+                        <input type="text" id="profile-display-name" placeholder="Nhập tên hiển thị mới của bạn" required>
+                    </div>
+
+                    <div class="form-profile-group">
+                        <label for="profile-phone">Số điện thoại</label>
+                        <input type="text" id="profile-phone" placeholder="Nhập số điện thoại liên hệ">
+                    </div>
+
+                    <div class="form-profile-group">
+                        <label for="profile-address">Địa chỉ nhận hàng</label>
+                        <textarea id="profile-address" placeholder="Nhập địa chỉ giao nhận hàng chi tiết của bạn"></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-save-profile" class="btn-update-profile">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../assets/js/supabase-config.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="../assets/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Khai báo các liên kết đến các thẻ HTML trên Form nhập liệu bên phải
+            const txtEmail = document.getElementById('profile-email');
+            const txtDisplayName = document.getElementById('profile-display-name');
+            const txtPhone = document.getElementById('profile-phone');
+            const txtAddress = document.getElementById('profile-address');
+            
+            // Khai báo các liên kết đến các thẻ hiển thị thông tin ở Sidebar bên trái
+            const lblSidebarName = document.getElementById('sidebar-display-name');
+            const lblSidebarRole = document.getElementById('sidebar-user-role');
+            const lblSidebarEmail = document.getElementById('sidebar-email');
+            const lblSidebarCreated = document.getElementById('sidebar-created-at');
+            const divAvatarLetter = document.getElementById('user-avatar-letter');
+            
+            // Các nút thao tác và thông báo trên giao diện
+            const formProfile = document.getElementById('form-customer-profile');
+            const btnSave = document.getElementById('btn-save-profile');
+            const alertBox = document.getElementById('profile-alert');
+
+            // Hàm dùng chung để hiển thị hộp thông báo lỗi hoặc thành công nhanh chóng
+            function hienThiThongBaoHoiPhan(noiDung, loaiTrangThai) {
+                alertBox.textContent = noiDung;
+                alertBox.className = 'alert-message'; // Xóa toàn bộ class trạng thái cũ cũ
+                
+                if (loaiTrangThai === 'success') {
+                    alertBox.classList.add('alert-success');
+                } else if (loaiTrangThai === 'error') {
+                    alertBox.classList.add('alert-error');
+                }
+                
+                alertBox.style.display = 'block';
+                
+                // Tự động biến mất sau 4 giây để bảo toàn tính thẩm mỹ của form
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 4000);
+            }
+
+            // Kiểm tra tính hợp lệ của đối tượng SupabaseClient kế thừa từ window
+            const clientSupabaseHoatDong = window.supabaseClient;
+            if (!clientSupabaseHoatDong) {
+                console.error("Không tìm thấy thực thể 'window.supabaseClient'. Vui lòng kiểm tra lại thứ tự khai báo file script!");
+                return;
+            }
+
+            // 1. Kiểm tra phiên đăng nhập (Session) hiện hành của người dùng
+            const { data: { session }, error: errorKiemTraSession } = await clientSupabaseHoatDong.auth.getSession();
+
+            if (errorKiemTraSession || !session || !session.user) {
+                console.log("Hệ thống phát hiện chưa đăng nhập. Tự động chuyển hướng về trang login.html.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const thongTinUserAuth = session.user;
+
+            // 2. Định nghĩa hàm tải thông tin chi tiết từ bảng public.users đổ lên giao diện
+            async function napDuLieuHoSoTaiKhoan() {
+                try {
+                    // Sử dụng .maybeSingle() để an toàn tuyệt đối, tránh lỗi 406 làm sập luồng xử lý
+                    const { data: banGhiUser, error: errorTruyVan } = await clientSupabaseHoatDong
+                        .from('users')
+                        .select('role, display_name, phone, address, created_at')
+                        .eq('id', thongTinUserAuth.id)
+                        .maybeSingle();
+
+                    if (errorTruyVan) {
+                        console.error("Lỗi phát sinh trong lúc đọc bảng public.users:", errorTruyVan.message);
+                        hienThiThongBaoHoiPhan("Hệ thống không thể kết nối tới bảng dữ liệu người dùng!", "error");
+                        return;
+                    }
+
+                    if (banGhiUser) {
+                        // Đổ dữ liệu thô vào các trường Input trên form
+                        txtEmail.value = thongTinUserAuth.email;
+                        txtDisplayName.value = banGhiUser.display_name || '';
+                        txtPhone.value = banGhiUser.phone || '';
+                        txtAddress.value = banGhiUser.address || '';
+
+                        // Đồng bộ dữ liệu hiển thị trực quan sang khu vực Sidebar tóm tắt
+                        lblSidebarName.textContent = banGhiUser.display_name || 'Người dùng mới';
+                        lblSidebarRole.textContent = banGhiUser.role === 'admin' ? 'Quản trị viên' : 'Thành viên';
+                        lblSidebarEmail.textContent = thongTinUserAuth.email;
+
+                        // Định dạng định dạng mốc thời gian tham gia sang kiểu chuỗi ngày truyền thống (DD/MM/YYYY)
+                        if (banGhiUser.created_at) {
+                            const doiTuongDate = new Date(banGhiUser.created_at);
+                            const ngay = String(doiTuongDate.getDate()).padStart(2, '0');
+                            const thang = String(doiTuongDate.getMonth() + 1).padStart(2, '0');
+                            const nam = doiTuongDate.getFullYear();
+                            lblSidebarCreated.textContent = `${ngay}/${thang}/${nam}`;
+                        } else {
+                            lblSidebarCreated.textContent = 'Chưa xác định';
+                        }
+
+                        // Trích xuất chữ cái đầu tiên của tên để gán làm Avatar nhận diện ký tự
+                        if (banGhiUser.display_name) {
+                            divAvatarLetter.textContent = banGhiUser.display_name.charAt(0).toUpperCase();
+                        } else {
+                            divAvatarLetter.textContent = thongTinUserAuth.email.charAt(0).toUpperCase();
+                        }
+                    } else {
+                        // Trường hợp tài khoản Auth hợp lệ nhưng dòng dữ liệu tương ứng bên bảng public.users chưa khởi tạo
+                        txtEmail.value = thongTinUserAuth.email;
+                        lblSidebarEmail.textContent = thongTinUserAuth.email;
+                        lblSidebarName.textContent = 'Thành viên mới';
+                        lblSidebarRole.textContent = 'Thành viên';
+                        lblSidebarCreated.textContent = 'Hôm nay';
+                        divAvatarLetter.textContent = thongTinUserAuth.email.charAt(0).toUpperCase();
+                    }
+                } catch (loiHeThongPhucTap) {
+                    console.error("Xảy ra sự cố nghiêm trọng không lường trước khi nạp thông tin:", loiHeThongPhucTap);
+                }
+            }
+
+            // Gọi hàm thực thi ngay sau khi vượt qua bài kiểm tra xác thực tài khoản đăng nhập
+            await napDuLieuHoSoTaiKhoan();
+
+            // 3. Xử lý sự kiện nộp Form (Submit) khi người dùng lưu thông tin cá nhân mới
+            formProfile.addEventListener('submit', async (suKienForm) => {
+                suKienForm.preventDefault(); // Ngăn chặn sự kiện làm mới trang web mặc định của HTML Form
+
+                // Khóa tạm thời nút Lưu để ngăn người dùng thao tác bấm liên tục
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu lại...';
+
+                const giaTriTenMoi = txtDisplayName.value.trim();
+                const giaTriSdtMoi = txtPhone.value.trim();
+                const giaTriDiaChiMoi = txtAddress.value.trim();
+
+                // Kiểm tra điều kiện bắt buộc nhập tên hiển thị
+                if (!giaTriTenMoi) {
+                    hienThiThongBaoHoiPhan("Tên hiển thị là trường bắt buộc điền thông tin!", "error");
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi';
+                    return;
+                }
+
+                try {
+                    // Thực hiện lệnh UPDATE lưu dữ liệu sửa đổi trực tiếp vào bảng public.users thông qua ID
+                    const { error: errorCapNhatHoSo } = await clientSupabaseHoatDong
+                        .from('users')
+                        .update({
+                            display_name: giaTriTenMoi,
+                            phone: giaTriSdtMoi,
+                            address: giaTriDiaChiMoi
+                        })
+                        .eq('id', thongTinUserAuth.id);
+
+                    if (errorCapNhatHoSo) {
+                        console.error("Supabase từ chối thực thi tác vụ cập nhật hồ sơ:", errorCapNhatHoSo.message);
+                        hienThiThongBaoHoiPhan("Cập nhật dữ liệu thất bại: " + errorCapNhatHoSo.message, "error");
+                    } else {
+                        hienThiThongBaoHoiPhan("Hồ sơ cá nhân của bạn đã được cập nhật thành công!", "success");
+                        
+                        // Đồng bộ tức thời thông tin lên thanh Sidebar để người dùng quan sát thấy ngay thay đổi
+                        lblSidebarName.textContent = giaTriTenMoi;
+                        divAvatarLetter.textContent = giaTriTenMoi.charAt(0).toUpperCase();
+                        
+                        // Phát tín hiệu sự kiện tùy chỉnh ra toàn hệ thống cửa hàng để Navbar cập nhật lại tên hiển thị chào mừng
+                        window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { display_name: giaTriTenMoi } }));
+                    }
+                } catch (loiNgoaiLeKhiGhi) {
+                    console.error("Lỗi ngoại lệ phát sinh trong tiến trình lưu dữ liệu:", loiNgoaiLeKhiGhi);
+                    hienThiThongBaoHoiPhan("Hệ thống máy chủ gặp sự cố không thể hoàn tất tác vụ!", "error");
+                } finally {
+                    // Mở khóa lại nút Lưu sau khi kết thúc toàn bộ tiến trình xử lý API dữ liệu
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

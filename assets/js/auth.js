@@ -1,5 +1,3 @@
-/* auth.js - Cập nhật để tránh lỗi null */
-
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Xử lý chuyển đổi form Login/Register (chỉ chạy ở trang login.html)
     const loginBox = document.getElementById('login-box');
