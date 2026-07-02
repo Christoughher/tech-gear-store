@@ -6,6 +6,7 @@
     <title>Admin Page - tech.no</title>
     <link rel="stylesheet" href="../../assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="admin-sidebar-container"></div>
@@ -126,6 +127,17 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="charts-container">
+            <div class="chart-card main-chart">
+                <h3>Phân tích Doanh thu & Đơn hàng</h3>
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="chart-card sub-chart">
+                <h3>Tỷ trọng sản phẩm bán ra</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
     </main>
 
     <script src="/assets/js/main.js"></script>

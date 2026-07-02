@@ -1,0 +1,6 @@
+ALTER TABLE public.products
+ADD COLUMN IF NOT EXISTS original_price DECIMAL(12,2),
+ADD COLUMN IF NOT EXISTS short_description TEXT,
+ADD COLUMN IF NOT EXISTS specifications JSONB NOT NULL DEFAULT '{}'::jsonb,
+ADD COLUMN IF NOT EXISTS source_url TEXT,
+ADD COLUMN IF NOT EXISTS specifications_updated_at TIMESTAMP WITH TIME ZONE;

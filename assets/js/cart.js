@@ -81,3 +81,4 @@ class ShoppingCart {
 
 // Tạo instance giỏ hàng toàn cầu
 const shopCart = new ShoppingCart();
+window.shopCart = shopCart;

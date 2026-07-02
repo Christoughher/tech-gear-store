@@ -207,10 +207,10 @@
                                 <label for="productCategory">Danh mục</label>
                                 <select id="productCategory">
                                     <option value="">Chọn danh mục</option>
-                                    <option>Laptop</option>
-                                    <option>PC / Desktop</option>
-                                    <option>Màn hình</option>
-                                    <option>Phụ kiện</option>
+                                    <option value="phone">Điện thoại</option>
+                                    <option value="laptop">Laptop</option>
+                                    <option value="pc">PC / Desktop</option>
+                                    <option value="phukien">Phụ kiện</option>
                                 </select>
                             </div>
                             <div class="form-group full">
@@ -238,9 +238,9 @@
                             <div class="form-group">
                                 <label for="productStatus">Trạng thái</label>
                                 <select id="productStatus">
-                                    <option>Còn hàng</option>
-                                    <option>Sắp hết hàng</option>
-                                    <option>Hết hàng</option>
+                                    <option value="ConHang">Còn hàng</option>
+                                    <option value="SapHetHang">Sắp hết hàng</option>
+                                    <option value="HetHang">Hết hàng</option>
                                 </select>
                             </div>
                         </div>
@@ -254,23 +254,29 @@
                             <span>
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <strong>Tải ảnh sản phẩm</strong>
-                                Chọn ảnh từ máy tính
+                                Chọn ảnh từ máy tính (Có thể chọn nhiều ảnh)
                             </span>
                         </label>
-                        <input type="file" id="productImage" accept="image/*" hidden>
+                        <input type="file" id="productImage" accept="image/*" multiple hidden>
+
+                        <div id="imagePreviewContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; margin-top: 15px;"></div>
                     </section>
                 </aside>
             </form>
 
             <div class="form-actions">
                 <a class="btn btn-secondary btn-link" href="admin-tongquan.html">Hủy</a>
-                <button class="btn btn-primary" type="button">
+                <button class="btn btn-primary" type="button" id="btnSaveProduct">
                     <i class="fa-solid fa-floppy-disk"></i> Lưu sản phẩm
                 </button>
             </div>
-        </div>
-    </main>
 
-    <script src="/assets/js/main.js"></script>
+            <!-- Supabase Library từ CDN -->
+            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+            <!-- Config & Auth Scripts -->
+            <script src="../../assets/js/supabase-config.js"></script>
+            <script src="../../assets/js/main.js"></script>
+            <script src="../../assets/js/admin-add-product.js"></script>
 </body>
 </html>
