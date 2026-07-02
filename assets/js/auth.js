@@ -59,7 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const { data, error } = await window.supabaseClient.auth.signUp({
                 email: email,
                 password: password,
-                options: { data: { full_name: fullname } }
+                options: {
+                    data: {
+                        full_name: fullname,
+                        display_name: fullname
+                    }
+                }
             });
 
             if (error) {

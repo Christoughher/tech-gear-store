@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Laptop - Tech.no</title>
+    <title>Laptop - Tech.no</title>
 
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/category.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body> 
+<body>
     <div id="navbar-container"></div>
 
     <main class="category-main">
@@ -22,10 +22,6 @@
         </section>
 
         <section class="category-toolbar">
-            <div class="category-search">
-                <input type="text" placeholder="Tìm kiếm laptop...">
-            </div>
-
             <div class="category-sort">
                 <select>
                     <option>Sắp xếp mặc định</option>
@@ -65,78 +61,15 @@
             </aside>
 
             <div class="product-grid">
-                <article class="product-card">
-                    <div class="product-image">
-                        <img src="../assets/images/products/laptop-1.png" alt="ASUS Vivobook 15">
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-tag">Laptop</span>
-                        <h3>ASUS Vivobook 15</h3>
-                        <p class="product-desc">
-                            Intel Core i5, RAM 16GB, SSD 512GB, màn hình 15.6 inch.
-                        </p>
-                        <p class="product-price">14.990.000đ</p>
-
-                        <div class="product-actions">
-                            <a href="#" class="btn-detail">Chi tiết</a>
-                            <button class="btn-cart">Thêm giỏ</button>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="product-card">
-                    <div class="product-image">
-                        <img src="../assets/images/products/laptop-2.png" alt="Dell Inspiron 14">
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-tag">Laptop</span>
-                        <h3>Dell Inspiron 14</h3>
-                        <p class="product-desc">
-                            Thiết kế mỏng nhẹ, phù hợp học tập và làm việc văn phòng.
-                        </p>
-                        <p class="product-price">16.490.000đ</p>
-
-                        <div class="product-actions">
-                            <a href="#" class="btn-detail">Chi tiết</a>
-                            <button class="btn-cart">Thêm giỏ</button>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="product-card">
-                    <div class="product-image">
-                        <img src="../assets/images/products/laptop-3.png" alt="Lenovo IdeaPad Slim">
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-tag">Laptop</span>
-                        <h3>Lenovo IdeaPad Slim</h3>
-                        <p class="product-desc">
-                            Hiệu năng ổn định, pin tốt, phù hợp sinh viên và nhân viên văn phòng.
-                        </p>
-                        <p class="product-price">13.990.000đ</p>
-
-                        <div class="product-actions">
-                            <a href="#" class="btn-detail">Chi tiết</a>
-                            <button class="btn-cart">Thêm giỏ</button>
-                        </div>
-                    </div>
-                </article>
+                <div class="products-empty-state">Đang tải sản phẩm...</div>
             </div>
         </section>
-
     </main>
 
-    <div id="pagination-container"></div>   
-
+    <div id="pagination-container"></div>
     <div id="footer-container"></div>
 
-    <!-- Supabase Library từ CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Config & Auth Scripts -->
     <script src="/assets/js/supabase-config.js"></script>
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/main.js"></script>

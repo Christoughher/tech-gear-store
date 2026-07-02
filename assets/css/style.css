@@ -178,6 +178,11 @@ body {
     margin: 40px 0;
 }
 
+#pagination-container.is-hidden,
+.pagination-container.is-hidden {
+    display: none;
+}
+
 .page-btn {
     width: 40px;
     height: 40px;
@@ -195,6 +200,16 @@ body {
     border-color: #288ad6;
     color: #288ad6;
     background-color: #ffffff;
+}
+
+.page-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.page-btn:disabled:hover {
+    color: #288ad6;
+    background-color: #f1f5f9;
 }
 
 .page-btn.active {

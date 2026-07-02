@@ -72,7 +72,6 @@
     <div id="footer-container"></div>
 
     <script src="/assets/js/cart.js"></script>
-    <script src="/assets/js/main.js"></script>
     <script>
         // Hàm để format tiền tệ
         function formatCurrency(amount) {
@@ -105,10 +104,11 @@
                 const itemElement = document.createElement('div');
                 itemElement.className = 'cart-item';
                 const itemTotal = item.price * item.quantity;
+                const itemImage = item.image || '../assets/images/products/default-product.png';
                 
                 itemElement.innerHTML = `
                     <div class="item-image">
-                        <img src="../assets/images/products/default-product.png" alt="${item.name}">
+                        <img src="${itemImage}" alt="${item.name}" onerror="this.src='../assets/images/products/default-product.png'">
                     </div>
 
                     <div class="item-details">
@@ -138,7 +138,7 @@
             // Gắn sự kiện cho nút +/-
             document.querySelectorAll('.qty-plus').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const productId = e.target.getAttribute('data-product-id');
+                    const productId = e.currentTarget.getAttribute('data-product-id');
                     const currentQty = parseInt(document.querySelector(`input[data-product-id="${productId}"]`).value);
                     shopCart.updateQuantity(productId, currentQty + 1);
                     renderCart();
@@ -147,7 +147,7 @@
 
             document.querySelectorAll('.qty-minus').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const productId = e.target.getAttribute('data-product-id');
+                    const productId = e.currentTarget.getAttribute('data-product-id');
                     const currentQty = parseInt(document.querySelector(`input[data-product-id="${productId}"]`).value);
                     if (currentQty > 1) {
                         shopCart.updateQuantity(productId, currentQty - 1);
@@ -171,7 +171,7 @@
             // Gắn sự kiện cho nút xóa
             document.querySelectorAll('.item-remove').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const productId = e.target.getAttribute('data-product-id');
+                    const productId = e.currentTarget.getAttribute('data-product-id');
                     shopCart.removeProduct(productId);
                     renderCart();
                 });

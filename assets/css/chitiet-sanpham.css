@@ -34,6 +34,19 @@
     padding: 50px 80px;
     display: block;
     background-color:  #ffffff;
+    object-fit: contain;
+}
+
+.product-detail-image-empty {
+    min-height: 400px;
+    background: linear-gradient(135deg, #f8fbff, #eef5fb);
+    color: #7a8797;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 6px;
 }
 
 .swiper-button-next, .swiper-button-prev {
@@ -79,25 +92,52 @@
     flex: 4; 
     background-color: #ffffff;
     border-radius: 8px;
+    padding: 18px;
 }
 
-.box-right h2 {
-    margin-left: 15px;
-    margin-top: 15px;
+.product-detail-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
 }
 
-.box-right li {
-    margin-left: 15px;
-    margin-top: 15px;
+.product-detail-tab {
+    min-height: 46px;
+    border: 1px solid #dbe3ec;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.product-detail-tab:hover,
+.product-detail-tab.is-active {
+    border-color: #8ec5ff;
+    background: #eef7ff;
+    color: #1677ff;
+}
+
+.product-detail-panel {
+    min-height: 350px;
+}
+
+.product-description-content {
+    color: #253044;
+    font-size: 16px;
+    line-height: 1.75;
+    white-space: pre-line;
+    padding: 8px 4px 0;
 }
 
 .box-right .price-box {
-    margin-left: 15px;
-    margin-top: 15px;
+    margin-top: 18px;
 }
 
 .box-right .btn-buy {
-    margin-left: 15px;
     margin-top: 15px;
 }
 .specs-list {
@@ -109,11 +149,13 @@
     padding: 10px 0;
     border-bottom: 1px solid #eee;
     display: flex;
+    gap: 16px;
 }
 
 .specs-list span {
     font-weight: bold;
-    width: 150px; 
+    width: 170px;
+    flex: 0 0 170px;
     color: #555;
 }
 
@@ -157,6 +199,11 @@
 
 .add-to-cart:hover {
     background-color: #e68900;
+}
+
+.add-to-cart:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
 }
 
 .add-to-cart i {

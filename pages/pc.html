@@ -22,10 +22,6 @@
         </section>
 
         <section class="category-toolbar">
-            <div class="category-search">
-                <input type="text" placeholder="Tìm kiếm PC Gaming...">
-            </div>
-
             <div class="category-sort">
                 <select>
                     <option>Sắp xếp mặc định</option>
@@ -65,79 +61,15 @@
             </aside>
 
             <div class="product-grid">
-                <article class="product-card">
-                    <div class="product-image">
-                        <img src="../assets/images/products/pc-1.png" alt="PC Gaming Starter">
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-tag">PC Gaming</span>
-                        <h3>PC Gaming Starter</h3>
-                        <p class="product-desc">
-                            Ryzen 5, RAM 16GB, SSD 512GB, card đồ họa RTX 3060.
-                        </p>
-                        <p class="product-price">15.990.000đ</p>
-
-                        <div class="product-actions">
-                            <a href="#" class="btn-detail">Chi tiết</a>
-                            <button class="btn-cart">Thêm giỏ</button>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="product-card">
-                    <div class="product-image">
-                        <img src="../assets/images/products/pc-2.png" alt="PC Gaming RTX 4060">
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-tag">PC Gaming</span>
-                        <h3>PC Gaming RTX 4060</h3>
-                        <p class="product-desc">
-                            Intel Core i5 14400F, RAM 16GB, SSD 1TB, RTX 4060 hiệu năng cao.
-                        </p>
-                        <p class="product-price">24.990.000đ</p>
-
-                        <div class="product-actions">
-                            <a href="#" class="btn-detail">Chi tiết</a>
-                            <button class="btn-cart">Thêm giỏ</button>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="product-card">
-                    <div class="product-image">
-                        <img src="../assets/images/products/pc-3.png" alt="PC Gaming Creator Pro">
-                    </div>
-
-                    <div class="product-info">
-                        <span class="product-tag">PC Gaming</span>
-                        <h3>PC Gaming Creator Pro</h3>
-                        <p class="product-desc">
-                            Cấu hình mạnh cho gaming, dựng video, render và thiết kế đồ họa.
-                        </p>
-                        <p class="product-price">36.990.000đ</p>
-
-                        <div class="product-actions">
-                            <a href="#" class="btn-detail">Chi tiết</a>
-                            <button class="btn-cart">Thêm giỏ</button>
-                        </div>
-                    </div>
-                </article>
+                <div class="products-empty-state">Đang tải sản phẩm...</div>
             </div>
         </section>
-
-
     </main>
 
     <div id="pagination-container"></div>
-
     <div id="footer-container"></div>
 
-    <!-- Supabase Library từ CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Config & Auth Scripts -->
     <script src="/assets/js/supabase-config.js"></script>
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/main.js"></script>
