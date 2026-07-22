@@ -1,5 +1,5 @@
 -- =========================================================
--- TECH.NO TGDD SAMPLE PRODUCTS SEED - 30 PRODUCTS
+-- TECH.NO TGDD SAMPLE PRODUCTS SEED - 60 PRODUCTS
 -- Chay file nay trong Supabase SQL Editor sau khi da tao schema.
 -- Ten/gia/anh dai dien tham khao tu cac card san pham cong khai tren
 -- thegioididong.com ngay 27/06/2026. Mo ta duoc viet lai cho demo.
@@ -12,10 +12,6 @@ INSERT INTO public.categories (id, name) VALUES
 ('phukien', 'Phu kien')
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name;
-
-DELETE FROM public.products
-WHERE sku LIKE 'TGDD-%'
-   OR sku LIKE 'TGDD2-%';
 
 INSERT INTO public.products
   (sku, name, description, price, discount_percent, category_id, brand, subcategory, image_urls, stock, status)
