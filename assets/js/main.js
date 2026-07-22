@@ -133,9 +133,8 @@ function getCurrentCategoryPage() {
     const pathname = window.location.pathname.toLowerCase();
 
     if (pathname.endsWith('/pages/laptop.html')) return 'laptop';
-    if (pathname.endsWith('/pages/pc.html')) return 'pc';
+    if (pathname.endsWith('/pages/pc.html')) return 'pc'; 
     if (pathname.endsWith('/pages/phu-kien.html')) return 'phukien';
-
     return '';
 }
 
@@ -919,7 +918,7 @@ function setupAddToCartButtons() {
     if (window.__technoAddToCartReady) return;
     window.__technoAddToCartReady = true;
 
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', async (event) => {
         const button = event.target.closest('.btn-cart');
         if (!button) return;
 
@@ -927,18 +926,28 @@ function setupAddToCartButtons() {
 
         const cartInstance = getShoppingCartInstance();
         if (!cartInstance) {
-            showNotification('Không thể thêm sản phẩm vì giỏ hàng chưa được tải.');
+            showNotification('Không thể thêm sản phẩm vì giỏ hàng chưa được tải.', 'error');
             return;
         }
 
         const product = getCartProductFromButton(button);
         if (!product) {
-            showNotification('Không thể đọc thông tin sản phẩm này.');
+            showNotification('Không thể đọc thông tin sản phẩm này.', 'error');
             return;
         }
 
-        cartInstance.addProduct(product);
-        showNotification(`✓ Đã thêm "${product.name}" vào giỏ hàng!`);
+        const wasDisabled = button.disabled;
+        button.disabled = true;
+
+        try {
+            await cartInstance.addProduct(product);
+            showNotification(`"${product.name}" đã được thêm vào giỏ hàng.`);
+        } catch (error) {
+            console.error('Không thể thêm sản phẩm vào giỏ hàng:', error);
+            showNotification(error.message || 'Không thể thêm sản phẩm vào giỏ hàng.', 'error');
+        } finally {
+            button.disabled = wasDisabled;
+        }
     });
 }
 
@@ -954,16 +963,19 @@ function getCartProductFromButton(button) {
     const priceElement = productCard?.querySelector('.product-price, .price-amount');
     const imageElement = productCard?.querySelector('img');
 
+    const productId = String(button.dataset.productId || '').trim();
     const productName = button.dataset.productName || nameElement?.textContent?.trim();
     const productPrice = Number(button.dataset.productPrice)
         || parseInt((priceElement?.textContent || '').replace(/\D/g, ''), 10);
 
-    if (!productName || !Number.isFinite(productPrice)) {
+    const isDatabaseUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(productId);
+
+    if (!isDatabaseUuid || !productName || !Number.isFinite(productPrice)) {
         return null;
     }
 
     return {
-        id: button.dataset.productId || normalizeProductKey(productName).replace(/\s+/g, '-'),
+        id: productId,
         name: productName,
         price: productPrice,
         quantity: 1,
@@ -971,32 +983,81 @@ function getCartProductFromButton(button) {
     };
 }
 
-// Hiển thị thông báo khi thêm sản phẩm
-function showNotification(message) {
-    // Tạo phần tử thông báo
+// Hiển thị toast nhỏ ở cuối màn hình để không che thanh điều hướng.
+function showNotification(message, type = 'success') {
+    const normalizedType = type === 'error' ? 'error' : 'success';
+    const duration = normalizedType === 'error' ? 5000 : 3600;
+    let notificationStack = document.querySelector('.cart-notification-stack');
+
+    if (!notificationStack) {
+        notificationStack = document.createElement('div');
+        notificationStack.className = 'cart-notification-stack';
+        notificationStack.setAttribute('aria-live', 'polite');
+        notificationStack.setAttribute('aria-atomic', 'false');
+        document.body.appendChild(notificationStack);
+    }
+
+    // Chỉ giữ tối đa ba toast để màn hình không bị chật khi người dùng bấm liên tục.
+    while (notificationStack.children.length >= 3) {
+        notificationStack.firstElementChild?.remove();
+    }
+
     const notification = document.createElement('div');
-    notification.className = 'cart-notification';
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4CAF50;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
-        z-index: 9999;
-        animation: slideIn 0.3s ease-out;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    `;
+    notification.className = `cart-notification cart-notification--${normalizedType}`;
+    notification.setAttribute('role', normalizedType === 'error' ? 'alert' : 'status');
+    notification.style.setProperty('--toast-duration', `${duration}ms`);
 
-    document.body.appendChild(notification);
+    const icon = document.createElement('span');
+    icon.className = 'cart-notification__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = normalizedType === 'error' ? '!' : '✓';
 
-    // Tự động xóa sau 3 giây
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    const content = document.createElement('div');
+    content.className = 'cart-notification__content';
+
+    const title = document.createElement('strong');
+    title.className = 'cart-notification__title';
+    title.textContent = normalizedType === 'error'
+        ? 'Không thể thêm sản phẩm'
+        : 'Đã thêm vào giỏ hàng';
+
+    const messageElement = document.createElement('p');
+    messageElement.className = 'cart-notification__message';
+    messageElement.textContent = message;
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'cart-notification__close';
+    closeButton.type = 'button';
+    closeButton.setAttribute('aria-label', 'Đóng thông báo');
+    closeButton.textContent = '×';
+
+    const progress = document.createElement('span');
+    progress.className = 'cart-notification__progress';
+    progress.setAttribute('aria-hidden', 'true');
+
+    content.append(title, messageElement);
+    notification.append(icon, content, closeButton, progress);
+    notificationStack.appendChild(notification);
+
+    let removeTimer;
+
+    const dismissNotification = () => {
+        if (notification.classList.contains('is-leaving')) return;
+
+        clearTimeout(removeTimer);
+        notification.classList.add('is-leaving');
+
+        setTimeout(() => {
+            notification.remove();
+
+            if (!notificationStack.children.length) {
+                notificationStack.remove();
+            }
+        }, 240);
+    };
+
+    closeButton.addEventListener('click', dismissNotification);
+    removeTimer = setTimeout(dismissNotification, duration);
 }
 
 // Chạy khi trang web tải xong

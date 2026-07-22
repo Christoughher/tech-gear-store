@@ -385,6 +385,161 @@ body {
     color: #e03131;
 }
 
+/* Toast thêm giỏ hàng: đặt cuối màn hình để không che thanh điều hướng. */
+.cart-notification-stack {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 12000;
+    display: grid;
+    width: min(380px, calc(100vw - 32px));
+    gap: 12px;
+    pointer-events: none;
+}
+
+.cart-notification {
+    --toast-accent: #16a34a;
+    --toast-soft: #dcfce7;
+    position: relative;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 28px;
+    align-items: start;
+    gap: 12px;
+    overflow: hidden;
+    padding: 14px 12px 16px 14px;
+    color: #111827;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid var(--toast-accent);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+    pointer-events: auto;
+    animation: cartToastEnter 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.cart-notification--error {
+    --toast-accent: #dc2626;
+    --toast-soft: #fee2e2;
+}
+
+.cart-notification__icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    color: var(--toast-accent);
+    background: var(--toast-soft);
+    border-radius: 50%;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.cart-notification__content {
+    min-width: 0;
+    padding-top: 1px;
+}
+
+.cart-notification__title {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.cart-notification__message {
+    margin: 3px 0 0;
+    color: #4b5563;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.cart-notification__close {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    place-items: center;
+    color: #6b7280;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: color 160ms ease, background-color 160ms ease;
+}
+
+.cart-notification__close:hover,
+.cart-notification__close:focus-visible {
+    color: #111827;
+    background: #f3f4f6;
+    outline: none;
+}
+
+.cart-notification__close:focus-visible {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.cart-notification__progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--toast-accent);
+    transform-origin: left;
+    animation: cartToastProgress var(--toast-duration) linear forwards;
+}
+
+.cart-notification.is-leaving {
+    pointer-events: none;
+    animation: cartToastLeave 240ms ease forwards;
+}
+
+@keyframes cartToastEnter {
+    from {
+        opacity: 0;
+        transform: translate3d(24px, 12px, 0) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes cartToastLeave {
+    to {
+        opacity: 0;
+        transform: translate3d(18px, 8px, 0) scale(0.98);
+    }
+}
+
+@keyframes cartToastProgress {
+    to {
+        transform: scaleX(0);
+    }
+}
+
+@media (max-width: 600px) {
+    .cart-notification-stack {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cart-notification,
+    .cart-notification.is-leaving,
+    .cart-notification__progress {
+        animation: none;
+    }
+}
+
 
 
 

@@ -95,6 +95,13 @@
     color: #6b7280;
 }
 
+.item-stock-warning {
+    margin-top: 6px;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .item-quantity {
     display: flex;
     align-items: center;
@@ -130,6 +137,12 @@
 
 .item-quantity button:hover {
     color: #111827;
+}
+
+.item-quantity button:disabled,
+.item-quantity input:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .item-total {
@@ -240,6 +253,14 @@
 .checkout-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+.checkout-btn:disabled,
+.checkout-btn:disabled:hover {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
 }
 
 .continue-shopping {

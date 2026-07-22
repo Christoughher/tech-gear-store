@@ -20,6 +20,8 @@ Tech.no là website cửa hàng bán lẻ sản phẩm công nghệ được xâ
 ## Công nghệ sử dụng
 - HTML
 - CSS
+- JavaScript
+- Supabase (PostgreSQL, Auth và Data API)
 - Font Awesome
 
 ## Triển khai
@@ -33,6 +35,6 @@ https://tech-gear-store.vercel.app
 3. Dùng menu điều hướng để xem trang chủ, sản phẩm, giỏ hàng và khu vực admin.
 
 ## Lưu ý
-- Đây là một website tĩnh, chưa tích hợp backend hoặc cơ sở dữ liệu.
-- Phù hợp để trình diễn thiết kế và trải nghiệm giao diện cửa hàng online.
+- Frontend kết nối Supabase bằng `@supabase/supabase-js`, Project URL và anon key.
+- Người dùng, sản phẩm và giỏ hàng đã sử dụng database; luồng tạo đơn hàng từ nút thanh toán vẫn đang được hoàn thiện.
 
