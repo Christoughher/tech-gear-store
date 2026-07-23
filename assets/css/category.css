@@ -6,25 +6,129 @@
     min-height: 100vh;
 }
 
-.category-hero {
-    background: linear-gradient(135deg, #111827, #2563eb);
-    color: #ffffff;
-    padding: 48px 40px;
-    border-radius: 18px;
-    margin-bottom: 32px;
+/* ========= CATEGORY BANNER ========= */
+
+.category-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
     margin-top: 60px;
+    margin-bottom: 30px;
+
+    padding: 30px 45px;
+
+    background: linear-gradient(
+        90deg,
+        #f5f6f9 0%,
+        #f3f5f9 60%,
+        #eef2f7 100%
+    );
+
+    border-radius: 20px;
+    overflow: hidden;
 }
 
-.category-hero h1 {
-    font-size: 38px;
-    margin-bottom: 12px;
+.hero-content {
+    flex: 1;
+    max-width: 430px;
 }
 
-.category-hero p {
-    font-size: 16px;
-    max-width: 650px;
-    line-height: 1.6;
-    color: #e5e7eb;
+.hero-content h1 {
+    font-size: 52px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+    margin-bottom: 18px;
+}
+
+.hero-content p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #475569;
+    margin-bottom: 24px;
+}
+
+.hero-benefits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.benefit-item i {
+    color: #2563eb;
+}
+
+.hero-image {
+    flex: 1.35;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 850px;
+
+    display: block;
+    object-fit: contain;
+}
+
+/* ===== Tablet ===== */
+
+@media (max-width: 992px) {
+
+    .category-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 24px;
+    }
+
+    .hero-content {
+        max-width: 100%;
+    }
+
+    .hero-benefits {
+        justify-content: center;
+    }
+
+    .hero-content h1 {
+        font-size: 40px;
+    }
+}
+
+/* ===== Mobile ===== */
+
+@media (max-width: 576px) {
+
+    .category-banner {
+        padding: 24px;
+    }
+
+    .hero-content h1 {
+        font-size: 30px;
+    }
+
+    .hero-content p {
+        font-size: 15px;
+    }
+
+    .hero-benefits {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
 }
 
 .category-toolbar {
@@ -409,4 +513,184 @@
     .product-actions {
         flex-direction: column;
     }
+}
+/* ===== HERO BANNER ===== */
+
+.category-hero {
+    position: relative;
+
+    min-height: 360px;
+
+    display: flex;
+    align-items: center;
+
+    margin-top: 60px;
+    margin-bottom: 30px;
+
+    border-radius: 20px;
+    overflow: hidden;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.laptop-hero {
+    background-image: url("../images/banner3.png");
+}
+
+.pc-hero {
+    background-image: url("../images/banner4.png");
+}
+
+.accessory-hero {
+    background-image: url("../images/banner5.png");
+}
+
+.hero-overlay {
+    max-width: 430px;
+    padding-left: 60px;
+}
+
+.hero-overlay h1 {
+    font-size: 56px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 18px;
+}
+
+.hero-overlay p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #334155;
+    margin-bottom: 24px;
+}
+
+/* ==========================
+   LAPTOP BENEFITS
+========================== */
+
+.laptop-hero .benefit-item {
+    color: #3b82f6;
+}
+
+.laptop-hero .benefit-item i {
+    color: #3b82f6;
+}
+
+/* ==========================
+   PC BENEFITS
+========================== */
+
+.pc-hero .benefit-item {
+    color: #6366f1;
+}
+
+.pc-hero .benefit-item i {
+    color: #6366f1;
+}
+
+/* ==========================
+   ACCESSORY BENEFITS
+========================== */
+
+.accessory-hero .benefit-item {
+    color: #f97316;
+}
+
+.accessory-hero .benefit-item i {
+    color: #f97316;
+}
+.hero-benefits {
+    display: flex;
+    gap: 28px;
+
+    margin-top: 24px;
+
+    flex-wrap: nowrap;
+}
+/* ==========================
+   BENEFIT ITEMS
+========================== */
+.benefit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    min-width: 160px;
+}
+
+.benefit-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    flex-shrink: 0;
+
+    position: relative;
+}
+
+.benefit-icon i {
+    font-size: 17px;
+
+    position: relative;
+    top: 1px;
+
+    line-height: 1;
+}
+
+.benefit-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.benefit-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+
+    margin-bottom: 4px;
+}
+
+.benefit-desc {
+    font-size: 13px;
+    color: #64748b;
+}
+.laptop-hero .benefit-icon {
+    background: #eaf2ff;
+}
+
+.laptop-hero .benefit-icon i {
+    color: #3b82f6;
+}
+
+.laptop-hero .benefit-title {
+    color: #1e293b;
+}
+.pc-hero .benefit-icon {
+    background: #f0edff;
+}
+
+.pc-hero .benefit-icon i {
+    color: #6366f1;
+}
+
+.pc-hero .benefit-title {
+    color: #1e293b;
+}
+.accessory-hero .benefit-icon {
+    background: #fff0e7;
+}
+
+.accessory-hero .benefit-icon i {
+    color: #f97316;
+}
+
+.accessory-hero .benefit-title {
+    color: #1e293b;
 }
