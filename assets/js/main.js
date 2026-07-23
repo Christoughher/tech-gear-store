@@ -872,25 +872,6 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
-const stars = document.querySelectorAll('.stars i');
-const ratingInput = document.getElementById('rating-value');
-
-stars.forEach(star => {
-    star.addEventListener('click', function() {
-        const value = this.getAttribute('data-value');
-        ratingInput.value = value;  /* ratingInput sẽ được gửi lên backend */
-
-        stars.forEach(s => s.classList.remove('selected'));  /* xóa class 'selected' cũ */
-
-        this.classList.add('selected');   /* thêm class 'selected' mới vào ptử đang chọn */
-        let nextSibling = this.nextElementSibling;
-        while (nextSibling) {
-            nextSibling.classList.add('selected');
-            nextSibling = nextSibling.nextElementSibling;
-        }
-    });
-});
-
 // Hàm để load một file HTML vào một phần tử có ID cho trước
 async function loadComponent(id, file) {
     const element = document.getElementById(id);
@@ -1129,6 +1110,7 @@ async function loadProductDetailPage() {
     }
 
     await renderProductDetail(product);
+    await window.ProductReviews?.init(product);
 }
 
 async function renderProductDetail(product) {
@@ -1655,89 +1637,4 @@ window.addEventListener('navbarLoaded', async () => {
     }
 });
 
-/* =============== BIỂU ĐỒ ================== */
-document.addEventListener("DOMContentLoaded", function () {
-    if (typeof Chart === 'undefined') return;
-
-    const revenueCanvas = document.getElementById('revenueChart');
-    const categoryCanvas = document.getElementById('categoryChart');
-
-    if (!revenueCanvas || !categoryCanvas) return;
-    // 1. CẤU HÌNH BIỂU ĐỒ DOANH THU & ĐƠN HÀNG (KẾT HỢP ĐƯỜNG VÀ CỘT)
-    const ctxRevenue = revenueCanvas.getContext('2d');
-    new Chart(ctxRevenue, {
-        type: 'bar', // Loại biểu đồ chính là Cột
-        data: {
-            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
-            datasets: [
-                {
-                    label: 'Doanh thu ($)',
-                    data: [12000, 19000, 15000, 25000, 22000, 43287], // Dữ liệu doanh thu
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)', // Màu xanh lam dương giống card gốc
-                    borderRadius: 6,
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'Số đơn hàng',
-                    data: [120, 190, 160, 280, 240, 398], // Dữ liệu đơn hàng
-                    type: 'line', // Chuyển riêng dataset này thành đường
-                    borderColor: '#10b981', // Màu xanh lá dương giống card đơn hàng
-                    backgroundColor: '#10b981',
-                    borderWidth: 3,
-                    tension: 0.3, // Bo tròn đường cong
-                    yAxisID: 'y1',
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    grid: { color: '#f1f5f9' }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: { drawOnChartArea: false } // Ẩn grid line trùng lặp
-                }
-            }
-        }
-    });
-
-    // 2. CẤU HÌNH BIỂU ĐỒ TỶ TRỌNG DANH MỤC (DOUGHNUT)
-    const ctxCategory = categoryCanvas.getContext('2d');
-    new Chart(ctxCategory, {
-        type: 'doughnut',
-        data: {
-            labels: ['Laptop', 'Điện thoại', 'Linh kiện PC', 'Phụ kiện'],
-            datasets: [{
-                data: [40, 30, 20, 10], // Tỷ lệ phần trăm %
-                backgroundColor: [
-                    '#3b82f6', // Xanh lam (Laptop)
-                    '#10b981', // Xanh lá (Điện thoại)
-                    '#f59e0b', // Vàng (Linh kiện)
-                    '#ef4444'  // Đỏ (Phụ kiện)
-                ],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom', // Đưa chú thích xuống dưới cho thoáng
-                    labels: { boxWidth: 12, padding: 15 }
-                }
-            },
-            cutout: '70%' // Làm rỗng ruột biểu đồ tròn nhìn hiện đại hơn
-        }
-    });
-});
+/* Biểu đồ và KPI admin được tải từ Supabase trong assets/js/admin-data.js. */

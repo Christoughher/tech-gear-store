@@ -9,6 +9,11 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 0. DROP OLD TABLES
 -- =========================================================
 
+DROP FUNCTION IF EXISTS public.list_product_reviews(UUID);
+DROP FUNCTION IF EXISTS public.create_product_review(UUID, INT, TEXT);
+DROP FUNCTION IF EXISTS public.get_admin_category_sales();
+DROP FUNCTION IF EXISTS public.get_admin_monthly_metrics(INTEGER);
+DROP FUNCTION IF EXISTS public.get_admin_dashboard_kpis();
 DROP TABLE IF EXISTS public.product_reviews CASCADE;
 DROP TABLE IF EXISTS public.order_items CASCADE;
 DROP TABLE IF EXISTS public.orders CASCADE;
@@ -147,6 +152,7 @@ CREATE TABLE public.orders (
   receiver_name VARCHAR,
   receiver_phone VARCHAR,
   shipping_address TEXT NOT NULL,
+  shipping_method VARCHAR NOT NULL DEFAULT 'Tiêu chuẩn',
   total_price DECIMAL(12,2) NOT NULL,
   status VARCHAR NOT NULL DEFAULT 'pending',
   note TEXT,
@@ -156,6 +162,9 @@ CREATE TABLE public.orders (
   CONSTRAINT orders_total_price_check CHECK (total_price >= 0),
   CONSTRAINT orders_cart_user_fk FOREIGN KEY (cart_id, user_id)
     REFERENCES public.carts(id, user_id) ON DELETE RESTRICT,
+  CONSTRAINT orders_shipping_method_check CHECK (
+    shipping_method IN ('Tiêu chuẩn', 'Hỏa tốc')
+  ),
   CONSTRAINT orders_status_check CHECK (
     status IN ('pending', 'processing', 'completed', 'cancelled')
   )
@@ -232,6 +241,9 @@ CREATE INDEX idx_order_items_product_id ON public.order_items(product_id);
 
 CREATE INDEX idx_reviews_product_id ON public.product_reviews(product_id);
 CREATE INDEX idx_reviews_user_id ON public.product_reviews(user_id);
+CREATE INDEX idx_reviews_product_visible_created_at
+ON public.product_reviews(product_id, created_at DESC)
+WHERE is_visible = true;
 
 -- =========================================================
 -- 10. UPDATED_AT TRIGGER
@@ -280,7 +292,7 @@ CREATE OR REPLACE FUNCTION public.validate_order_cart()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
   source_cart_user_id UUID;
@@ -334,17 +346,21 @@ AFTER INSERT ON public.orders
 FOR EACH ROW EXECUTE FUNCTION public.mark_cart_checked_out();
 
 -- Checkout nguyên tử: client không được tự ghi giá vào orders/order_items.
+DROP FUNCTION IF EXISTS public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR);
+
 CREATE OR REPLACE FUNCTION public.checkout_cart(
   p_cart_id UUID,
   p_receiver_name VARCHAR,
   p_receiver_phone VARCHAR,
   p_shipping_address TEXT,
-  p_note TEXT DEFAULT NULL
+  p_note TEXT DEFAULT NULL,
+  p_shipping_method VARCHAR DEFAULT 'Tiêu chuẩn'
 )
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 DECLARE
   current_user_id UUID := auth.uid();
@@ -352,6 +368,10 @@ DECLARE
   existing_order_id UUID;
   new_order_id UUID;
   calculated_total DECIMAL(12,2);
+  normalized_shipping_method VARCHAR := COALESCE(
+    NULLIF(btrim(p_shipping_method), ''),
+    'Tiêu chuẩn'
+  );
 BEGIN
   IF current_user_id IS NULL THEN
     RAISE EXCEPTION 'Authentication required';
@@ -359,6 +379,10 @@ BEGIN
 
   IF NULLIF(btrim(p_shipping_address), '') IS NULL THEN
     RAISE EXCEPTION 'Shipping address is required';
+  END IF;
+
+  IF normalized_shipping_method NOT IN ('Tiêu chuẩn', 'Hỏa tốc') THEN
+    RAISE EXCEPTION 'Shipping method must be Tiêu chuẩn or Hỏa tốc';
   END IF;
 
   -- Khóa cart để hai request đồng thời không thể tạo hai order.
@@ -426,6 +450,7 @@ BEGIN
     receiver_name,
     receiver_phone,
     shipping_address,
+    shipping_method,
     total_price,
     status,
     note
@@ -436,6 +461,7 @@ BEGIN
     NULLIF(btrim(p_receiver_name), ''),
     NULLIF(btrim(p_receiver_phone), ''),
     btrim(p_shipping_address),
+    normalized_shipping_method,
     calculated_total,
     'pending',
     NULLIF(btrim(p_note), '')
@@ -476,9 +502,9 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT) FROM anon;
-GRANT EXECUTE ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR) FROM anon;
+GRANT EXECUTE ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR) TO authenticated;
 
 -- =========================================================
 -- 12. AUTO CREATE PROFILE WHEN SIGN UP
@@ -537,6 +563,181 @@ AS $$
       AND role = 'admin'
   );
 $$;
+
+-- =========================================================
+-- 13A. ADMIN DASHBOARD AGGREGATES
+-- Ngưỡng sắp hết hàng: stock từ 1 đến 50.
+-- Chỉ admin được gọi; tính trong database để không bị giới hạn 1.000 dòng.
+-- =========================================================
+
+CREATE OR REPLACE FUNCTION public.get_admin_dashboard_kpis()
+RETURNS TABLE (
+  revenue_total NUMERIC,
+  order_total BIGINT,
+  customer_total BIGINT,
+  product_total BIGINT,
+  product_in_stock BIGINT,
+  product_low_stock BIGINT,
+  product_out_of_stock BIGINT,
+  order_completed BIGINT,
+  order_pending BIGINT,
+  order_processing BIGINT,
+  order_cancelled BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+STABLE
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Admin access required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  WITH order_stats AS (
+    SELECT
+      COALESCE(
+        SUM(orders.total_price) FILTER (WHERE orders.status = 'completed'),
+        0
+      )::NUMERIC AS revenue_total,
+      COUNT(*)::BIGINT AS order_total,
+      COUNT(DISTINCT orders.user_id)::BIGINT AS customer_total,
+      COUNT(*) FILTER (WHERE orders.status = 'completed')::BIGINT AS order_completed,
+      COUNT(*) FILTER (WHERE orders.status = 'pending')::BIGINT AS order_pending,
+      COUNT(*) FILTER (WHERE orders.status = 'processing')::BIGINT AS order_processing,
+      COUNT(*) FILTER (WHERE orders.status = 'cancelled')::BIGINT AS order_cancelled
+    FROM public.orders
+  ),
+  product_stats AS (
+    SELECT
+      COUNT(*)::BIGINT AS product_total,
+      COUNT(*) FILTER (WHERE products.stock > 50)::BIGINT AS product_in_stock,
+      COUNT(*) FILTER (WHERE products.stock BETWEEN 1 AND 50)::BIGINT AS product_low_stock,
+      COUNT(*) FILTER (WHERE products.stock = 0)::BIGINT AS product_out_of_stock
+    FROM public.products
+  )
+  SELECT
+    order_stats.revenue_total,
+    order_stats.order_total,
+    order_stats.customer_total,
+    product_stats.product_total,
+    product_stats.product_in_stock,
+    product_stats.product_low_stock,
+    product_stats.product_out_of_stock,
+    order_stats.order_completed,
+    order_stats.order_pending,
+    order_stats.order_processing,
+    order_stats.order_cancelled
+  FROM order_stats
+  CROSS JOIN product_stats;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_admin_monthly_metrics(p_months INTEGER DEFAULT 6)
+RETURNS TABLE (
+  month_start DATE,
+  revenue_total NUMERIC,
+  order_total BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+STABLE
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Admin access required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  IF p_months IS NULL OR p_months < 1 OR p_months > 24 THEN
+    RAISE EXCEPTION 'p_months must be between 1 and 24'
+      USING ERRCODE = '22023';
+  END IF;
+
+  RETURN QUERY
+  WITH months AS (
+    SELECT generate_series(
+      date_trunc('month', timezone('Asia/Ho_Chi_Minh', now()))
+        - ((p_months - 1) * INTERVAL '1 month'),
+      date_trunc('month', timezone('Asia/Ho_Chi_Minh', now())),
+      INTERVAL '1 month'
+    )::DATE AS month_start
+  )
+  SELECT
+    months.month_start,
+    COALESCE(
+      SUM(orders.total_price) FILTER (WHERE orders.status = 'completed'),
+      0
+    )::NUMERIC AS revenue_total,
+    COUNT(orders.id)::BIGINT AS order_total
+  FROM months
+  LEFT JOIN public.orders
+    ON date_trunc(
+      'month',
+      timezone('Asia/Ho_Chi_Minh', orders.created_at)
+    )::DATE = months.month_start
+  GROUP BY months.month_start
+  ORDER BY months.month_start;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_admin_category_sales()
+RETURNS TABLE (
+  category_id VARCHAR,
+  category_name VARCHAR,
+  quantity_sold BIGINT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+STABLE
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Admin access required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  RETURN QUERY
+  WITH completed_sales AS (
+    SELECT
+      products.category_id,
+      SUM(order_items.quantity)::BIGINT AS quantity_sold
+    FROM public.order_items
+    JOIN public.orders
+      ON orders.id = order_items.order_id
+     AND orders.status = 'completed'
+    JOIN public.products
+      ON products.id = order_items.product_id
+    GROUP BY products.category_id
+  )
+  SELECT
+    categories.id::VARCHAR AS category_id,
+    categories.name::VARCHAR AS category_name,
+    COALESCE(completed_sales.quantity_sold, 0)::BIGINT AS quantity_sold
+  FROM public.categories
+  LEFT JOIN completed_sales
+    ON completed_sales.category_id = categories.id
+  ORDER BY CASE categories.id
+    WHEN 'phone' THEN 1
+    WHEN 'laptop' THEN 2
+    WHEN 'pc' THEN 3
+    WHEN 'phukien' THEN 4
+    ELSE 5
+  END;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.get_admin_dashboard_kpis() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_admin_monthly_metrics(INTEGER) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_admin_category_sales() FROM PUBLIC;
+
+GRANT EXECUTE ON FUNCTION public.get_admin_dashboard_kpis() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_admin_monthly_metrics(INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_admin_category_sales() TO authenticated;
 
 -- Chặn customer tự đổi role thành admin
 CREATE OR REPLACE FUNCTION public.prevent_non_admin_role_change()
@@ -818,7 +1019,109 @@ TO authenticated
 USING (user_id = auth.uid() OR public.is_admin());
 
 -- =========================================================
--- 23. TABLE PRIVILEGES
+-- 23. PUBLIC REVIEW FEED
+-- Chỉ trả về thông tin an toàn để không lộ email, phone, address của users.
+-- =========================================================
+
+CREATE OR REPLACE FUNCTION public.list_product_reviews(p_product_id UUID)
+RETURNS TABLE (
+  id UUID,
+  reviewer_name TEXT,
+  rating INT,
+  comment TEXT,
+  created_at TIMESTAMP WITH TIME ZONE,
+  is_own BOOLEAN
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT
+    review.id,
+    COALESCE(NULLIF(btrim(profile.display_name), ''), 'Khách hàng')::TEXT AS reviewer_name,
+    review.rating,
+    review.comment,
+    review.created_at,
+    COALESCE(review.user_id = auth.uid(), false) AS is_own
+  FROM public.product_reviews AS review
+  JOIN public.users AS profile ON profile.id = review.user_id
+  JOIN public.products AS product ON product.id = review.product_id
+  WHERE review.product_id = p_product_id
+    AND review.is_visible = true
+    AND product.status = 'active'
+  ORDER BY review.created_at DESC
+  LIMIT 100;
+$$;
+
+CREATE OR REPLACE FUNCTION public.create_product_review(
+  p_product_id UUID,
+  p_rating INT,
+  p_comment TEXT
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  current_user_id UUID := auth.uid();
+  new_review_id UUID;
+  normalized_comment TEXT := NULLIF(btrim(p_comment), '');
+BEGIN
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  IF p_rating IS NULL OR p_rating < 1 OR p_rating > 5 THEN
+    RAISE EXCEPTION 'Rating must be between 1 and 5';
+  END IF;
+
+  IF normalized_comment IS NULL THEN
+    RAISE EXCEPTION 'Review comment is required';
+  END IF;
+
+  IF char_length(normalized_comment) > 1000 THEN
+    RAISE EXCEPTION 'Review comment must not exceed 1000 characters';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.products AS product
+    WHERE product.id = p_product_id
+      AND product.status = 'active'
+  ) THEN
+    RAISE EXCEPTION 'Active product not found';
+  END IF;
+
+  INSERT INTO public.product_reviews (
+    product_id,
+    user_id,
+    rating,
+    comment
+  )
+  VALUES (
+    p_product_id,
+    current_user_id,
+    p_rating,
+    normalized_comment
+  )
+  RETURNING id INTO new_review_id;
+
+  RETURN new_review_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.list_product_reviews(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.list_product_reviews(UUID) FROM anon;
+GRANT EXECUTE ON FUNCTION public.list_product_reviews(UUID) TO anon, authenticated;
+
+REVOKE ALL ON FUNCTION public.create_product_review(UUID, INT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.create_product_review(UUID, INT, TEXT) FROM anon;
+GRANT EXECUTE ON FUNCTION public.create_product_review(UUID, INT, TEXT) TO authenticated;
+
+-- =========================================================
+-- 24. TABLE PRIVILEGES
 -- RLS quyết định dòng nào được truy cập; GRANT quyết định thao tác nào tồn tại.
 -- =========================================================
 
@@ -829,8 +1132,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.carts, public.cart_items TO authe
 GRANT SELECT ON public.orders, public.order_items TO authenticated;
 GRANT UPDATE (status, note) ON public.orders TO authenticated;
 
+REVOKE ALL ON public.product_reviews FROM anon, authenticated;
+
 -- =========================================================
--- 24. STORAGE BUCKET FOR PRODUCT IMAGES
+-- 25. STORAGE BUCKET FOR PRODUCT IMAGES
 -- Dùng cho image_urls trong bảng products
 -- =========================================================
 

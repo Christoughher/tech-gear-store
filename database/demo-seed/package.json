@@ -1,0 +1,19 @@
+{
+  "name": "techno-demo-data-seed",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend-only realistic demo data generator for the Tech.no Supabase project.",
+  "scripts": {
+    "self-test": "node seed-demo-data.mjs --self-test",
+    "preview": "node --env-file=.env.seed seed-demo-data.mjs --preview",
+    "seed": "node --env-file=.env.seed seed-demo-data.mjs --execute",
+    "cleanup": "node --env-file=.env.seed seed-demo-data.mjs --execute --cleanup-only"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

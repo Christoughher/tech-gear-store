@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm sản phẩm - tech.no</title>
+    <title id="documentTitle">Thêm sản phẩm - tech.no</title>
     <link rel="stylesheet" href="../../assets/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .add-product-wrapper {
-            margin-left: 265px;
-            margin-right: 40px;
-            margin-bottom: 40px;
+            margin: 0 40px 40px 265px;
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
@@ -21,10 +19,6 @@
         .form-header {
             padding: 22px 28px;
             border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
         }
 
         .form-header h2 {
@@ -33,16 +27,18 @@
             font-weight: 700;
         }
 
-        .form-header p {
+        .form-header p,
+        .form-note {
             color: #64748b;
-            font-size: 14px;
-            margin-top: 4px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 5px;
         }
 
         .product-form {
             padding: 28px;
             display: grid;
-            grid-template-columns: 1.3fr 0.7fr;
+            grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
             gap: 28px;
         }
 
@@ -86,6 +82,10 @@
             font-weight: 700;
         }
 
+        .required-mark {
+            color: #dc2626;
+        }
+
         .form-group input,
         .form-group select,
         .form-group textarea {
@@ -112,10 +112,18 @@
             box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
         }
 
+        .form-group input:disabled,
+        .form-group select:disabled,
+        .form-group textarea:disabled {
+            cursor: not-allowed;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
         .upload-box {
             border: 2px dashed #cbd5e1;
             border-radius: 10px;
-            min-height: 220px;
+            min-height: 190px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -123,6 +131,13 @@
             padding: 24px;
             background: #f8fafc;
             color: #64748b;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .upload-box:hover {
+            cursor: pointer;
+            border-color: #2563eb;
+            background: #eff6ff;
         }
 
         .upload-box i {
@@ -137,8 +152,89 @@
             margin-bottom: 6px;
         }
 
-        .upload-box:hover {
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .image-preview {
+            position: relative;
+            min-height: 96px;
+            overflow: hidden;
+            border: 1px solid #dbe3ee;
+            border-radius: 9px;
+            background: #f8fafc;
+        }
+
+        .image-preview img {
+            display: block;
+            width: 100%;
+            height: 96px;
+            object-fit: contain;
+            background: #ffffff;
+        }
+
+        .image-preview__remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.82);
+            color: #ffffff;
             cursor: pointer;
+        }
+
+        .image-preview__label {
+            display: block;
+            padding: 6px;
+            color: #475569;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .empty-images {
+            color: #64748b;
+            font-size: 13px;
+            grid-column: 1 / -1;
+        }
+
+        .form-message {
+            margin: 20px 28px 0;
+            padding: 12px 14px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .form-message[hidden] {
+            display: none;
+        }
+
+        .form-message.info {
+            border-color: #bfdbfe;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .form-message.success {
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .form-message.error {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #b91c1c;
         }
 
         .form-actions {
@@ -154,9 +250,40 @@
             text-decoration: none;
         }
 
+        .product-cancel-link[aria-disabled="true"] {
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
         @media (max-width: 1024px) {
             .product-form {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .add-product-wrapper {
+                margin: 20px;
+            }
+
+            .product-form,
+            .form-header,
+            .form-actions {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
             }
         }
     </style>
@@ -167,16 +294,16 @@
     <main class="page-content">
         <div class="page-header">
             <div class="header-left">
-                <div class="header-icon" style="background: linear-gradient(135deg,#111827,#334155); color: #ffffff;">
+                <div id="productHeaderIcon" class="header-icon" style="background: linear-gradient(135deg,#111827,#334155); color: #ffffff;">
                     <i class="fa-solid fa-plus"></i>
                 </div>
                 <div>
-                    <h1>Thêm sản phẩm</h1>
-                    <p>Tạo sản phẩm mới cho cửa hàng tech.no</p>
+                    <h1 id="productPageTitle">Thêm sản phẩm</h1>
+                    <p id="productPageSubtitle">Tạo sản phẩm mới cho cửa hàng tech.no</p>
                 </div>
             </div>
             <div class="header-right">
-                <a class="btn btn-secondary btn-link" href="admin-tongquan.html">
+                <a class="btn btn-secondary btn-link product-cancel-link" href="admin-qly-sanpham.html">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại
                 </a>
             </div>
@@ -184,99 +311,97 @@
 
         <div class="add-product-wrapper">
             <div class="form-header">
-                <div>
-                    <h2>Thông tin sản phẩm</h2>
-                    <p>Nhập đầy đủ thông tin để hiển thị sản phẩm trên website</p>
-                </div>
+                <h2 id="productFormTitle">Thông tin sản phẩm</h2>
+                <p id="productFormHint">Nhập đầy đủ thông tin để hiển thị sản phẩm trên website.</p>
             </div>
 
-            <form class="product-form">
-                <div>
-                    <section class="form-section">
-                        <h3 class="form-section-title">Thông tin cơ bản</h3>
-                        <div class="form-grid">
-                            <div class="form-group full">
-                                <label for="productName">Tên sản phẩm</label>
-                                <input type="text" id="productName" placeholder="VD: MacBook Pro 14 M3">
-                            </div>
-                            <div class="form-group">
-                                <label for="productSku">Mã sản phẩm</label>
-                                <input type="text" id="productSku" placeholder="VD: MBP-M3-14">
-                            </div>
-                            <div class="form-group">
-                                <label for="productCategory">Danh mục</label>
-                                <select id="productCategory">
-                                    <option value="">Chọn danh mục</option>
-                                    <option value="phone">Điện thoại</option>
-                                    <option value="laptop">Laptop</option>
-                                    <option value="pc">PC / Desktop</option>
-                                    <option value="phukien">Phụ kiện</option>
-                                </select>
-                            </div>
-                            <div class="form-group full">
-                                <label for="productDescription">Mô tả sản phẩm</label>
-                                <textarea id="productDescription" placeholder="Nhập mô tả, cấu hình nổi bật, bảo hành..."></textarea>
-                            </div>
-                        </div>
-                    </section>
+            <div id="productFormMessage" class="form-message info" role="status" aria-live="polite" tabindex="-1" hidden></div>
 
-                    <section class="form-section">
-                        <h3 class="form-section-title">Giá và kho</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="productPrice">Giá bán</label>
-                                <input type="number" id="productPrice" placeholder="0">
+            <form id="productForm">
+                <div class="product-form">
+                    <div>
+                        <section class="form-section">
+                            <h3 class="form-section-title">Thông tin cơ bản</h3>
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label for="productName">Tên sản phẩm <span class="required-mark">*</span></label>
+                                    <input type="text" id="productName" maxlength="255" placeholder="VD: MacBook Pro 14 M3" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productSku">Mã sản phẩm (SKU) <span class="required-mark">*</span></label>
+                                    <input type="text" id="productSku" maxlength="100" placeholder="VD: MBP-M3-14" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productCategory">Danh mục <span class="required-mark">*</span></label>
+                                    <select id="productCategory" required>
+                                        <option value="">Đang tải danh mục...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full">
+                                    <label for="productDescription">Mô tả sản phẩm</label>
+                                    <textarea id="productDescription" placeholder="Nhập mô tả, cấu hình nổi bật, bảo hành..."></textarea>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="productSalePrice">Giá khuyến mãi</label>
-                                <input type="number" id="productSalePrice" placeholder="0">
+                        </section>
+
+                        <section class="form-section">
+                            <h3 class="form-section-title">Giá và kho</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="productPrice">Giá bán thông thường (VNĐ) <span class="required-mark">*</span></label>
+                                    <input type="number" id="productPrice" min="0" step="1000" placeholder="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productSalePrice">Giá khuyến mãi (VNĐ)</label>
+                                    <input type="number" id="productSalePrice" min="0" step="1000" placeholder="Để trống nếu không giảm giá">
+                                </div>
+                                <div class="form-group">
+                                    <label for="productStock">Số lượng tồn kho <span class="required-mark">*</span></label>
+                                    <input type="number" id="productStock" min="0" step="1" placeholder="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productStatus">Trạng thái</label>
+                                    <select id="productStatus">
+                                        <option value="active">Đang bán</option>
+                                        <option value="hidden">Đã ẩn</option>
+                                        <option value="out_of_stock" disabled>Hết hàng (tự động khi tồn kho = 0)</option>
+                                    </select>
+                                    <span class="form-note">“Sắp hết hàng” được tính tự động khi tồn kho từ 1 đến 50.</span>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="productStock">Số lượng tồn kho</label>
-                                <input type="number" id="productStock" placeholder="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="productStatus">Trạng thái</label>
-                                <select id="productStatus">
-                                    <option value="ConHang">Còn hàng</option>
-                                    <option value="SapHetHang">Sắp hết hàng</option>
-                                    <option value="HetHang">Hết hàng</option>
-                                </select>
-                            </div>
-                        </div>
-                    </section>
+                        </section>
+                    </div>
+
+                    <aside>
+                        <section class="form-section">
+                            <h3 class="form-section-title">Hình ảnh</h3>
+                            <label class="upload-box" for="productImage">
+                                <span>
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <strong>Chọn ảnh sản phẩm</strong>
+                                    JPEG, PNG hoặc WebP; tối đa 5 MB/ảnh và 8 ảnh.
+                                </span>
+                            </label>
+                            <input type="file" id="productImage" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden>
+                            <p class="form-note">Khi sửa, ảnh cũ được giữ lại. Bạn có thể bỏ từng ảnh hoặc thêm ảnh mới.</p>
+                            <div id="imagePreviewContainer" class="image-preview-grid" aria-live="polite"></div>
+                        </section>
+                    </aside>
                 </div>
 
-                <aside>
-                    <section class="form-section">
-                        <h3 class="form-section-title">Hình ảnh</h3>
-                        <label class="upload-box" for="productImage">
-                            <span>
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <strong>Tải ảnh sản phẩm</strong>
-                                Chọn ảnh từ máy tính (Có thể chọn nhiều ảnh)
-                            </span>
-                        </label>
-                        <input type="file" id="productImage" accept="image/*" multiple hidden>
-
-                        <div id="imagePreviewContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; margin-top: 15px;"></div>
-                    </section>
-                </aside>
+                <div class="form-actions">
+                    <a class="btn btn-secondary btn-link product-cancel-link" href="admin-qly-sanpham.html">Hủy</a>
+                    <button class="btn btn-primary" type="submit" id="btnSaveProduct" disabled>
+                        <i class="fa-solid fa-spinner fa-spin"></i> Đang kiểm tra quyền...
+                    </button>
+                </div>
             </form>
+        </div>
+    </main>
 
-            <div class="form-actions">
-                <a class="btn btn-secondary btn-link" href="admin-tongquan.html">Hủy</a>
-                <button class="btn btn-primary" type="button" id="btnSaveProduct">
-                    <i class="fa-solid fa-floppy-disk"></i> Lưu sản phẩm
-                </button>
-            </div>
-
-            <!-- Supabase Library từ CDN -->
-            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-            <!-- Config & Auth Scripts -->
-            <script src="../../assets/js/supabase-config.js"></script>
-            <script src="../../assets/js/main.js"></script>
-            <script src="../../assets/js/admin-add-product.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8"></script>
+    <script src="../../assets/js/supabase-config.js"></script>
+    <script src="../../assets/js/main.js"></script>
+    <script src="../../assets/js/admin-add-product.js"></script>
 </body>
 </html>

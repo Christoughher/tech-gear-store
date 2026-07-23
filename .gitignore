@@ -1,0 +1,9 @@
+node_modules/
+
+# Local backend secrets and environment files
+.env
+.env.*
+!.env.example
+!**/.env.example
+!**/.env.seed.example
+

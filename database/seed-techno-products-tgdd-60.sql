@@ -3,7 +3,11 @@
 -- Chay file nay trong Supabase SQL Editor sau khi da tao schema.
 -- Ten/gia/anh dai dien tham khao tu cac card san pham cong khai tren
 -- thegioididong.com ngay 27/06/2026. Mo ta duoc viet lai cho demo.
+-- Ton kho sau khi seed: 45/60 san pham co stock = 100 (> 50),
+-- 15/60 san pham co stock = 25 (< 50), khong co san pham o bien stock = 50.
 -- =========================================================
+
+BEGIN;
 
 INSERT INTO public.categories (id, name) VALUES
 ('phone', 'Dien thoai'),
@@ -173,11 +177,29 @@ WITH display_order(sku, sort_rank) AS (
     ('TGDD2-PHN-IPHONE-17PM-256', 58),
     ('TGDD2-ACC-SAMSUNG-WATCH-ULTRA-2025', 59),
     ('TGDD2-ACC-AMAZFIT-BIP-MAX', 60)
-)
+),
+updated_products AS (
 UPDATE public.products AS product
 SET
+  -- Moi san pham thu 4 nam trong nhom sap het hang: 15/60 = 1/4.
+  stock = CASE
+    WHEN display_order.sort_rank % 4 = 0 THEN 25
+    ELSE 100
+  END,
+  status = 'active',
   created_at = TIMESTAMPTZ '2026-06-27 22:00:00+07'
     - ((display_order.sort_rank - 1) * INTERVAL '1 minute'),
   updated_at = now()
 FROM display_order
-WHERE product.sku = display_order.sku;
+WHERE product.sku = display_order.sku
+RETURNING product.stock
+)
+-- Ket qua mong doi: total=60, stock_above_50=45, stock_below_50=15, stock_equal_50=0.
+SELECT
+  COUNT(*) AS total_seeded_products,
+  COUNT(*) FILTER (WHERE stock > 50) AS stock_above_50,
+  COUNT(*) FILTER (WHERE stock < 50) AS stock_below_50,
+  COUNT(*) FILTER (WHERE stock = 50) AS stock_equal_50
+FROM updated_products;
+
+COMMIT;

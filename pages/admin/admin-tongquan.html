@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body data-admin-page="overview">
     <div id="admin-sidebar-container"></div>
     
     <main class="page-content"> 
@@ -41,27 +41,27 @@
             <div class="stat-card revenue">
                 <div>
                     <h1>DOANH THU</h1>
-                    <p class>$43,287</p>
+                    <p data-kpi="dashboard-revenue" aria-live="polite">Đang tải...</p>
                 </div>
                 <div class="card-icon-dollar">
-                    <i class="fa-solid fa-dollar-sign"></i>
+                    <i class="fa-solid fa-coins"></i>
                 </div>
             </div>
 
             <div class="stat-card orders">
                 <div>
                     <h1>ĐƠN HÀNG</h1>
-                    <p>3,980</p>
+                    <p data-kpi="dashboard-orders" aria-live="polite">Đang tải...</p>
                 </div>
                 <div class="card-icon-invoice">
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <i class="fa-solid fa-file-invoice"></i>
                 </div>
             </div>
 
             <div class="stat-card customers">
                 <div>
                     <h1>KHÁCH HÀNG</h1>
-                    <p>363,678</p>
+                    <p data-kpi="dashboard-customers" aria-live="polite">Đang tải...</p>
                 </div>
                 <div class="card-icon-users">
                     <i class="fa-solid fa-users"></i>
@@ -71,7 +71,7 @@
             <div class="stat-card products">
                 <div>
                     <h1>SẢN PHẨM</h1>
-                    <p>15,977</p>
+                    <p data-kpi="dashboard-products" aria-live="polite">Đang tải...</p>
                 </div>
                 <div class="card-icon-laptop">
                     <i class="fa-solid fa-laptop"></i>
@@ -89,41 +89,13 @@
                     <th>ID Đơn</th>
                     <th>Tổng tiền</th>
                     <th>Hình thức giao</th>
-                    <th>Ngày giao hàng</th>
+                    <th>Ngày đặt</th>
                     <th>Trạng thái</th>
                 </tr>
             </thead>
-            <tbody> 
+            <tbody id="recentOrdersBody">
                 <tr>
-                    <td>#LAP1001</td>
-                    <td>$1050</td>
-                    <td>Tiêu chuẩn</td>
-                    <td>12-06-2026</td>
-                    <td><span class="badge completed">Hoàn thành</span></td>
-                </tr>
-
-                <tr>
-                    <td>#LAP1002</td>
-                    <td>$1120</td>
-                    <td>Hỏa tốc</td>
-                    <td>12-06-2026</td>
-                    <td><span class="badge cancel">Đã hủy</span></td>
-                </tr>
-
-                <tr> 
-                    <td>#LAP1003</td>
-                    <td>$1333</td>
-                    <td>Hỏa tốc</td>
-                    <td>12-06-2026</td>
-                    <td><span class="badge completed">Hoàn thành</span></td>
-                </tr>
-
-                <tr>
-                    <td>#PC2001</td>
-                    <td>$2049</td>
-                    <td>Hỏa tốc</td>
-                    <td>12-06-2026</td>
-                    <td><span class="badge pending">Chờ duyệt</span></td>
+                    <td colspan="5">Đang tải đơn hàng...</td>
                 </tr>
             </tbody>
         </table>
@@ -140,6 +112,9 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../assets/js/supabase-config.js"></script>
     <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/admin-data.js"></script>
 </body>
 </html>
