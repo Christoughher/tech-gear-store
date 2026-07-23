@@ -72,42 +72,67 @@
 
     </div>
 
-    <section class="comment-section">
-        <h3>Đánh giá sản phẩm</h3>
-
-        <div class="rating-input">
-            <span>Đánh giá của bạn:</span>
-            <div class="stars" id="star-rating">
-                <i class="fa-solid fa-star" data-value="1"></i>
-                <i class="fa-solid fa-star" data-value="2"></i>
-                <i class="fa-solid fa-star" data-value="3"></i>
-                <i class="fa-solid fa-star" data-value="4"></i>
-                <i class="fa-solid fa-star" data-value="5"></i>
+    <section class="comment-section" aria-labelledby="product-reviews-title">
+        <div class="review-section-header">
+            <div>
+                <span class="review-eyebrow">Ý kiến khách hàng</span>
+                <h2 id="product-reviews-title">Đánh giá sản phẩm</h2>
             </div>
-            <input type="hidden" id="rating-value" value="0"> </div>
+            <div class="review-summary" id="review-summary" aria-live="polite">
+                Chưa có đánh giá
+            </div>
         </div>
 
-        <div class="comment-input-group">
-            <textarea placeholder="Viết đánh giá của bạn về sản phẩm..." rows="4"></textarea>
-            <button class="btn-submit-comment">Gửi bình luận</button>
-        </div>
-
-        <div class="comment-list">
-            <div class="comment-item">
-                <div class="user-info">
-                    <strong>Nguyễn Văn A</strong>
+        <form class="review-form" id="product-review-form" novalidate>
+            <fieldset class="rating-input">
+                <legend>Đánh giá của bạn</legend>
+                <div class="rating-picker" id="star-rating" role="group" aria-label="Chọn số sao">
+                    <button class="rating-star" type="button" data-rating="1" aria-label="1 sao" aria-pressed="false">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    </button>
+                    <button class="rating-star" type="button" data-rating="2" aria-label="2 sao" aria-pressed="false">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    </button>
+                    <button class="rating-star" type="button" data-rating="3" aria-label="3 sao" aria-pressed="false">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    </button>
+                    <button class="rating-star" type="button" data-rating="4" aria-label="4 sao" aria-pressed="false">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    </button>
+                    <button class="rating-star" type="button" data-rating="5" aria-label="5 sao" aria-pressed="false">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <p>Sản phẩm rất tốt, thiết kế đẹp và cầm rất chắc tay. Giao hàng nhanh!</p>
+                <input type="hidden" id="rating-value" name="rating" value="0">
+                <span class="rating-description" id="rating-description">Chưa chọn số sao</span>
+            </fieldset>
+
+            <div class="comment-input-group">
+                <label for="review-comment">Nhận xét của bạn</label>
+                <textarea
+                    id="review-comment"
+                    name="comment"
+                    placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                    rows="4"
+                    maxlength="1000"
+                    required
+                ></textarea>
             </div>
-            
-            <div class="comment-item">
-                <div class="user-info">
-                    <strong>Trần Thị B</strong>
-                </div>
-                <p>Màn hình sắc nét, pin dùng khá ổn trong tầm giá này.</p>
+
+            <div class="review-form-footer">
+                <p class="review-form-message" id="review-form-message" aria-live="polite"></p>
+                <button class="btn-submit-comment" id="review-submit" type="submit" disabled>
+                    Gửi đánh giá
+                </button>
             </div>
+        </form>
+
+        <div class="review-list-header">
+            <h3>Nhận xét từ khách hàng</h3>
         </div>
-        
+        <div class="comment-list" id="product-review-list" aria-live="polite">
+            <div class="review-state">Đang tải đánh giá...</div>
+        </div>
     </section>
 
     <div id="footer-container"></div>
@@ -121,6 +146,7 @@
     <script src="/assets/js/supabase-config.js"></script>
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/cart.js"></script>
+    <script src="/assets/js/product-reviews.js"></script>
     <script src="/assets/js/main.js"></script>
 </body>
 </html>

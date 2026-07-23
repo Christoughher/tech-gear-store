@@ -159,6 +159,7 @@ body {
 
 .stats-cards {
     display: flex;
+    flex-wrap: wrap;
     gap: 5px;   
     margin-bottom: 30px;
     margin-left: 265px;
@@ -169,6 +170,7 @@ body {
     background-color: #ffffff;
     border-radius: 12px;
     flex: 1;
+    min-width: 190px;
     padding: 20px 24px;
     box-shadow: 0 3px 16px rgba(0, 0, 0, 0.1); 
     border: 1px solid #e2e8f0;
@@ -282,6 +284,7 @@ table {
 .badge.completed { background-color: #dcfce7; color: #15803d; } 
 .badge.cancel { background-color: #fee2e2; color: #b91c1c; }   
 .badge.pending { background-color: #fef3c7; color: #b45309; }   
+.badge.shipping { background-color: #dbeafe; color: #1d4ed8; }
 
 .orders-table tbody tr:nth-child(odd) {
     background-color: #ffffff;

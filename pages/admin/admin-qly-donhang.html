@@ -50,6 +50,7 @@
         .toolbar-right {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .search-box {
@@ -138,9 +139,179 @@
             background: #111827;
             color: white;
         }
+
+        .page-btn:disabled {
+            cursor: not-allowed;
+            opacity: .45;
+        }
+
+        .page-btn.active:disabled {
+            cursor: default;
+            opacity: 1;
+        }
+
+        .pagination-ellipsis {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .table-state {
+            padding: 36px 16px !important;
+            text-align: center !important;
+            color: #64748b;
+        }
+
+        .table-state.error {
+            color: #b91c1c;
+        }
+
+        .table-footer {
+            min-height: 76px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .table-footer .pagination {
+            padding: 0;
+        }
+
+        .table-result-count {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .order-product-summary {
+            max-width: 260px;
+            line-height: 1.45;
+        }
+
+        .order-product-more {
+            display: block;
+            margin-top: 2px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .btn-icon.view {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .order-detail-dialog {
+            width: min(720px, calc(100vw - 32px));
+            max-height: calc(100vh - 48px);
+            padding: 0;
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+        }
+
+        .order-detail-dialog::backdrop {
+            background: rgba(15, 23, 42, .55);
+        }
+
+        .order-detail-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .order-detail-header h2 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .order-detail-close {
+            border: 0;
+            background: transparent;
+            color: #64748b;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .order-detail-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .order-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .order-detail-field {
+            min-width: 0;
+        }
+
+        .order-detail-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .order-detail-label {
+            display: block;
+            margin-bottom: 4px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .order-detail-value {
+            color: #111827;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .order-detail-items {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-detail-items th,
+        .order-detail-items td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+            .table-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .toolbar-right,
+            .search-box input,
+            .filter-select {
+                width: 100%;
+            }
+
+            .order-detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .order-detail-field.full {
+                grid-column: auto;
+            }
+        }
     </style>
 </head>
-<body>
+<body data-admin-page="orders">
     <div id="admin-sidebar-container"></div>
 
     <main class="page-content">
@@ -148,7 +319,7 @@
         <div class="page-header">
             <div class="header-left">
                 <div class="header-icon" style="background: linear-gradient(135deg,#059669,#10b981);">
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <i class="fa-solid fa-file-invoice"></i>
                 </div>
                 <div>
                     <h1>Quản lý đơn hàng</h1>
@@ -160,19 +331,23 @@
         <!-- Stats Cards -->
         <div class="stats-cards">
             <div class="stat-card">
-                <div><h1>TỔNG ĐƠN HÀNG</h1><p>3,980</p></div>
-                <div class="card-icon-invoice"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                <div><h1>TỔNG ĐƠN HÀNG</h1><p data-kpi="orders-total" aria-live="polite">Đang tải...</p></div>
+                <div class="card-icon-invoice"><i class="fa-solid fa-file-invoice"></i></div>
             </div>
             <div class="stat-card">
-                <div><h1>HOÀN THÀNH</h1><p>2,841</p></div>
+                <div><h1>HOÀN THÀNH</h1><p data-kpi="orders-completed" aria-live="polite">Đang tải...</p></div>
                 <div class="card-icon-laptop" style="background:#d1fae5;color:#059669;"><i class="fa-solid fa-circle-check"></i></div>
             </div>
             <div class="stat-card">
-                <div><h1>CHỜ DUYỆT</h1><p>864</p></div>
+                <div><h1>CHỜ DUYỆT</h1><p data-kpi="orders-pending" aria-live="polite">Đang tải...</p></div>
                 <div class="card-icon-users" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-clock"></i></div>
             </div>
             <div class="stat-card">
-                <div><h1>ĐÃ HỦY</h1><p>275</p></div>
+                <div><h1>ĐANG GIAO</h1><p data-kpi="orders-processing" aria-live="polite">Đang tải...</p></div>
+                <div class="card-icon-users" style="background:#dbeafe;color:#1d4ed8;"><i class="fa-solid fa-truck-fast"></i></div>
+            </div>
+            <div class="stat-card">
+                <div><h1>ĐÃ HỦY</h1><p data-kpi="orders-cancelled" aria-live="polite">Đang tải...</p></div>
                 <div class="card-icon-dollar" style="background:#fee2e2;color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i></div>
             </div>
         </div>
@@ -184,145 +359,55 @@
                 <div class="toolbar-right">
                     <div class="search-box">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Tìm theo ID, khách hàng...">
+                        <input id="adminOrderSearch" type="search" placeholder="Tìm ID, tên hoặc SĐT người nhận..." autocomplete="off">
                     </div>
-                    <select class="filter-select">
+                    <select id="adminOrderStatus" class="filter-select" aria-label="Lọc theo trạng thái">
                         <option value="">Tất cả trạng thái</option>
-                        <option>Hoàn thành</option>
-                        <option>Chờ duyệt</option>
-                        <option>Đang giao</option>
-                        <option>Đã hủy</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="pending">Chờ duyệt</option>
+                        <option value="processing">Đang giao</option>
+                        <option value="cancelled">Đã hủy</option>
                     </select>
-                    <select class="filter-select">
+                    <select id="adminOrderShipping" class="filter-select" aria-label="Lọc theo hình thức giao">
                         <option value="">Hình thức giao</option>
-                        <option>Tiêu chuẩn</option>
-                        <option>Hỏa tốc</option>
+                        <option value="Tiêu chuẩn">Tiêu chuẩn</option>
+                        <option value="Hỏa tốc">Hỏa tốc</option>
                     </select>
                 </div>
             </div>
 
-            <table class="orders-mgmt-table">
-                <thead>
-                    <tr class="header-row">
-                        <th><input type="checkbox"></th>
-                        <th>ID Đơn</th>
-                        <th>Khách hàng</th>
-                        <th>Sản phẩm</th>
-                        <th>Tổng tiền</th>
-                        <th>Hình thức</th>
-                        <th>Ngày giao</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td><strong>#LAP1001</strong></td>
-                        <td>
-                            <div style="font-weight:600;font-size:14px;">Nguyễn Văn A</div>
-                            <div style="font-size:12px;color:#9ca3af;">nguyenvana@gmail.com</div>
-                        </td>
-                        <td>MacBook Pro 14" M3</td>
-                        <td><strong>$1,050</strong></td>
-                        <td>Tiêu chuẩn</td>
-                        <td>12-06-2026</td>
-                        <td><span class="badge completed">Hoàn thành</span></td>
-                        <td><div class="action-btns">
-                            <button class="btn-icon edit" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-icon edit" title="Chỉnh sửa"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon delete" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td><strong>#LAP1002</strong></td>
-                        <td>
-                            <div style="font-weight:600;font-size:14px;">Trần Thị B</div>
-                            <div style="font-size:12px;color:#9ca3af;">tranthib@gmail.com</div>
-                        </td>
-                        <td>Dell XPS 15 9530</td>
-                        <td><strong>$1,120</strong></td>
-                        <td>Hỏa tốc</td>
-                        <td>12-06-2026</td>
-                        <td><span class="badge cancel">Đã hủy</span></td>
-                        <td><div class="action-btns">
-                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td><strong>#LAP1003</strong></td>
-                        <td>
-                            <div style="font-weight:600;font-size:14px;">Lê Minh C</div>
-                            <div style="font-size:12px;color:#9ca3af;">leminhc@gmail.com</div>
-                        </td>
-                        <td>LG UltraWide 34"</td>
-                        <td><strong>$1,333</strong></td>
-                        <td>Hỏa tốc</td>
-                        <td>12-06-2026</td>
-                        <td><span class="badge completed">Hoàn thành</span></td>
-                        <td><div class="action-btns">
-                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td><strong>#PC2001</strong></td>
-                        <td>
-                            <div style="font-weight:600;font-size:14px;">Phạm Đức D</div>
-                            <div style="font-size:12px;color:#9ca3af;">phamducd@gmail.com</div>
-                        </td>
-                        <td>PC Gaming RTX 4080</td>
-                        <td><strong>$2,049</strong></td>
-                        <td>Hỏa tốc</td>
-                        <td>12-06-2026</td>
-                        <td><span class="badge pending">Chờ duyệt</span></td>
-                        <td><div class="action-btns">
-                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td><strong>#PC2002</strong></td>
-                        <td>
-                            <div style="font-weight:600;font-size:14px;">Hoàng Thị E</div>
-                            <div style="font-size:12px;color:#9ca3af;">hoangthie@gmail.com</div>
-                        </td>
-                        <td>Keychron K8 Pro</td>
-                        <td><strong>$198</strong></td>
-                        <td>Tiêu chuẩn</td>
-                        <td>13-06-2026</td>
-                        <td><span class="badge shipping">Đang giao</span></td>
-                        <td><div class="action-btns">
-                            <button class="btn-icon edit"><i class="fa-solid fa-eye"></i></button>
-                            <button class="btn-icon edit"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon delete"><i class="fa-solid fa-trash"></i></button>
-                        </div></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-scroll">
+                <table class="orders-mgmt-table">
+                    <thead>
+                        <tr class="header-row">
+                            <th>ID Đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Sản phẩm</th>
+                            <th>Tổng tiền</th>
+                            <th>Hình thức</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminOrdersBody" aria-live="polite">
+                        <tr><td class="table-state" colspan="8">Đang tải đơn hàng từ Supabase...</td></tr>
+                    </tbody>
+                </table>
+            </div>
 
-            <!-- Pagination -->
-            <div class="pagination">
-                <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">...</button>
-                <button class="page-btn">8</button>
-                <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="table-footer">
+                <span id="adminOrdersCount" class="table-result-count">Đang tải...</span>
+                <nav id="adminOrdersPagination" class="pagination" aria-label="Phân trang đơn hàng"></nav>
             </div>
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8"></script>
+    <script src="../../assets/js/supabase-config.js"></script>
     <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/admin-data.js"></script>
+    <script src="/assets/js/admin-management.js"></script>
 
 </body>
 </html>
