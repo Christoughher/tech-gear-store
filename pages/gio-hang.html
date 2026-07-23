@@ -59,6 +59,55 @@
                 </a>
             </aside>
         </div>
+
+        <div class="checkout-modal-overlay" id="checkout-modal-overlay" hidden>
+            <div class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title">
+                <button class="checkout-modal-close" id="checkout-modal-close" type="button" aria-label="Đóng">×</button>
+                <h2 id="checkout-modal-title">Thông tin nhận hàng</h2>
+                <p class="checkout-modal-desc">Vui lòng điền thông tin để chúng tôi chuẩn bị đơn hàng cho bạn.</p>
+
+                <form id="checkout-form" class="checkout-form">
+                    <label class="checkout-field">
+                        <span>Họ tên người nhận</span>
+                        <input type="text" name="fullName" required>
+                    </label>
+
+                    <label class="checkout-field">
+                        <span>Số điện thoại</span>
+                        <input type="tel" name="phone" required>
+                    </label>
+
+                    <label class="checkout-field">
+                        <span>Địa chỉ giao hàng</span>
+                        <textarea name="address" rows="3" required></textarea>
+                    </label>
+
+                    <label class="checkout-field">
+                        <span>Ghi chú đơn hàng</span>
+                        <textarea name="note" rows="3" placeholder="Ví dụ: Giao trước 10h sáng..."></textarea>
+                    </label>
+
+                    <div class="checkout-field">
+                        <span>Hình thức giao hàng</span>
+                        <div class="delivery-options">
+                            <label class="delivery-option">
+                                <input type="radio" name="deliveryMethod" value="Tiêu chuẩn" checked>
+                                <span>Tiêu chuẩn</span>
+                            </label>
+                            <label class="delivery-option">
+                                <input type="radio" name="deliveryMethod" value="Hỏa tốc">
+                                <span>Hỏa tốc</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="checkout-form-actions">
+                        <button type="button" class="checkout-cancel-btn" id="checkout-cancel-btn">Hủy</button>
+                        <button type="submit" class="checkout-submit-btn">Xác nhận</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <div id="footer-container"></div>
