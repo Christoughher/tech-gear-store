@@ -159,8 +159,31 @@ async function runCartMutation(mutation) {
     }
 }
 
+function openCheckoutModal() {
+    const modal = document.getElementById('checkout-modal-overlay');
+    if (!modal) return;
+
+    modal.hidden = false;
+    const firstField = modal.querySelector('input[name="fullName"]');
+    firstField?.focus();
+}
+
+function closeCheckoutModal() {
+    const modal = document.getElementById('checkout-modal-overlay');
+    const form = document.getElementById('checkout-form');
+    if (!modal) return;
+
+    modal.hidden = true;
+    form?.reset();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('cart-items-container');
+    const checkoutButton = document.getElementById('checkout-btn');
+    const modal = document.getElementById('checkout-modal-overlay');
+    const closeButton = document.getElementById('checkout-modal-close');
+    const cancelButton = document.getElementById('checkout-cancel-btn');
+    const form = document.getElementById('checkout-form');
 
     renderCart();
     await window.shopCart.ready;
@@ -194,7 +217,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         await runCartMutation(() => window.shopCart.updateQuantity(productId, quantity));
     });
 
-    document.getElementById('checkout-btn').addEventListener('click', () => {
-        alert('Giỏ hàng đã kết nối database. Bước tiếp theo là thêm thông tin nhận hàng và tạo đơn hàng.');
+    checkoutButton.addEventListener('click', () => {
+        if (checkoutButton.disabled) return;
+        openCheckoutModal();
+    });
+
+    closeButton?.addEventListener('click', closeCheckoutModal);
+    cancelButton?.addEventListener('click', closeCheckoutModal);
+
+    modal?.addEventListener('click', event => {
+        if (event.target === modal) {
+            closeCheckoutModal();
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && modal && modal.hidden === false) {
+            closeCheckoutModal();
+        }
+    });
+
+    form?.addEventListener('submit', event => {
+        event.preventDefault();
+        alert('Bạn đã đặt hàng thành công !');
+        closeCheckoutModal();
     });
 });
