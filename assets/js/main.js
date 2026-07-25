@@ -164,6 +164,7 @@ let currentProductList = [];
 let currentProductPage = 1;
 let currentSearchKeyword = '';
 let currentCategoryFilterGroups = [];
+let currentPhonePriceFilter = 'all';
 let currentLaptopPriceFilter = 'all';
 let currentPcPriceFilter = 'all';
 let currentAccessoryPriceFilter = 'all';
@@ -177,6 +178,7 @@ function getProductListContainer() {
 function getCurrentCategoryPage() {
     const pathname = window.location.pathname.toLowerCase();
 
+    if (pathname.endsWith('/pages/phone.html')) return 'phone';
     if (pathname.endsWith('/pages/laptop.html')) return 'laptop';
     if (pathname.endsWith('/pages/pc.html')) return 'pc'; 
     if (pathname.endsWith('/pages/phu-kien.html')) return 'phukien';
@@ -331,12 +333,14 @@ function applyProductSearch(page = 1) {
         : [...currentBaseProductList];
 
     filteredProducts = applyCategoryFilterGroups(filteredProducts);
+    filteredProducts = applyPhoneHeroPriceFilter(filteredProducts);
     filteredProducts = applyLaptopHeroPriceFilter(filteredProducts);
     filteredProducts = applyPcHeroPriceFilter(filteredProducts);
     filteredProducts = applyAccessoryHeroPriceFilter(filteredProducts);
     currentProductList = filteredProducts;
     currentEmptyProductMessage = keyword
         || hasActiveCategoryFilters()
+        || currentPhonePriceFilter !== 'all'
         || currentLaptopPriceFilter !== 'all'
         || currentPcPriceFilter !== 'all'
         || currentAccessoryPriceFilter !== 'all'
@@ -380,6 +384,28 @@ function applyCategoryFilterGroups(products) {
 
 function hasActiveCategoryFilters() {
     return currentCategoryFilterGroups.some(group => group.values.length > 0);
+}
+
+function applyPhoneHeroPriceFilter(products) {
+    if (currentCategoryPage !== 'phone' || currentPhonePriceFilter === 'all') {
+        return products;
+    }
+
+    const priceBoundary = 10_000_000;
+
+    return products.filter(product => {
+        const price = Number(product.price || 0);
+
+        if (currentPhonePriceFilter === 'under-10') {
+            return price < priceBoundary;
+        }
+
+        if (currentPhonePriceFilter === 'from-10') {
+            return price >= priceBoundary;
+        }
+
+        return true;
+    });
 }
 
 function applyLaptopHeroPriceFilter(products) {
@@ -1015,6 +1041,11 @@ async function loadComponent(id, file) {
                 const event = new CustomEvent('navbarLoaded');
                 window.dispatchEvent(event);  
             }
+            // NẾU ĐÃ LOAD XONG ADMIN SIDEBAR, THÌ SETUP LOGOUT
+            if (file === 'admin-sidebar.html') {
+                console.log("Admin sidebar đã được nạp, setup logout button...");
+                setupAdminLogout();
+            }
         } catch (error) {
             console.error(`Lỗi khi load component ${file}:`, error);
         }
@@ -1182,6 +1213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Thiết lập sự kiện cho nút "Thêm giỏ"
     setupAddToCartButtons();
     setupCategoryFilterGroups();
+    setupPhoneHeroPriceFilters();
     setupLaptopHeroPriceFilters();
     setupPcHeroPriceFilters();
     setupAccessoryHeroPriceFilters();
@@ -1734,6 +1766,30 @@ function setupCategoryFilterGroups() {
     updateCategoryFilterGroups(false);
 }
 
+function setupPhoneHeroPriceFilters() {
+    const buttons = [...document.querySelectorAll('[data-phone-price-filter]')];
+    if (currentCategoryPage !== 'phone' || !buttons.length) return;
+
+    const updateButtonState = () => {
+        buttons.forEach(button => {
+            const isActive = button.dataset.phonePriceFilter === currentPhonePriceFilter;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
+        });
+    };
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            currentPhonePriceFilter = button.dataset.phonePriceFilter || 'all';
+            updateButtonState();
+            applyProductSearch(1);
+            scrollToProductList();
+        });
+    });
+
+    updateButtonState();
+}
+
 function setupLaptopHeroPriceFilters() {
     const buttons = [...document.querySelectorAll('[data-laptop-price-filter]')];
     if (currentCategoryPage !== 'laptop' || !buttons.length) return;
@@ -1833,6 +1889,11 @@ function updateCategoryFilterGroups(shouldRender = true) {
 // =========================================================================
 
 window.addEventListener('navbarLoaded', async () => {
+    // Chỉ chạy redirect admin một lần duy nhất (nếu đã chạy rồi thì bỏ qua)
+    if (sessionStorage.getItem('adminRedirectProcessed')) {
+        return;
+    }
+    
     // 1. Truy cập vào các phần tử HTML cần can thiệp trên navbar vừa nạp
     const adminNavLink = document.getElementById('admin-nav-link');
     const authStatusContainer = document.getElementById('auth-status');
@@ -1893,8 +1954,39 @@ window.addEventListener('navbarLoaded', async () => {
 
         // 5. Kiểm tra giá trị cột role từ cơ sở dữ liệu đổ về để quyết định ẩn/hiện nút Admin công khai
         if (userProfile && userProfile.role === 'admin') {
-            console.log("Xác thực thành công: Người dùng hiện tại có quyền hạn Admin!");
-            adminNavLink.style.display = 'list-item'; // Cho phép hiển thị nút Admin trên thanh Menu
+            console.log("Xác thực thành công: Người dùng hiện tại có quyền hạn Admin! Chuyển hướng đến trang admin...");
+            console.log("userProfile.role =", userProfile.role);
+            adminNavLink.style.display = 'none'; // Ẩn nút Admin cũ
+            
+            // Thay đổi nút "Trang chủ" thành "Admin" cho user admin (luôn luôn thay đổi, không phụ thuộc redirect)
+            const homeNavLink = document.getElementById('home-nav-link');
+            console.log("homeNavLink found:", homeNavLink);
+            if (homeNavLink) {
+                const homeLink = homeNavLink.querySelector('a');
+                console.log("homeLink found:", homeLink);
+                if (homeLink) {
+                    console.log("Changing home link to Admin");
+                    homeLink.textContent = 'Admin';
+                    homeLink.href = '/pages/admin/admin-tongquan.html';  // Absolute path
+                }
+            }
+            
+            // Mark that we've processed admin redirect logic (prevent repeat on other pages)
+            sessionStorage.setItem('adminRedirectProcessed', 'true');
+            
+            // Nếu người dùng là admin và không phải đang ở trang admin, redirect ngay
+            const currentPath = window.location.pathname.toLowerCase();
+            const params = new URLSearchParams(window.location.search);
+            const isViewingAsAdmin = params.get('viewing_as_admin');
+            
+            if (!currentPath.includes('/pages/admin/') && !isViewingAsAdmin) {
+                window.location.href = '/pages/admin/admin-tongquan.html';
+            }
+            
+            // Xóa param sau khi sử dụng để khi reload trang sẽ redirect bình thường
+            if (isViewingAsAdmin) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         } else {
             console.log("Xác thực: Tài khoản này là khách hàng thành viên (customer), ẩn nút Admin.");
             adminNavLink.style.display = 'none'; // Người dùng thông thường không được thấy nút này
@@ -1906,27 +1998,74 @@ window.addEventListener('navbarLoaded', async () => {
             const btnLogout = document.getElementById('navbar-btn-logout');
             if (btnLogout) {
                 btnLogout.addEventListener('click', async (event) => {
-                    event.preventDefault(); // Chặn hành vi cuộn trang lên đầu của thẻ 'a' mặc định
+                    event.preventDefault();
                     
-                    const xácNhận = confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Tech.no?");
-                    if (xácNhận) {
-                        const { error: signOutError } = await thucTheSupabaseActive.auth.signOut();
-                        if (!signOutError) {
-                            alert("Bạn đã đăng xuất tài khoản thành công!");
-                            // Điều hướng toàn bộ trang web quay trở về trang chủ index để cập nhật lại trạng thái
-                            window.location.href = window.location.origin + "/index.html";
-                        } else {
-                            alert("Hệ thống gặp lỗi khi đăng xuất: " + signOutError.message);
+                    const { error: signOutError } = await thucTheSupabaseActive.auth.signOut();
+                    if (!signOutError) {
+                        sessionStorage.removeItem('adminRedirectProcessed');
+                        // Restore home link
+                        const homeNavLink = document.getElementById('home-nav-link');
+                        if (homeNavLink) {
+                            const homeLink = homeNavLink.querySelector('a');
+                            if (homeLink) {
+                                homeLink.textContent = 'Trang chủ';
+                                homeLink.href = '/index.html';
+                            }
                         }
+                        window.location.href = window.location.origin + "/index.html";
+                    } else {
+                        alert("Hệ thống gặp lỗi khi đăng xuất: " + signOutError.message);
                     }
                 });
             }
         }
+
+        // 7. Setup event listener cho nút logout trong sidebar admin
+        // (Được setup sau khi sidebar load trong hàm setupAdminLogout())
 
     } catch (criticalError) {
         console.error("Hệ thống lỗi phân quyền toàn cục gặp sự cố nghiêm trọng:", criticalError);
         adminNavLink.style.display = 'none';
     }
 });
+
+// =========================================================================
+// SETUP ADMIN LOGOUT BUTTON
+// =========================================================================
+
+async function setupAdminLogout() {
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (!logoutBtn) {
+        console.warn('Logout button not found in admin sidebar');
+        return;
+    }
+    
+    logoutBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        
+        try {
+            const { error: signOutError } = await window.supabaseClient.auth.signOut();
+            if (!signOutError) {
+                sessionStorage.removeItem('adminRedirectProcessed');
+                // Restore home link in navbar
+                const homeNavLink = document.getElementById('home-nav-link');
+                if (homeNavLink) {
+                    const homeLink = homeNavLink.querySelector('a');
+                    if (homeLink) {
+                        homeLink.textContent = 'Trang chủ';
+                        homeLink.href = '/index.html';
+                    }
+                }
+                window.location.href = "/index.html";
+            } else {
+                alert("Hệ thống gặp lỗi khi đăng xuất: " + signOutError.message);
+            }
+        } catch (error) {
+            console.error("Lỗi khi đăng xuất:", error);
+            alert("Hệ thống gặp lỗi khi đăng xuất!");
+        }
+    });
+    console.log("Admin logout button setup completed");
+}
 
 /* Biểu đồ và KPI admin được tải từ Supabase trong assets/js/admin-data.js. */

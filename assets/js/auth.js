@@ -36,7 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Đăng nhập thất bại: ' + error.message);
             } else {
                 localStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = '/index.html';
+                
+                // Kiểm tra role của user để điều hướng phù hợp
+                const { data: userProfile } = await window.supabaseClient
+                    .from('users')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+                
+                if (userProfile && userProfile.role === 'admin') {
+                    window.location.href = '/pages/admin/admin-tongquan.html';
+                } else {
+                    window.location.href = '/index.html';
+                }
             }
         });
     }
