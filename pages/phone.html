@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điện thoại - Tech.no</title>
+
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/category.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <main class="category-main">
+        <section class="category-hero phone-hero">
+            <div class="hero-overlay">
+                <h1>Điện thoại</h1>
+
+                <p>
+                    Khám phá những chiếc điện thoại thông minh mới nhất với
+                    công nghệ tiên tiến, thiết kế hiện đại và hiệu năng vượt trội.
+                </p>
+
+                <div class="hero-benefits">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+
+                        <div class="benefit-content">
+                            <span class="benefit-title">Chính hãng 100%</span>
+                            <span class="benefit-desc">Đầy đủ VAT</span>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+
+                        <div class="benefit-content">
+                            <span class="benefit-title">Miễn phí giao hàng</span>
+                            <span class="benefit-desc">Toàn quốc</span>
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+
+                        <div class="benefit-content">
+                            <span class="benefit-title">Trả góp 0%</span>
+                            <span class="benefit-desc">Lãi suất ưu đãi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="hero-actions"
+                    role="group"
+                    aria-label="Lọc nhanh điện thoại theo mức giá"
+                >
+                    <button
+                        class="hero-action hero-action--primary is-active"
+                        type="button"
+                        data-phone-price-filter="all"
+                        aria-pressed="true"
+                    >
+                        Xem tất cả điện thoại
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </button>
+
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-phone-price-filter="under-10"
+                        aria-pressed="false"
+                    >
+                        Dưới 10 triệu
+                        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                    </button>
+
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-phone-price-filter="from-10"
+                        aria-pressed="false"
+                    >
+                        Từ 10 triệu
+                        <i class="fa-solid fa-coins" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="category-layout">
+            <div class="category-controls">
+                <aside class="category-filter">
+                    <h3>Bộ lọc</h3>
+
+                    <div class="filter-group">
+                        <h4>Thương hiệu</h4>
+                        <label><input type="checkbox"> iPhone</label>
+                        <label><input type="checkbox"> Samsung</label>
+                        <label><input type="checkbox"> OPPO</label>
+                        <label><input type="checkbox"> Xiaomi</label>
+                        <label><input type="checkbox"> Realme</label>
+                        <label><input type="checkbox"> Vivo</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Mức giá</h4>
+                        <label><input type="checkbox"> Dưới 5 triệu</label>
+                        <label><input type="checkbox"> 5 - 10 triệu</label>
+                        <label><input type="checkbox"> 10 - 20 triệu</label>
+                        <label><input type="checkbox"> Trên 20 triệu</label>
+                    </div>
+
+                    <div class="filter-group">
+                        <h4>Tính năng</h4>
+                        <label><input type="checkbox"> 5G</label>
+                        <label><input type="checkbox"> Camera cao cấp</label>
+                        <label><input type="checkbox"> Pin lâu</label>
+                        <label><input type="checkbox"> Sạc nhanh</label>
+                    </div>
+                </aside>
+
+                <div class="category-toolbar">
+                    <div class="category-sort">
+                        <select aria-label="Sắp xếp sản phẩm">
+                            <option>Sắp xếp mặc định</option>
+                            <option>Giá tăng dần</option>
+                            <option>Giá giảm dần</option>
+                            <option>Mới nhất</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-grid">
+                <div class="products-empty-state">Đang tải sản phẩm...</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="pagination-container"></div>
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/supabase-config.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/cart.js"></script>
+    <script src="/assets/js/main.js"></script>
+</body>
+</html>

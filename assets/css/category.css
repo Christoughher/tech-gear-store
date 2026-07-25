@@ -556,6 +556,201 @@
 
 .category-hero::before {
     content: "";
+    padding: 4px 9px;
+    margin-bottom: 8px;
+    border-radius: 999px;
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.product-info h3 {
+    min-height: 42px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #111827;
+    margin-bottom: 7px;
+}
+
+.product-info h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.product-info h3 a:hover {
+    color: #2563eb;
+}
+
+.product-desc {
+    color: #6b7280;
+    min-height: 36px;
+    font-size: 12px;
+    line-height: 1.45;
+    margin-bottom: 10px;
+}
+
+.product-price-row {
+    min-height: 34px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.product-price {
+    color: #dc2626;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.discount-badge {
+    font-size: 15px;
+    font-weight: bold;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+}
+
+.discount-badge i {
+    position: absolute;
+    font-size: 42px;
+    color: #ff3b30;
+}
+
+.discount-badge span {
+    position: relative;
+    left: 1px;
+    color: #fff08f;
+    font-weight: 1000;
+    font-size: 11px;
+}
+
+.product-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.product-actions a,
+.product-actions button {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-detail {
+    background-color: #f1f5f9;
+    border: 1px solid #dbe3ec;
+    color: #243447;
+}
+
+.btn-detail:hover {
+    background-color: #e8f4ff;
+    border-color: #8ec5ff;
+    color: #1677ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(22, 119, 255, 0.16);
+}
+
+.btn-cart {
+    background-color: #e8f4ff;
+    border-color: #8ec5ff;
+    color: #1677ff;
+}
+
+.btn-cart:hover {
+    background-color: #dff0ff;
+    border-color: #64afff;
+    color: #0f5ed7;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(22, 119, 255, 0.16);
+}
+
+.category-note {
+    margin-top: 34px;
+    padding: 18px;
+    background-color: #ffffff;
+    border-left: 5px solid #2563eb;
+    border-radius: 12px;
+    color: #4b5563;
+}
+
+/* Responsive cho tablet */
+@media (max-width: 992px) {
+    .category-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .category-controls {
+        flex-wrap: wrap;
+    }
+
+    .category-toolbar {
+        margin-left: auto;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Responsive cho điện thoại */
+@media (max-width: 576px) {
+    .category-main {
+        padding: 24px 5%;
+    }
+
+    .category-hero {
+        padding: 34px 24px;
+    }
+
+    .category-hero h1 {
+        font-size: 28px;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-actions {
+        flex-direction: column;
+    }
+}
+/* ===== HERO BANNER ===== */
+
+.category-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: clamp(340px, 27vw, 430px);
+    min-height: 0;
+    margin-top: 60px;
+    margin-bottom: 30px;
+    border-radius: 18px;
+    overflow: hidden;
+    isolation: isolate;
+    background-color: #f8fafc;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.category-hero::before {
+    content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
@@ -580,6 +775,10 @@
 
 .accessory-hero {
     background-image: url("../images/banner5.png");
+}
+
+.phone-hero {
+    background-image: url("../images/banner6.png");
 }
 
 /* Banner Laptop dùng đúng tỷ lệ ảnh gốc và chừa vùng an toàn giữa chữ với ảnh. */
@@ -638,13 +837,6 @@
         padding-right: 10px;
         padding-left: 10px;
         font-size: 10.5px;
-    }
-
-    .laptop-hero .benefit-item {
-        flex: 0 0 auto;
-        gap: 5px;
-    }
-
     .laptop-hero .benefit-icon {
         width: 28px;
         height: 28px;
