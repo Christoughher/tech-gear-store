@@ -60,7 +60,39 @@ const { data: orderId, error } = await supabase.rpc('checkout_cart', {
 
 RPC tự khóa cart/sản phẩm, kiểm tra tồn kho, tính tổng tiền từ database, tạo order,
 sao chép `cart_items` sang `order_items`, lưu hình thức giao hàng, trừ tồn kho và
-chuyển cart sang `checked_out` trong cùng một transaction.
+chuyển cart sang `checked_out` trong cùng một transaction. Trigger ghi
+`cart_items` khóa cùng cart cha nên giỏ không thể bị thêm/sửa/xóa giữa lúc RPC
+đang tạo snapshot. Retry cùng `cart_id` trả lại order đã có thay vì tạo đơn trùng.
+
+Với database đang chạy, chạy lại `add-shipping-method.sql` để cài phiên bản RPC
+và khóa đồng thời mới. Không chạy `create-table.sql` vì đó là full reset. Có thể
+kiểm thử logic frontend không ghi dữ liệu thật bằng:
+
+```powershell
+node database/checkout-flow.test.cjs
+```
+
+## Đơn hàng trong profile và hủy hoàn kho
+
+Trang `pages/profile.html#orders` đọc trực tiếp `orders`/`order_items` theo RLS
+để hiển thị danh sách, chi tiết và trạng thái hiện hành. Khách hàng hủy đơn qua
+RPC `cancel_pending_order`; client không được tự update `orders.status`.
+
+RPC chỉ cho hủy order của đúng tài khoản khi còn `pending`. State-machine trigger
+khóa order và sản phẩm, cộng lại đúng tổng `order_items.quantity`, chuyển sản
+phẩm `out_of_stock` về `active` khi có hàng, giữ nguyên sản phẩm `hidden`, rồi
+ghi `inventory_restored_at` và `cancelled_at` trong cùng transaction. Retry hoặc
+hai request hủy đồng thời không thể hoàn kho hai lần.
+
+`inventory_deducted_at` chỉ được ghi bởi checkout thật. Không backfill cột này
+hàng loạt: order demo được seed trực tiếp không hề trừ kho, nên cố hoàn các đơn
+đó sẽ làm tồn kho tăng sai. Đơn cũ có marker `NULL` bị từ chối hủy tự động.
+
+Trang quản lý đơn hàng của admin chuyển trạng thái qua RPC
+`advance_order_status`, không update trực tiếp từ trình duyệt. RPC kiểm tra role
+admin, khóa order và yêu cầu trạng thái mà giao diện vừa đọc còn khớp trước khi
+chuyển `pending -> processing -> completed`; profile khách hàng tự làm mới trạng
+thái từ database.
 
 ## Đánh giá sản phẩm
 
@@ -86,11 +118,17 @@ hàng là số `user_id` khác nhau đã có đơn hàng.
 
 Với database đang sử dụng, chạy theo thứ tự:
 
-1. Chạy `add-shipping-method.sql` để thêm/chuẩn hóa `shipping_method` và cập
-   nhật RPC checkout. File này an toàn khi chạy lại.
-2. `enable-admin-dashboard.sql` để tạo ba RPC thống kê an toàn.
-3. Chạy lại `seed-techno-products-tgdd-60.sql` để cập nhật stock cho 60 SKU mẫu.
-4. Trước khi dùng công cụ sinh 200 khách hàng demo, chạy
+1. Chạy `add-shipping-method.sql` để thêm/chuẩn hóa `shipping_method`, bắt buộc
+   `stock NOT NULL`, khóa thay đổi cart khi checkout và cập nhật RPC. File này
+   an toàn khi chạy lại.
+2. Chạy `enable-user-order-management.sql` để bật lịch sử đơn, state machine,
+   RPC hủy đơn có hoàn kho và RPC chuyển trạng thái dành riêng cho admin.
+3. `enable-admin-dashboard.sql` để tạo ba RPC thống kê an toàn.
+4. Chạy lại `seed-techno-products-tgdd-60.sql` để cập nhật stock cho 60 SKU mẫu.
+5. Nếu gallery từng bị mất do đã chạy bản seed cũ, chạy lại
+   `update-product-gallery-images-tgdd.sql` một lần để khôi phục các mảng ảnh.
+   Kết quả cuối file phải trả về `products_with_gallery=33` với bộ seed chuẩn.
+6. Trước khi dùng công cụ sinh 200 khách hàng demo, chạy
    `enable-demo-data-seed.sql` để tạo RPC kiểm tra schema chỉ dành cho backend.
 
 Trang quản lý đơn hàng hiển thị riêng `pending`, `processing`, `completed` và
@@ -98,7 +136,8 @@ Trang quản lý đơn hàng hiển thị riêng `pending`, `processing`, `compl
 
 Kết quả cuối file seed phải là `total=60`, `stock_above_50=45`,
 `stock_below_50=15`, `stock_equal_50=0`. Seed là upsert nên không xóa sản phẩm
-khác ngoài danh sách 60 SKU mẫu. Nếu bảng đã có thêm sản phẩm ngoài seed, các
+khác ngoài danh sách 60 SKU mẫu và không ghi đè gallery nhiều ảnh đã tồn tại.
+Nếu bảng đã có thêm sản phẩm ngoài seed, các
 card vẫn tính toàn bộ dữ liệu thật trong bảng.
 
 ## Dữ liệu demo cho dashboard

@@ -36,5 +36,12 @@ https://tech-gear-store.vercel.app
 
 ## Lưu ý
 - Frontend kết nối Supabase bằng `@supabase/supabase-js`, Project URL và anon key.
-- Người dùng, sản phẩm và giỏ hàng đã sử dụng database; luồng tạo đơn hàng từ nút thanh toán vẫn đang được hoàn thiện.
+- Người dùng, sản phẩm, giỏ hàng và checkout sử dụng Supabase. Checkout gọi RPC
+  `checkout_cart` để tạo `orders`/`order_items`, trừ tồn kho và đóng giỏ trong
+  cùng một transaction.
+- Database đang sử dụng cần chạy `database/add-shipping-method.sql` trong
+  Supabase SQL Editor để cài bản RPC checkout và khóa đồng thời mới nhất.
+- Sau đó chạy `database/enable-user-order-management.sql` để profile đọc lịch
+  sử đơn, hủy đơn `pending` kèm hoàn tồn kho nguyên tử, đồng thời cho admin
+  chuyển đơn an toàn qua `pending -> processing -> completed`.
 

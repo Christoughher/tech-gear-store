@@ -3,76 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        id="product-meta-description"
+        name="description"
+        content="Khám phá thông tin, giá bán và thông số chi tiết sản phẩm tại Tech.no."
+    >
     <title>Chi tiết sản phẩm - Tech.no</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/chitiet-sanpham.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 </head>
-<body>
+<body class="product-detail-body">
     <div id="navbar-container"></div>
 
-    <div class="product-name">
-        <h1 id="product-detail-name">Đang tải chi tiết sản phẩm...</h1>
-    </div>
-    
-    <div class="box-main">
-        <div class="box-left">
-            <div class="swiper mySwiper">
-                <div class="swiper-wrapper" id="product-detail-gallery">
-                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details.jpg"></div>
-                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details-1.jpg"></div>
-                    <div class="swiper-slide"><img src="../assets/images/products/ssga36-details-2.jpg"></div>
+    <main class="product-detail-page">
+        <nav class="product-breadcrumb" aria-label="Điều hướng sản phẩm">
+            <a href="../index.html">
+                <i class="fa-solid fa-house" aria-hidden="true"></i>
+                Trang chủ
+            </a>
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            <span id="product-detail-breadcrumb-category">Sản phẩm</span>
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            <span aria-current="page">Chi tiết</span>
+        </nav>
+
+        <section class="box-main" aria-labelledby="product-detail-name">
+            <div class="box-left product-gallery-card">
+                <div class="product-gallery-heading">
+                    <span>
+                        <i class="fa-regular fa-images" aria-hidden="true"></i>
+                        Hình ảnh sản phẩm
+                    </span>
+                    <span class="product-gallery-hint">Vuốt hoặc dùng phím điều hướng</span>
                 </div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
+
+                <div class="swiper mySwiper" aria-label="Thư viện ảnh sản phẩm">
+                    <div class="swiper-wrapper" id="product-detail-gallery" aria-live="polite">
+                        <div class="swiper-slide product-detail-image-empty">
+                            <span>Đang tải hình ảnh...</span>
+                        </div>
+                    </div>
+                    <button class="swiper-button-next" type="button" aria-label="Ảnh tiếp theo"></button>
+                    <button class="swiper-button-prev" type="button" aria-label="Ảnh trước"></button>
+                    <div class="swiper-pagination" aria-hidden="true"></div>
+                </div>
+
+                <p class="product-gallery-note">
+                    Hình ảnh giúp mô tả sản phẩm; màu sắc thực tế có thể chênh lệch nhẹ theo màn hình.
+                </p>
             </div>
 
-            <div class="policy">
-                <div class="exchange-policy">
-                    <img src="../assets/images/exchange.png">
-                    <span>Hư gì đổi nấy 12 tháng tại 2992 siêu thị toàn quốc (miễn phí tháng đầu)</span>
+            <article class="box-right product-summary-card">
+                <div class="product-summary-topline">
+                    <span class="product-category-badge" id="product-detail-category">
+                        Đang tải danh mục
+                    </span>
+                    <span class="product-stock-badge is-loading" id="product-detail-stock" aria-live="polite">
+                        Đang kiểm tra tồn kho
+                    </span>
                 </div>
 
-                <div class="warranty-policy">
-                    <img src="../assets/images/warranty.png">
-                    <span>Bảo hành chính hãng 1 năm tại các trung tâm bảo hành hãng</span>
-                </div>
-            </div>
-        </div>
+                <h1 id="product-detail-name">Đang tải chi tiết sản phẩm...</h1>
 
-        <div class="box-right">
+                <div class="product-identity">
+                    <span>
+                        Thương hiệu
+                        <strong id="product-detail-brand">Đang cập nhật</strong>
+                    </span>
+                    <span>
+                        Mã sản phẩm
+                        <strong id="product-detail-sku">Đang cập nhật</strong>
+                    </span>
+                    <a href="#product-reviews">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                        Xem đánh giá
+                    </a>
+                </div>
+
+                <p class="product-short-description" id="product-detail-short-description">
+                    Thông tin nổi bật của sản phẩm đang được tải từ hệ thống.
+                </p>
+
+                <div class="product-price-card">
+                    <span class="product-price-label">Giá bán tại Tech.no</span>
+                    <div class="price-box" id="product-detail-price" aria-live="polite">
+                        Đang tải giá...
+                    </div>
+                    <p>
+                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                        Giá được xác nhận lại từ database khi tạo đơn hàng.
+                    </p>
+                </div>
+
+                <button
+                    class="add-to-cart btn-cart"
+                    id="product-detail-add-cart"
+                    type="button"
+                    disabled
+                >
+                    <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+                    <span id="product-detail-add-cart-label">Thêm vào giỏ hàng</span>
+                </button>
+
+                <p class="product-cart-note">
+                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                    Tồn kho và giá bán được kiểm tra lại an toàn khi thanh toán.
+                </p>
+            </article>
+        </section>
+
+        <section class="product-benefits" aria-label="Quyền lợi mua hàng">
+            <article>
+                <span class="product-benefit-icon">
+                    <i class="fa-solid fa-truck-fast" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <strong>Giao hàng linh hoạt</strong>
+                    <p>Lựa chọn giao tiêu chuẩn hoặc hỏa tốc khi đặt hàng.</p>
+                </div>
+            </article>
+            <article>
+                <span class="product-benefit-icon">
+                    <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <strong>Thông tin minh bạch</strong>
+                    <p>Giá và cấu hình được đồng bộ trực tiếp từ dữ liệu sản phẩm.</p>
+                </div>
+            </article>
+            <article>
+                <span class="product-benefit-icon">
+                    <i class="fa-solid fa-headset" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <strong>Hỗ trợ rõ ràng</strong>
+                    <p>Kiểm tra đơn hàng và trạng thái trực tiếp trong hồ sơ.</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="product-information-card" aria-label="Thông tin chi tiết">
             <div class="product-detail-tabs" role="tablist" aria-label="Thông tin chi tiết sản phẩm">
-                <button class="product-detail-tab is-active" id="product-specs-tab" type="button" data-product-tab="specs" role="tab" aria-selected="true" aria-controls="product-specs-panel">
+                <button
+                    class="product-detail-tab is-active"
+                    id="product-specs-tab"
+                    type="button"
+                    data-product-tab="specs"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="product-specs-panel"
+                >
+                    <i class="fa-solid fa-microchip" aria-hidden="true"></i>
                     Thông số kỹ thuật
                 </button>
-                <button class="product-detail-tab" id="product-description-tab" type="button" data-product-tab="description" role="tab" aria-selected="false" aria-controls="product-description-panel">
+                <button
+                    class="product-detail-tab"
+                    id="product-description-tab"
+                    type="button"
+                    data-product-tab="description"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="product-description-panel"
+                    tabindex="-1"
+                >
+                    <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
                     Thông tin sản phẩm
                 </button>
             </div>
 
-            <div class="product-detail-panel is-active" id="product-specs-panel" role="tabpanel" aria-labelledby="product-specs-tab">
+            <div
+                class="product-detail-panel is-active"
+                id="product-specs-panel"
+                role="tabpanel"
+                aria-labelledby="product-specs-tab"
+            >
+                <div class="product-panel-heading">
+                    <span>Thông tin cấu hình</span>
+                    <p>Các thông số được đồng bộ từ dữ liệu sản phẩm của Tech.no.</p>
+                </div>
                 <ul class="specs-list" id="product-detail-specs">
-                    <li><span>Trạng thái:</span> Đang tải thông số...</li>
+                    <li><span>Trạng thái</span><strong>Đang tải thông số...</strong></li>
                 </ul>
             </div>
 
-            <div class="product-detail-panel" id="product-description-panel" role="tabpanel" aria-labelledby="product-description-tab" hidden>
+            <div
+                class="product-detail-panel"
+                id="product-description-panel"
+                role="tabpanel"
+                aria-labelledby="product-description-tab"
+                hidden
+            >
+                <div class="product-panel-heading">
+                    <span>Giới thiệu sản phẩm</span>
+                    <p>Điểm nổi bật và thông tin sử dụng sản phẩm.</p>
+                </div>
                 <div class="product-description-content" id="product-detail-description">
                     Đang tải thông tin sản phẩm...
                 </div>
             </div>
+        </section>
+    </main>
 
-            <div class="price-box" id="product-detail-price">Đang tải...</div>
-            <button class="btn-buy">Mua ngay</button>
-            <button class="add-to-cart btn-cart" id="product-detail-add-cart" type="button" disabled>
-                <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ hàng
-            </button>
-        </div>
-
-    </div>
-
-    <section class="comment-section" aria-labelledby="product-reviews-title">
+    <section id="product-reviews" class="comment-section" aria-labelledby="product-reviews-title">
         <div class="review-section-header">
             <div>
                 <span class="review-eyebrow">Ý kiến khách hàng</span>

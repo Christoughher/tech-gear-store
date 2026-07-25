@@ -14,96 +14,127 @@
 
     <main class="category-main">
         <section class="category-hero laptop-hero">
-    <div class="hero-overlay">
-        <h1>Laptop</h1>
+            <div class="hero-overlay">
+                <h1>Laptop</h1>
 
-        <p>
-            Khám phá các mẫu laptop chính hãng phù hợp cho học tập,
-            làm việc và gaming với hiệu năng ổn định.
-        </p>
+                <p>
+                    Khám phá các mẫu laptop chính hãng phù hợp cho học tập,
+                    làm việc và gaming với hiệu năng ổn định.
+                </p>
 
-    <div class="hero-benefits">
+                <div class="hero-benefits">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
 
-    <div class="benefit-item">
+                        <div class="benefit-content">
+                            <span class="benefit-title">Chính hãng 100%</span>
+                            <span class="benefit-desc">Đầy đủ VAT</span>
+                        </div>
+                    </div>
 
-        <div class="benefit-icon">
-            <i class="fa-solid fa-shield-halved"></i>
-        </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Chính hãng 100%</span>
-            <span class="benefit-desc">Đầy đủ VAT</span>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Miễn phí giao hàng</span>
+                            <span class="benefit-desc">Toàn quốc</span>
+                        </div>
+                    </div>
 
-    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
 
-    <div class="benefit-item">
+                        <div class="benefit-content">
+                            <span class="benefit-title">Trả góp 0%</span>
+                            <span class="benefit-desc">Lãi suất ưu đãi</span>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="benefit-icon">
-            <i class="fa-solid fa-truck-fast"></i>
-        </div>
+                <div
+                    class="hero-actions"
+                    role="group"
+                    aria-label="Lọc nhanh laptop theo mức giá"
+                >
+                    <button
+                        class="hero-action hero-action--primary is-active"
+                        type="button"
+                        data-laptop-price-filter="all"
+                        aria-pressed="true"
+                    >
+                        Xem tất cả laptop
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </button>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Miễn phí giao hàng</span>
-            <span class="benefit-desc">Toàn quốc</span>
-        </div>
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-laptop-price-filter="under-20"
+                        aria-pressed="false"
+                    >
+                        Dưới 20 triệu
+                        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                    </button>
 
-    </div>
-
-    <div class="benefit-item">
-
-        <div class="benefit-icon">
-            <i class="fa-solid fa-headset"></i>
-        </div>
-
-        <div class="benefit-content">
-            <span class="benefit-title">Trả góp 0%</span>
-            <span class="benefit-desc">Lãi suất ưu đãi</span>
-        </div>
-
-    </div>
-
-</div>
-</section>
-
-        <section class="category-toolbar">
-            <div class="category-sort">
-                <select>
-                    <option>Sắp xếp mặc định</option>
-                    <option>Giá tăng dần</option>
-                    <option>Giá giảm dần</option>
-                    <option>Mới nhất</option>
-                </select>
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-laptop-price-filter="from-20"
+                        aria-pressed="false"
+                    >
+                        Từ 20 triệu
+                        <i class="fa-solid fa-coins" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
         <section class="category-layout">
-            <aside class="category-filter">
-                <h3>Bộ lọc</h3>
+            <div class="category-controls">
+                <aside class="category-filter">
+                    <h3>Bộ lọc</h3>
 
-                <div class="filter-group">
-                    <h4>Thương hiệu</h4>
-                    <label><input type="checkbox"> ASUS</label>
-                    <label><input type="checkbox"> Dell</label>
-                    <label><input type="checkbox"> HP</label>
-                    <label><input type="checkbox"> Lenovo</label>
-                </div>
+                    <div class="filter-group">
+                        <h4>Thương hiệu</h4>
+                        <label><input type="checkbox"> ASUS</label>
+                        <label><input type="checkbox"> Dell</label>
+                        <label><input type="checkbox"> HP</label>
+                        <label><input type="checkbox"> Lenovo</label>
+                    </div>
 
-                <div class="filter-group">
-                    <h4>Mức giá</h4>
-                    <label><input type="checkbox"> Dưới 15 triệu</label>
-                    <label><input type="checkbox"> 15 - 25 triệu</label>
-                    <label><input type="checkbox"> Trên 25 triệu</label>
-                </div>
+                    <div class="filter-group">
+                        <h4>Mức giá</h4>
+                        <label><input type="checkbox"> Dưới 15 triệu</label>
+                        <label><input type="checkbox"> 15 - 25 triệu</label>
+                        <label><input type="checkbox"> Trên 25 triệu</label>
+                    </div>
 
-                <div class="filter-group">
-                    <h4>Nhu cầu</h4>
-                    <label><input type="checkbox"> Học tập</label>
-                    <label><input type="checkbox"> Văn phòng</label>
-                    <label><input type="checkbox"> Gaming</label>
-                    <label><input type="checkbox"> Đồ họa</label>
+                    <div class="filter-group">
+                        <h4>Nhu cầu</h4>
+                        <label><input type="checkbox"> Học tập</label>
+                        <label><input type="checkbox"> Văn phòng</label>
+                        <label><input type="checkbox"> Gaming</label>
+                        <label><input type="checkbox"> Đồ họa</label>
+                    </div>
+                </aside>
+
+                <div class="category-toolbar">
+                    <div class="category-sort">
+                        <select aria-label="Sắp xếp sản phẩm">
+                            <option>Sắp xếp mặc định</option>
+                            <option>Giá tăng dần</option>
+                            <option>Giá giảm dần</option>
+                            <option>Mới nhất</option>
+                        </select>
+                    </div>
                 </div>
-            </aside>
+            </div>
 
             <div class="product-grid">
                 <div class="products-empty-state">Đang tải sản phẩm...</div>

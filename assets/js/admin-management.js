@@ -25,6 +25,17 @@
         cancelled: { label: 'Đã hủy', className: 'cancel' }
     });
 
+    const orderAdvanceMeta = Object.freeze({
+        pending: {
+            label: 'Chuyển sang đang giao',
+            icon: 'fa-truck-fast'
+        },
+        processing: {
+            label: 'Đánh dấu hoàn thành',
+            icon: 'fa-circle-check'
+        }
+    });
+
     const categoryIcon = Object.freeze({
         phone: 'fa-mobile-screen-button',
         laptop: 'fa-laptop',
@@ -702,7 +713,7 @@
         return { ...order, ...data };
     }
 
-    function renderOrderRow(order, client) {
+    function renderOrderRow(order, client, refreshOrders) {
         const row = document.createElement('tr');
         row.dataset.orderId = order.id;
 
@@ -762,6 +773,42 @@
 
         const actionCell = document.createElement('td');
         const actions = createElement('div', 'action-btns');
+        const advance = orderAdvanceMeta[order.status];
+
+        if (advance) {
+            const advanceButton = createElement('button', 'btn-icon edit');
+            advanceButton.type = 'button';
+            advanceButton.title = advance.label;
+            advanceButton.setAttribute(
+                'aria-label',
+                `${advance.label} cho đơn ${shortId}`
+            );
+            advanceButton.appendChild(createIcon(advance.icon));
+            advanceButton.addEventListener('click', async () => {
+                advanceButton.disabled = true;
+                advanceButton.replaceChildren(createIcon('fa-spinner fa-spin'));
+
+                try {
+                    const { error } = await client.rpc('advance_order_status', {
+                        p_order_id: order.id,
+                        p_expected_status: order.status
+                    });
+                    if (error) throw error;
+
+                    await refreshOrders();
+                } catch (error) {
+                    console.error('Không thể cập nhật trạng thái đơn hàng:', error);
+                    window.alert('Không thể cập nhật trạng thái đơn hàng. Vui lòng thử lại.');
+                } finally {
+                    if (advanceButton.isConnected) {
+                        advanceButton.disabled = false;
+                        advanceButton.replaceChildren(createIcon(advance.icon));
+                    }
+                }
+            });
+            actions.appendChild(advanceButton);
+        }
+
         const viewButton = createElement('button', 'btn-icon view');
         viewButton.type = 'button';
         viewButton.title = 'Xem chi tiết';
@@ -872,7 +919,9 @@
                     setTableMessage(elements.tbody, 8, 'Không tìm thấy đơn hàng phù hợp.');
                 } else {
                     const fragment = document.createDocumentFragment();
-                    orders.forEach((order) => fragment.appendChild(renderOrderRow(order, client)));
+                    orders.forEach((order) => {
+                        fragment.appendChild(renderOrderRow(order, client, loadOrders));
+                    });
                     elements.tbody.appendChild(fragment);
                 }
 

@@ -1304,8 +1304,23 @@ async function cleanupBusinessData(client, userIds) {
         return;
     }
     console.log(`\nCleaning business data for ${userIds.length} tagged demo users...`);
+    const demoCarts = await selectByIds(
+        client,
+        'carts',
+        'id',
+        'user_id',
+        userIds,
+        'Load demo carts for cleanup'
+    );
     await deleteByIds(client, 'product_reviews', 'user_id', userIds, 'Delete demo reviews');
     await deleteByIds(client, 'orders', 'user_id', userIds, 'Delete demo orders');
+    await deleteByIds(
+        client,
+        'cart_items',
+        'cart_id',
+        demoCarts.map((cart) => cart.id),
+        'Delete demo cart items'
+    );
     await deleteByIds(client, 'carts', 'user_id', userIds, 'Delete demo carts');
     console.log('Demo business data cleaned. Auth users and public profiles were kept.');
 }

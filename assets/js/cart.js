@@ -201,6 +201,179 @@ class ShoppingCart {
         return this.getCart();
     }
 
+    async checkout({
+        receiverName,
+        receiverPhone,
+        shippingAddress,
+        note = null,
+        shippingMethod = 'Tiêu chuẩn'
+    }) {
+        await this.requireUser();
+
+        const normalizedReceiverName = String(receiverName || '').trim();
+        const normalizedReceiverPhone = String(receiverPhone || '').trim();
+        const normalizedShippingAddress = String(shippingAddress || '').trim();
+        const normalizedNote = String(note || '').trim();
+        const normalizedShippingMethod = String(shippingMethod || '').trim() || 'Tiêu chuẩn';
+        const phoneDigits = normalizedReceiverPhone.replace(/\D/g, '');
+
+        if (normalizedReceiverName.length < 2 || normalizedReceiverName.length > 120) {
+            throw new Error('Vui lòng nhập đầy đủ họ tên người nhận.');
+        }
+
+        if (
+            normalizedReceiverPhone.length > 30
+            || phoneDigits.length < 9
+            || phoneDigits.length > 15
+        ) {
+            throw new Error('Số điện thoại người nhận không hợp lệ.');
+        }
+
+        if (normalizedShippingAddress.length < 5 || normalizedShippingAddress.length > 500) {
+            throw new Error('Vui lòng nhập địa chỉ giao hàng đầy đủ.');
+        }
+
+        if (!['Tiêu chuẩn', 'Hỏa tốc'].includes(normalizedShippingMethod)) {
+            throw new Error('Hình thức giao hàng không hợp lệ.');
+        }
+
+        if (normalizedNote.length > 1000) {
+            throw new Error('Ghi chú đơn hàng không được dài quá 1000 ký tự.');
+        }
+
+        if (!this.cartId) {
+            const activeCart = await this.findActiveCart();
+            this.cartId = activeCart?.id || null;
+        }
+
+        if (!this.cartId) {
+            throw new Error('Không tìm thấy giỏ hàng đang hoạt động.');
+        }
+
+        await this.loadItems();
+
+        if (!this.cart.length) {
+            throw new Error('Không thể thanh toán một giỏ hàng trống.');
+        }
+
+        const cartSnapshot = this.cart.map(item => ({
+            productId: item.productId,
+            quantity: Number(item.quantity)
+        }));
+        const checkedOutCartId = this.cartId;
+        const { data: orderId, error: checkoutError } = await this.supabase.rpc('checkout_cart', {
+            p_cart_id: checkedOutCartId,
+            p_receiver_name: normalizedReceiverName,
+            p_receiver_phone: normalizedReceiverPhone,
+            p_shipping_address: normalizedShippingAddress,
+            p_note: normalizedNote || null,
+            p_shipping_method: normalizedShippingMethod
+        });
+
+        if (checkoutError) {
+            throw this.toCheckoutError(checkoutError);
+        }
+
+        if (!this.isUuid(orderId)) {
+            const invalidResponseError = new Error(
+                'Database không trả về mã đơn hàng hợp lệ. Vui lòng kiểm tra lại lịch sử đơn hàng.'
+            );
+            invalidResponseError.code = 'CHECKOUT_INVALID_RESPONSE';
+            throw invalidResponseError;
+        }
+
+        // Chỉ báo thành công sau khi đọc lại được order và các dòng snapshot đã commit.
+        const { data: order, error: orderReadError } = await this.supabase
+            .from('orders')
+            .select('id, cart_id, user_id, total_price, status, shipping_method, created_at')
+            .eq('id', orderId)
+            .eq('cart_id', checkedOutCartId)
+            .eq('user_id', this.user.id)
+            .maybeSingle();
+
+        if (orderReadError || !order) {
+            const verificationError = this.toCartError(
+                orderReadError,
+                'Đơn hàng có thể đã được tạo nhưng chưa thể xác minh lại từ database.'
+            );
+            verificationError.code = 'CHECKOUT_VERIFICATION_FAILED';
+            verificationError.orderId = orderId;
+            throw verificationError;
+        }
+
+        const { data: orderItems, error: orderItemsReadError } = await this.supabase
+            .from('order_items')
+            .select('id, product_id, quantity, price_at_purchase')
+            .eq('order_id', orderId);
+
+        if (orderItemsReadError || !orderItems?.length) {
+            const verificationError = this.toCartError(
+                orderItemsReadError,
+                'Đơn hàng đã được tạo nhưng không thể xác minh chi tiết sản phẩm.'
+            );
+            verificationError.code = 'CHECKOUT_ITEMS_VERIFICATION_FAILED';
+            verificationError.orderId = orderId;
+            throw verificationError;
+        }
+
+        const orderItemsByProduct = new Map(
+            orderItems.map(item => [item.product_id, Number(item.quantity)])
+        );
+        const snapshotMatches = orderItems.length === cartSnapshot.length
+            && cartSnapshot.every(item => (
+                orderItemsByProduct.get(item.productId) === item.quantity
+            ));
+
+        if (!snapshotMatches) {
+            const verificationError = new Error(
+                'Đơn hàng đã được tạo nhưng sản phẩm không khớp với giỏ hàng đã thanh toán.'
+            );
+            verificationError.code = 'CHECKOUT_ITEMS_MISMATCH';
+            verificationError.orderId = orderId;
+            throw verificationError;
+        }
+
+        const verifiedTotal = orderItems.reduce(
+            (total, item) => total + (Number(item.price_at_purchase) * Number(item.quantity)),
+            0
+        );
+
+        if (Math.abs(verifiedTotal - Number(order.total_price)) > 0.01) {
+            const verificationError = new Error(
+                'Đơn hàng đã được tạo nhưng tổng tiền không khớp với chi tiết sản phẩm.'
+            );
+            verificationError.code = 'CHECKOUT_TOTAL_MISMATCH';
+            verificationError.orderId = orderId;
+            throw verificationError;
+        }
+
+        const { data: checkedOutCart, error: cartReadError } = await this.supabase
+            .from('carts')
+            .select('id, status, checked_out_at')
+            .eq('id', checkedOutCartId)
+            .eq('user_id', this.user.id)
+            .maybeSingle();
+
+        if (cartReadError || checkedOutCart?.status !== 'checked_out' || !checkedOutCart.checked_out_at) {
+            const verificationError = this.toCartError(
+                cartReadError,
+                'Đơn hàng đã được tạo nhưng trạng thái giỏ hàng chưa được xác minh.'
+            );
+            verificationError.code = 'CHECKOUT_CART_VERIFICATION_FAILED';
+            verificationError.orderId = orderId;
+            throw verificationError;
+        }
+
+        this.cartId = null;
+        this.cart = [];
+        this.emitChange();
+
+        return {
+            ...order,
+            itemCount: orderItems.length
+        };
+    }
+
     async getPurchasableProduct(productId) {
         const { data, error } = await this.supabase
             .from('products')
@@ -429,6 +602,44 @@ class ShoppingCart {
         cartError.code = error?.code || 'CART_DATABASE_ERROR';
         cartError.cause = error;
         return cartError;
+    }
+
+    toCheckoutError(error) {
+        const databaseMessage = String(error?.message || '');
+        let message = 'Không thể tạo đơn hàng. Vui lòng thử lại.';
+
+        if (/Authentication required/i.test(databaseMessage)) {
+            message = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+        } else if (/Receiver name is (required|invalid)/i.test(databaseMessage)) {
+            message = 'Vui lòng nhập đầy đủ họ tên người nhận.';
+        } else if (/Receiver phone is invalid/i.test(databaseMessage)) {
+            message = 'Số điện thoại người nhận không hợp lệ.';
+        } else if (/Order note is too long/i.test(databaseMessage)) {
+            message = 'Ghi chú đơn hàng không được dài quá 1000 ký tự.';
+        } else if (/does not exist or does not belong/i.test(databaseMessage)) {
+            message = 'Giỏ hàng không tồn tại hoặc không thuộc tài khoản hiện tại.';
+        } else if (/Only an active cart/i.test(databaseMessage)) {
+            message = 'Giỏ hàng này đã được thanh toán hoặc không còn hoạt động.';
+        } else if (/empty cart/i.test(databaseMessage)) {
+            message = 'Không thể thanh toán một giỏ hàng trống.';
+        } else if (/unavailable or insufficient-stock/i.test(databaseMessage)) {
+            message = 'Một hoặc nhiều sản phẩm đã hết hàng hoặc không còn đủ số lượng.';
+        } else if (/Shipping address is (required|invalid)/i.test(databaseMessage)) {
+            message = 'Vui lòng nhập địa chỉ giao hàng đầy đủ.';
+        } else if (/Shipping method/i.test(databaseMessage)) {
+            message = 'Hình thức giao hàng không hợp lệ.';
+        } else if (error?.code === 'PGRST202' || error?.code === '42883') {
+            message = 'Database chưa cài đặt RPC checkout_cart.';
+        } else if (error?.code === '42501') {
+            message = 'Bạn không có quyền tạo đơn hàng với tài khoản hiện tại.';
+        } else if (databaseMessage) {
+            message = databaseMessage;
+        }
+
+        const checkoutError = new Error(message);
+        checkoutError.code = error?.code || 'CHECKOUT_DATABASE_ERROR';
+        checkoutError.cause = error;
+        return checkoutError;
     }
 
     emitChange() {

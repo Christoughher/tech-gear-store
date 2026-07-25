@@ -20,6 +20,9 @@ Doanh thu được tính từ giá thật hiện tại trong `products`; chỉ �
 `completed` được cộng vào card doanh thu. Script không thay đổi `products.stock`
 để giữ phân bố 45 sản phẩm còn hàng và 15 sản phẩm sắp hết hàng.
 
+Vì order demo không trừ tồn kho, `inventory_deducted_at` của chúng phải giữ
+`NULL`. Profile sẽ không cho hủy tự động các đơn này, tránh cộng tồn kho giả.
+
 Nếu database đã có dữ liệu thật, các card admin sẽ hiển thị tổng của dữ liệu
 thật cộng với dữ liệu demo.
 

@@ -14,89 +14,126 @@
 
     <main class="category-main">
         <section class="category-hero accessory-hero">
-    <div class="hero-overlay">
-        <h1>Phụ Kiện</h1>
+            <div class="hero-overlay">
+                <h1>Phụ Kiện</h1>
 
-        <p>
-            Danh sách phụ kiện công nghệ dành cho laptop,
-            PC Gaming và góc làm việc cá nhân.
-        </p>
+                <p>
+                    Danh sách phụ kiện công nghệ dành cho laptop,
+                    PC Gaming và góc làm việc cá nhân.
+                </p>
 
-        <div class="hero-benefits">
+                <div class="hero-benefits">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
 
-    <div class="benefit-item">
-        <div class="benefit-icon">
-            <i class="fa-solid fa-shield-halved"></i>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Chính hãng 100%</span>
+                            <span class="benefit-desc">Đảm bảo chất lượng</span>
+                        </div>
+                    </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Chính hãng 100%</span>
-            <span class="benefit-desc">Đảm bảo chất lượng</span>
-        </div>
-    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
 
-    <div class="benefit-item">
-        <div class="benefit-icon">
-            <i class="fa-solid fa-truck-fast"></i>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Giao hàng nhanh</span>
+                            <span class="benefit-desc">Toàn quốc</span>
+                        </div>
+                    </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Giao hàng nhanh</span>
-            <span class="benefit-desc">Toàn quốc</span>
-        </div>
-    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
 
-    <div class="benefit-item">
-        <div class="benefit-icon">
-            <i class="fa-solid fa-tags"></i>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Giá tốt mỗi ngày</span>
+                            <span class="benefit-desc">Nhiều ưu đãi hấp dẫn</span>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Giá tốt mỗi ngày</span>
-            <span class="benefit-desc">Nhiều ưu đãi hấp dẫn</span>
-        </div>
-    </div>
+                <div
+                    class="hero-actions"
+                    role="group"
+                    aria-label="Lọc nhanh phụ kiện theo mức giá"
+                >
+                    <button
+                        class="hero-action hero-action--primary is-active"
+                        type="button"
+                        data-accessory-price-filter="all"
+                        aria-pressed="true"
+                    >
+                        Xem tất cả phụ kiện
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </button>
 
-</div>
-</section>
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-accessory-price-filter="under-2"
+                        aria-pressed="false"
+                    >
+                        Dưới 2 triệu
+                        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                    </button>
 
-        <section class="category-toolbar">
-            <div class="category-sort">
-                <select>
-                    <option>Sắp xếp mặc định</option>
-                    <option>Giá tăng dần</option>
-                    <option>Giá giảm dần</option>
-                    <option>Bán chạy</option>
-                </select>
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-accessory-price-filter="from-2"
+                        aria-pressed="false"
+                    >
+                        Từ 2 triệu
+                        <i class="fa-solid fa-coins" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
         <section class="category-layout">
-            <aside class="category-filter">
-                <h3>Bộ lọc</h3>
+            <div class="category-controls">
+                <aside class="category-filter">
+                    <h3>Bộ lọc</h3>
 
-                <div class="filter-group">
-                    <h4>Loại phụ kiện</h4>
-                    <label><input type="checkbox"> Chuột</label>
-                    <label><input type="checkbox"> Bàn phím</label>
-                    <label><input type="checkbox"> Tai nghe</label>
-                    <label><input type="checkbox"> Màn hình</label>
-                </div>
+                    <div class="filter-group">
+                        <h4>Loại phụ kiện</h4>
+                        <label><input type="checkbox"> Chuột</label>
+                        <label><input type="checkbox"> Bàn phím</label>
+                        <label><input type="checkbox"> Tai nghe</label>
+                        <label><input type="checkbox"> Màn hình</label>
+                    </div>
 
-                <div class="filter-group">
-                    <h4>Kết nối</h4>
-                    <label><input type="checkbox"> Có dây</label>
-                    <label><input type="checkbox"> Không dây</label>
-                    <label><input type="checkbox"> Bluetooth</label>
-                </div>
+                    <div class="filter-group">
+                        <h4>Kết nối</h4>
+                        <label><input type="checkbox"> Có dây</label>
+                        <label><input type="checkbox"> Không dây</label>
+                        <label><input type="checkbox"> Bluetooth</label>
+                    </div>
 
-                <div class="filter-group">
-                    <h4>Mức giá</h4>
-                    <label><input type="checkbox"> Dưới 500 nghìn</label>
-                    <label><input type="checkbox"> 500 nghìn - 2 triệu</label>
-                    <label><input type="checkbox"> Trên 2 triệu</label>
+                    <div class="filter-group">
+                        <h4>Mức giá</h4>
+                        <label><input type="checkbox"> Dưới 500 nghìn</label>
+                        <label><input type="checkbox"> 500 nghìn - 2 triệu</label>
+                        <label><input type="checkbox"> Trên 2 triệu</label>
+                    </div>
+                </aside>
+
+                <div class="category-toolbar">
+                    <div class="category-sort">
+                        <select aria-label="Sắp xếp sản phẩm">
+                            <option>Sắp xếp mặc định</option>
+                            <option>Giá tăng dần</option>
+                            <option>Giá giảm dần</option>
+                            <option>Bán chạy</option>
+                        </select>
+                    </div>
                 </div>
-            </aside>
+            </div>
 
             <div class="product-grid">
                 <div class="products-empty-state">Đang tải sản phẩm...</div>

@@ -109,7 +109,11 @@ ON CONFLICT (sku) DO UPDATE SET
   category_id = EXCLUDED.category_id,
   brand = EXCLUDED.brand,
   subcategory = EXCLUDED.subcategory,
-  image_urls = EXCLUDED.image_urls,
+  -- Giữ gallery đã được migration; seed chỉ cấp thumbnail khi sản phẩm chưa có gallery.
+  image_urls = CASE
+    WHEN COALESCE(cardinality(products.image_urls), 0) > 1 THEN products.image_urls
+    ELSE EXCLUDED.image_urls
+  END,
   stock = EXCLUDED.stock,
   status = EXCLUDED.status;
 
