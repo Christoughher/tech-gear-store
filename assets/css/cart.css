@@ -7,23 +7,129 @@
 }
 
 .cart-hero {
-    background: linear-gradient(135deg, #111827, #2563eb);
-    color: #ffffff;
-    padding: 48px 40px;
-    border-radius: 18px;
-    margin-bottom: 32px;
+    position: relative;
+    background-image: url("../images/banner7.png");
+    background-size: cover;
+    background-position: center right;
+    background-repeat: no-repeat;
+    border-radius: 20px;
+    padding: 38px 46px;
     margin-top: 60px;
+    margin-bottom: 32px;
+    width: 100%;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.04);
+    min-height: 255px;
+    display: flex;
+    align-items: center;
 }
 
-.cart-hero h1 {
-    font-size: 38px;
-    margin-bottom: 12px;
+.cart-hero-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    max-width: 74%;
 }
 
-.cart-hero p {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #e5e7eb;
+.cart-hero-info {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.cart-hero-icon {
+    width: 74px;
+    height: 74px;
+    min-width: 74px;
+    background: #ffffff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1), 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.cart-hero-icon i {
+    font-size: 32px;
+    color: #3b82f6;
+}
+
+.cart-hero-text h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0d1527;
+    margin: 0 0 4px 0;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.cart-hero-text p {
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #64748b;
+    max-width: 310px;
+    margin: 0;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* Stepper Indicator */
+.cart-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.step-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #475569;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.step-item.active .step-circle {
+    color: #1e293b;
+    border-color: #cbd5e1;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
+}
+
+.step-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.step-item.active .step-label {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.step-line {
+    width: 40px;
+    height: 2px;
+    background-color: #cbd5e1;
+    margin-top: 23px;
 }
 
 .cart-container {
@@ -423,6 +529,12 @@
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+    .cart-hero-wrapper {
+        max-width: 100%;
+    }
+}
+
 @media (max-width: 1024px) {
     .cart-main {
         padding: 50px 5%;
@@ -435,15 +547,65 @@
     .cart-summary {
         position: static;
     }
+
+    .cart-hero {
+        aspect-ratio: auto;
+        min-height: auto;
+    }
+
+    .cart-hero-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 768px) {
     .cart-hero {
-        padding: 32px 24px;
+        padding: 28px 20px;
+        border-radius: 16px;
+        background-size: cover;
+        background-position: center;
     }
 
-    .cart-hero h1 {
+    .cart-hero-icon {
+        width: 68px;
+        height: 68px;
+        min-width: 68px;
+        border-radius: 18px;
+    }
+
+    .cart-hero-icon i {
         font-size: 28px;
+    }
+
+    .cart-hero-text h1 {
+        font-size: 26px;
+    }
+
+    .cart-hero-text p {
+        font-size: 13.5px;
+    }
+
+    .cart-steps {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 15px;
+    }
+
+    .step-line {
+        width: 24px;
+        margin-top: 19px;
+    }
+
+    .step-label {
+        font-size: 12px;
     }
 
     .cart-item {
