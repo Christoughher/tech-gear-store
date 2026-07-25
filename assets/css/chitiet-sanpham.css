@@ -148,6 +148,11 @@
     transition: transform 260ms ease;
 }
 
+/* Thu nhỏ riêng ảnh đầu tiên trong thư viện sản phẩm */
+.product-gallery-card .swiper-wrapper > .swiper-slide:first-child img {
+    padding: clamp(54px, 6vw, 84px);
+}
+
 .product-gallery-card .swiper-slide:hover img {
     transform: scale(1.025);
 }
@@ -1060,6 +1065,10 @@
 
     .product-gallery-card .swiper-slide img {
         padding: clamp(24px, 10vw, 54px);
+    }
+
+    .product-gallery-card .swiper-wrapper > .swiper-slide:first-child img {
+    padding: clamp(46px, 14vw, 62px);
     }
 
     .product-gallery-card .swiper-button-next,

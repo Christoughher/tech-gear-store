@@ -20,7 +20,7 @@ const filterLabelMap = {
     lenovo: 'Lenovo',
     msi: 'MSI',
     gigabyte: 'Gigabyte',
-    airpods: 'AIRPODS',
+    airpods: 'TAI NGHE',
     loa: 'LOA',
     camera: 'CAMERA',
     sac: 'SẠC',
@@ -117,7 +117,7 @@ const genericProductSpecificationTemplate = [
 ];
 
 const accessoryProductSpecificationSubcategories = Object.freeze([
-    { value: 'airpods', label: 'Tai nghe / AirPods', templateKey: 'audio' },
+    { value: 'airpods', label: 'Tai nghe', templateKey: 'audio' },
     { value: 'dong-ho', label: 'Đồng hồ thông minh', templateKey: 'watch' },
     { value: 'camera', label: 'Camera', templateKey: 'camera' },
     { value: 'sac', label: 'Sạc / Pin dự phòng', templateKey: 'charger' },
@@ -377,7 +377,9 @@ function applyCategoryFilterGroups(products) {
 
     return products.filter(product =>
         activeGroups.every(group =>
-            group.values.some(value => productMatchesCategoryFilter(product, group.title, value))
+            group.values.some(value =>
+                productMatchesCategoryFilter(product, group.title, value, group.field)
+            )
         )
     );
 }
@@ -474,9 +476,21 @@ function applyAccessoryHeroPriceFilter(products) {
     });
 }
 
-function productMatchesCategoryFilter(product, groupTitle, value) {
+function productMatchesCategoryFilter(product, groupTitle, value, field = '') {
     const normalizedGroupTitle = normalizeProductKey(groupTitle);
     const normalizedValue = normalizeProductKey(value);
+
+    if (field === 'subcategory') {
+        const productSubcategory = normalizeProductKey(product.subcategory);
+
+        // Dữ liệu hiện tại dùng "airpods" cho nhóm tai nghe. Đồng thời hỗ trợ
+        // cả mã "tai-nghe" để các sản phẩm được thêm mới sau này vẫn lọc đúng.
+        if (normalizedValue === 'airpods') {
+            return productSubcategory === 'airpods' || productSubcategory === 'tai-nghe';
+        }
+
+        return productSubcategory === normalizedValue;
+    }
 
     if (normalizedGroupTitle.includes('gia')) {
         return productMatchesPriceFilter(product, normalizedValue);
@@ -1866,15 +1880,23 @@ function updateCategoryFilterGroups(shouldRender = true) {
     const groups = [...document.querySelectorAll('.category-filter .filter-group')];
 
     currentCategoryFilterGroups = groups.map(group => {
+        const field = group.dataset.filterField || '';
         const values = [...group.querySelectorAll('label')]
             .filter(label => label.querySelector('input')?.checked)
-            .map(label => label.textContent.trim())
+            .map(label => {
+                const input = label.querySelector('input');
+
+                return field
+                    ? String(input?.value || '').trim()
+                    : label.textContent.trim();
+            })
             .filter(Boolean);
 
         group.classList.toggle('has-selection', values.length > 0);
 
         return {
             title: group.querySelector('h4')?.textContent.trim() || '',
+            field,
             values
         };
     });
