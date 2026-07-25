@@ -11,11 +11,100 @@
     ]);
     const PRODUCT_STATUSES = new Set(['active', 'hidden', 'out_of_stock']);
     const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const PRODUCT_SPECIFICATION_CONFIG = window.techNoProductSpecificationConfig;
+    const CATEGORY_FORM_COPY = Object.freeze({
+        phone: {
+            label: 'Điện thoại',
+            title: 'Thông số điện thoại',
+            hint: 'Nhập màn hình, hệ điều hành, chip, RAM, bộ nhớ, pin và các thông tin phần cứng.'
+        },
+        laptop: {
+            label: 'Laptop',
+            title: 'Thông số laptop',
+            hint: 'Nhập CPU, GPU, RAM, ổ cứng, màn hình, tần số quét, bàn phím và tản nhiệt.'
+        },
+        pc: {
+            label: 'PC',
+            title: 'Thông số máy tính để bàn',
+            hint: 'Nhập mainboard, CPU, RAM, ổ cứng, card đồ họa, nguồn, case và hệ điều hành.'
+        },
+        phukien: {
+            label: 'Phụ kiện',
+            title: 'Thông số phụ kiện',
+            hint: 'Chọn loại phụ kiện trước để nhận đúng bộ trường thông số.'
+        }
+    });
+    const BRAND_SUGGESTIONS = Object.freeze({
+        phone: ['iphone', 'samsung', 'oppo', 'xiaomi', 'realme', 'vivo'],
+        laptop: ['asus', 'hp', 'dell', 'acer', 'macbook', 'lenovo', 'msi', 'gigabyte'],
+        pc: ['asus', 'msi', 'gigabyte'],
+        phukien: ['apple', 'samsung', 'sony', 'tplink', 'ugreen', 'xiaomi', 'huawei', 'amazfit']
+    });
+    const LONG_SPECIFICATION_FIELDS = new Set([
+        'storage',
+        'cooling',
+        'charging_time',
+        'audio_technology',
+        'compatibility',
+        'input',
+        'output',
+        'battery_life'
+    ]);
+    const SPECIFICATION_PLACEHOLDERS = Object.freeze({
+        screen: 'VD: OLED 6.7 inch, 120 Hz',
+        os: 'VD: Windows 11 Home / Android 15',
+        chip: 'VD: Snapdragon 8 Gen 3',
+        ram: 'VD: 16 GB',
+        storage: 'VD: 512 GB SSD NVMe PCIe',
+        battery: 'VD: 5000 mAh',
+        charging: 'VD: 67 W',
+        material: 'VD: Khung nhôm, mặt lưng kính',
+        sim: 'VD: 2 Nano SIM',
+        cpu_technology: 'VD: Intel Core i5-13420H',
+        cpu: 'VD: Intel Core i5-14400F',
+        gpu: 'VD: NVIDIA GeForce RTX 4060 8 GB',
+        screen_size: 'VD: 15.6 inch',
+        resolution: 'VD: Full HD (1920 x 1080)',
+        refresh_rate: 'VD: 144 Hz',
+        keyboard_backlight: 'VD: RGB 4 vùng',
+        cooling: 'VD: 2 quạt, 4 ống đồng',
+        mainboard: 'VD: ASUS B760M',
+        case: 'VD: Mid Tower',
+        power_supply: 'VD: 650 W 80 Plus Bronze',
+        charging_time: 'VD: Dùng 8 giờ, sạc 1.5 giờ',
+        audio_technology: 'VD: Chống ồn chủ động, Spatial Audio',
+        compatibility: 'VD: Android, iOS, Windows, macOS',
+        simultaneous_connections: 'VD: 2 thiết bị',
+        dimensions: 'VD: Dài 10 cm × rộng 7 cm × dày 2 cm',
+        weight: 'VD: 250 g',
+        face_diameter: 'VD: 46 mm',
+        strap_material: 'VD: Silicone',
+        strap_width: 'VD: 2.2 cm',
+        frame_material: 'VD: Hợp kim nhôm',
+        case_thickness: 'VD: 10.5 mm',
+        glass_material: 'VD: Kính Sapphire',
+        battery_life: 'VD: Khoảng 7 ngày',
+        viewing_angle: 'VD: 105 độ',
+        rotation_angle: 'VD: Ngang 360 độ, dọc 114 độ',
+        infrared_range: 'VD: 10 m',
+        input: 'VD: USB-C 5V/3A, 9V/2A',
+        output: 'VD: USB-C PD 20 W',
+        connection: 'VD: Bluetooth 5.3 / Wi-Fi',
+        model: 'VD: Series 2026',
+        origin: 'VD: Việt Nam',
+        warranty: 'VD: 24 tháng'
+    });
 
     const state = {
         client: null,
         productId: null,
         originalUpdatedAt: null,
+        originalCategoryId: '',
+        originalSubcategory: '',
+        originalSpecifications: {},
+        originalSpecificationsUpdatedAt: null,
+        activeSpecificationContext: '',
+        specificationDrafts: new Map(),
         existingImageUrls: [],
         removedExistingUrls: new Set(),
         selectedFiles: [],
@@ -39,6 +128,251 @@
         if (className) element.className = className;
         if (text !== undefined && text !== null) element.textContent = String(text);
         return element;
+    }
+
+    function parseSpecificationObject(value) {
+        if (!value) return {};
+        if (typeof value === 'string') {
+            try {
+                const parsed = JSON.parse(value);
+                return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+                    ? parsed
+                    : {};
+            } catch {
+                return {};
+            }
+        }
+        return typeof value === 'object' && !Array.isArray(value)
+            ? { ...value }
+            : {};
+    }
+
+    function normalizeTaxonomySlug(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function populateAccessorySubcategories() {
+        elements.subcategory.replaceChildren(new Option('Chọn loại phụ kiện', ''));
+        PRODUCT_SPECIFICATION_CONFIG.accessorySubcategories.forEach((subcategory) => {
+            elements.subcategory.appendChild(new Option(subcategory.label, subcategory.value));
+        });
+    }
+
+    function ensureAccessorySubcategoryOption(value) {
+        if (!value || [...elements.subcategory.options].some((option) => option.value === value)) {
+            return;
+        }
+        elements.subcategory.appendChild(new Option(`${value} (đang sử dụng)`, value));
+    }
+
+    function updateBrandSuggestions(categoryId) {
+        const suggestions = BRAND_SUGGESTIONS[categoryId]
+            || [...new Set(Object.values(BRAND_SUGGESTIONS).flat())];
+        elements.brandOptions.replaceChildren(
+            ...suggestions.map((brand) => {
+                const option = document.createElement('option');
+                option.value = brand;
+                return option;
+            })
+        );
+    }
+
+    function getSelectedCategoryLabel(categoryId) {
+        const selectedOption = [...elements.category.options]
+            .find((option) => option.value === categoryId);
+        return CATEGORY_FORM_COPY[categoryId]?.label
+            || selectedOption?.textContent?.trim()
+            || categoryId;
+    }
+
+    function getSpecificationContext() {
+        const categoryId = elements.category.value;
+        const subcategory = categoryId === 'phukien'
+            ? elements.subcategory.value
+            : '';
+        if (!categoryId) {
+            return {
+                key: '',
+                categoryId: '',
+                subcategory: '',
+                title: 'Thông số theo loại sản phẩm',
+                hint: 'Chọn danh mục để form hiển thị đúng các trường được lưu trong specifications.',
+                badge: 'Chưa chọn danh mục',
+                fields: [],
+                needsSubcategory: false
+            };
+        }
+
+        const categoryCopy = CATEGORY_FORM_COPY[categoryId];
+        const categoryLabel = getSelectedCategoryLabel(categoryId);
+        if (categoryId === 'phukien' && !subcategory) {
+            return {
+                key: `${categoryId}|`,
+                categoryId,
+                subcategory: '',
+                title: categoryCopy.title,
+                hint: categoryCopy.hint,
+                badge: categoryCopy.label,
+                fields: [],
+                needsSubcategory: true
+            };
+        }
+
+        let templateKey = PRODUCT_SPECIFICATION_CONFIG.categoryTemplateKeys[categoryId];
+        let detailLabel = categoryLabel;
+        if (categoryId === 'phukien') {
+            templateKey = subcategory === 'tai-nghe'
+                ? 'audio'
+                : PRODUCT_SPECIFICATION_CONFIG.accessoryTemplateKeys[subcategory];
+            detailLabel = PRODUCT_SPECIFICATION_CONFIG.accessorySubcategories
+                .find((item) => item.value === subcategory)?.label
+                || subcategory;
+        }
+
+        const template = PRODUCT_SPECIFICATION_CONFIG.templates[templateKey]
+            || PRODUCT_SPECIFICATION_CONFIG.fallbackTemplate;
+        const fields = template.filter(([key]) => key !== 'brand');
+
+        return {
+            key: `${categoryId}|${subcategory}`,
+            categoryId,
+            subcategory,
+            title: categoryId === 'phukien'
+                ? `Thông số ${detailLabel}`
+                : (categoryCopy?.title || `Thông số ${categoryLabel}`),
+            hint: categoryId === 'phukien'
+                ? `Các trường dưới đây được lưu vào specifications cho nhóm ${detailLabel.toLowerCase()}.`
+                : (categoryCopy?.hint || 'Nhập các thông số kỹ thuật phù hợp với danh mục này.'),
+            badge: detailLabel,
+            fields,
+            needsSubcategory: false
+        };
+    }
+
+    function getOriginalSpecificationContextKey() {
+        const originalSubcategory = state.originalCategoryId === 'phukien'
+            ? state.originalSubcategory
+            : '';
+        return state.originalCategoryId
+            ? `${state.originalCategoryId}|${originalSubcategory}`
+            : '';
+    }
+
+    function captureSpecificationDraft() {
+        if (!state.activeSpecificationContext) return;
+        const draft = {};
+        elements.specificationFields.querySelectorAll('[data-spec-key]').forEach((control) => {
+            draft[control.dataset.specKey] = control.value;
+        });
+        state.specificationDrafts.set(state.activeSpecificationContext, draft);
+    }
+
+    function createSpecificationField(key, label, value) {
+        const isLongField = LONG_SPECIFICATION_FIELDS.has(key);
+        const group = createElement('div', `form-group${isLongField ? ' full' : ''}`);
+        const controlId = `productSpec-${key.replace(/[^a-z0-9_-]/gi, '-')}`;
+        const fieldLabel = createElement('label', '', label);
+        fieldLabel.htmlFor = controlId;
+
+        const control = isLongField
+            ? document.createElement('textarea')
+            : document.createElement('input');
+        if (control instanceof HTMLInputElement) control.type = 'text';
+        if (control instanceof HTMLTextAreaElement) {
+            control.rows = 2;
+            control.className = 'specification-textarea';
+        }
+        control.id = controlId;
+        control.dataset.specKey = key;
+        control.maxLength = 1000;
+        control.placeholder = SPECIFICATION_PLACEHOLDERS[key]
+            || `Nhập ${label.toLowerCase()}`;
+        control.value = value === undefined || value === null ? '' : String(value);
+        control.disabled = state.saving || !state.initialized;
+
+        const helperId = `${controlId}-helper`;
+        const helper = createElement('span', 'field-helper', `Lưu vào products.specifications.${key}`);
+        helper.id = helperId;
+        control.setAttribute('aria-describedby', helperId);
+        group.append(fieldLabel, control, helper);
+        return group;
+    }
+
+    function renderSpecificationFields() {
+        const categoryId = elements.category.value;
+        const isAccessory = categoryId === 'phukien';
+        elements.subcategoryGroup.hidden = !isAccessory;
+        elements.subcategory.required = isAccessory;
+        if (!isAccessory) elements.subcategory.value = '';
+        updateBrandSuggestions(categoryId);
+
+        const context = getSpecificationContext();
+        state.activeSpecificationContext = context.key;
+        elements.specificationTitle.textContent = context.title;
+        elements.specificationHint.textContent = context.hint;
+        elements.specificationBadge.textContent = context.badge;
+        elements.specificationFields.replaceChildren();
+
+        if (!context.categoryId) {
+            elements.specificationFields.appendChild(createElement(
+                'p',
+                'dynamic-fields-empty',
+                'Chọn danh mục sản phẩm để bắt đầu nhập thông số.'
+            ));
+            return;
+        }
+        if (context.needsSubcategory) {
+            elements.specificationFields.appendChild(createElement(
+                'p',
+                'dynamic-fields-empty',
+                'Chọn loại phụ kiện để hiển thị đúng các trường thông số.'
+            ));
+            return;
+        }
+
+        const originalContextKey = getOriginalSpecificationContextKey();
+        const values = state.specificationDrafts.has(context.key)
+            ? state.specificationDrafts.get(context.key)
+            : (context.key === originalContextKey ? state.originalSpecifications : {});
+        context.fields.forEach(([key, label]) => {
+            elements.specificationFields.appendChild(
+                createSpecificationField(key, label, values[key])
+            );
+        });
+    }
+
+    function collectCurrentSpecifications() {
+        const context = getSpecificationContext();
+        const shouldPreserveOriginal = context.key === getOriginalSpecificationContextKey();
+        const specifications = shouldPreserveOriginal
+            ? { ...state.originalSpecifications }
+            : {};
+
+        elements.specificationFields.querySelectorAll('[data-spec-key]').forEach((control) => {
+            const key = control.dataset.specKey;
+            const value = control.value.trim();
+            if (value) {
+                specifications[key] = value;
+            } else {
+                delete specifications[key];
+            }
+        });
+        return specifications;
+    }
+
+    function haveEqualSpecifications(left, right) {
+        const normalize = (value) => Object.fromEntries(
+            Object.entries(value || {}).sort(([leftKey], [rightKey]) => (
+                leftKey.localeCompare(rightKey)
+            ))
+        );
+        return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
     }
 
     function showMessage(message, type = 'info') {
@@ -146,7 +480,7 @@
     async function loadProduct() {
         const { data: product, error } = await state.client
             .from('products')
-            .select('id, sku, name, description, price, original_price, discount_percent, category_id, image_urls, stock, status, updated_at')
+            .select('id, sku, name, description, short_description, price, original_price, discount_percent, category_id, brand, subcategory, specifications, source_url, specifications_updated_at, image_urls, stock, status, updated_at')
             .eq('id', state.productId)
             .single();
 
@@ -156,7 +490,19 @@
         elements.name.value = product.name || '';
         elements.sku.value = product.sku || '';
         elements.category.value = product.category_id || '';
+        elements.brand.value = product.brand || '';
+        elements.shortDescription.value = product.short_description || '';
         elements.description.value = product.description || '';
+        elements.sourceUrl.value = product.source_url || '';
+
+        state.originalCategoryId = product.category_id || '';
+        state.originalSubcategory = product.subcategory || '';
+        state.originalSpecifications = parseSpecificationObject(product.specifications);
+        state.originalSpecificationsUpdatedAt = product.specifications_updated_at || null;
+        state.specificationDrafts.clear();
+        ensureAccessorySubcategoryOption(state.originalSubcategory);
+        elements.subcategory.value = state.originalSubcategory;
+        renderSpecificationFields();
 
         const currentPrice = Number(product.price) || 0;
         const originalPrice = product.original_price === null || product.original_price === undefined
@@ -290,16 +636,29 @@
 
     function readAndValidateProduct() {
         const name = elements.name.value.trim();
-        const sku = elements.sku.value.trim();
+        const sku = elements.sku.value.trim().toUpperCase().replace(/\s+/g, '-');
         const categoryId = elements.category.value;
+        const brand = normalizeTaxonomySlug(elements.brand.value);
+        const subcategory = categoryId === 'phukien'
+            ? elements.subcategory.value
+            : null;
+        const shortDescription = elements.shortDescription.value.trim();
         const description = elements.description.value.trim();
+        const sourceUrlText = elements.sourceUrl.value.trim();
+        const sourceUrl = sourceUrlText ? getSafeImageUrl(sourceUrlText) : null;
         const regularPrice = Number(elements.price.value);
         const salePriceText = elements.salePrice.value.trim();
         const salePrice = salePriceText === '' ? null : Number(salePriceText);
         const stock = Number(elements.stock.value);
 
-        if (!name || !sku || !categoryId) {
-            throw new Error('Tên sản phẩm, SKU và danh mục là bắt buộc.');
+        if (!name || !sku || !categoryId || !brand) {
+            throw new Error('Tên sản phẩm, SKU, danh mục và thương hiệu là bắt buộc.');
+        }
+        if (categoryId === 'phukien' && !subcategory) {
+            throw new Error('Hãy chọn loại phụ kiện để lưu đúng thông số và bộ lọc.');
+        }
+        if (sourceUrlText && !sourceUrl) {
+            throw new Error('Trang thông tin tham khảo phải là URL HTTP hoặc HTTPS hợp lệ.');
         }
         if (!Number.isFinite(regularPrice) || regularPrice < 0) {
             throw new Error('Giá bán thông thường phải là số không âm.');
@@ -329,15 +688,29 @@
         const status = requestedStatus === 'hidden'
             ? 'hidden'
             : (stock === 0 ? 'out_of_stock' : 'active');
+        const specifications = collectCurrentSpecifications();
+        const specificationContextChanged = getSpecificationContext().key
+            !== getOriginalSpecificationContextKey();
+        const specificationsChanged = specificationContextChanged
+            || !haveEqualSpecifications(specifications, state.originalSpecifications);
+        const specificationsUpdatedAt = specificationsChanged
+            ? new Date().toISOString()
+            : state.originalSpecificationsUpdatedAt;
 
         return {
             sku,
             name,
+            brand,
+            subcategory,
+            short_description: shortDescription || null,
             description: description || null,
             price: effectivePrice,
             original_price: originalPrice,
             discount_percent: discountPercent,
             category_id: categoryId,
+            specifications,
+            source_url: sourceUrl,
+            specifications_updated_at: specificationsUpdatedAt,
             stock,
             status
         };
@@ -593,6 +966,28 @@
 
         elements.stock.addEventListener('input', syncStatusWithStock);
         elements.status.addEventListener('change', syncStatusWithStock);
+        elements.category.addEventListener('change', () => {
+            captureSpecificationDraft();
+            renderSpecificationFields();
+        });
+        elements.subcategory.addEventListener('change', () => {
+            captureSpecificationDraft();
+            renderSpecificationFields();
+        });
+        elements.brand.addEventListener('blur', () => {
+            const normalizedBrand = normalizeTaxonomySlug(elements.brand.value);
+            if (normalizedBrand !== elements.brand.value) {
+                elements.brand.value = normalizedBrand;
+                if (state.initialized) state.dirty = true;
+            }
+        });
+        elements.sku.addEventListener('blur', () => {
+            const normalizedSku = elements.sku.value.trim().toUpperCase().replace(/\s+/g, '-');
+            if (normalizedSku !== elements.sku.value) {
+                elements.sku.value = normalizedSku;
+                if (state.initialized) state.dirty = true;
+            }
+        });
 
         document.querySelectorAll('.product-cancel-link').forEach((link) => {
             link.addEventListener('click', (event) => {
@@ -626,7 +1021,17 @@
             name: document.getElementById('productName'),
             sku: document.getElementById('productSku'),
             category: document.getElementById('productCategory'),
+            brand: document.getElementById('productBrand'),
+            brandOptions: document.getElementById('productBrandOptions'),
+            subcategoryGroup: document.getElementById('productSubcategoryGroup'),
+            subcategory: document.getElementById('productSubcategory'),
+            shortDescription: document.getElementById('productShortDescription'),
             description: document.getElementById('productDescription'),
+            sourceUrl: document.getElementById('productSourceUrl'),
+            specificationTitle: document.getElementById('productSpecificationTitle'),
+            specificationHint: document.getElementById('productSpecificationHint'),
+            specificationBadge: document.getElementById('productSpecificationBadge'),
+            specificationFields: document.getElementById('productSpecificationFields'),
             price: document.getElementById('productPrice'),
             salePrice: document.getElementById('productSalePrice'),
             stock: document.getElementById('productStock'),
@@ -644,8 +1049,17 @@
             console.error('Trang sản phẩm thiếu thành phần form bắt buộc.');
             return;
         }
+        if (
+            !PRODUCT_SPECIFICATION_CONFIG?.templates
+            || !PRODUCT_SPECIFICATION_CONFIG?.accessorySubcategories
+        ) {
+            console.error('Không tìm thấy cấu hình thông số sản phẩm dùng chung.');
+            showMessage('Không thể tải cấu hình thông số sản phẩm. Hãy kiểm tra file main.js.', 'error');
+            return;
+        }
 
         state.client = window.supabaseClient;
+        populateAccessorySubcategories();
         bindEvents();
         setControlsDisabled(true);
         renderImagePreviews();
@@ -671,7 +1085,11 @@
             showMessage(state.productId ? 'Đang tải sản phẩm từ database...' : 'Đang kiểm tra quyền quản trị...', 'info');
             await requireAdmin();
             await loadCategories();
-            if (state.productId) await loadProduct();
+            if (state.productId) {
+                await loadProduct();
+            } else {
+                renderSpecificationFields();
+            }
 
             state.initialized = true;
             state.dirty = false;

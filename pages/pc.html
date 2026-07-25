@@ -14,92 +14,128 @@
 
     <main class="category-main">
         <section class="category-hero pc-hero">
-    <div class="hero-overlay">
-        <h1>PC Gaming</h1>
+            <div class="hero-overlay">
+                <h1>PC Gaming</h1>
 
-        <p>
-            Trải nghiệm các bộ PC Gaming cấu hình mạnh,
-            tối ưu hiệu suất cho học tập, làm việc và giải trí.
-        </p>
+                <p>
+                    Trải nghiệm các bộ PC Gaming cấu hình mạnh,
+                    tối ưu hiệu suất cho học tập, làm việc và giải trí.
+                </p>
 
-        <div class="hero-benefits">
+                <div class="hero-benefits">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
 
-    <div class="benefit-item">
-        <div class="benefit-icon">
-            <i class="fa-solid fa-bolt"></i>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Hiệu năng mạnh mẽ</span>
+                            <span class="benefit-desc">Xử lý mọi tác vụ</span>
+                        </div>
+                    </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Hiệu năng mạnh mẽ</span>
-            <span class="benefit-desc">Xử lý mọi tác vụ</span>
-        </div>
-    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
 
-    <div class="benefit-item">
-        <div class="benefit-icon">
-            <i class="fa-solid fa-shield-halved"></i>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Linh kiện chính hãng</span>
+                            <span class="benefit-desc">Bảo hành uy tín</span>
+                        </div>
+                    </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Linh kiện chính hãng</span>
-            <span class="benefit-desc">Bảo hành uy tín</span>
-        </div>
-    </div>
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </div>
 
-    <div class="benefit-item">
-        <div class="benefit-icon">
-            <i class="fa-solid fa-gear"></i>
-        </div>
+                        <div class="benefit-content">
+                            <span class="benefit-title">Tùy chọn đa dạng</span>
+                            <span class="benefit-desc">Build theo nhu cầu</span>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="benefit-content">
-            <span class="benefit-title">Tùy chọn đa dạng</span>
-            <span class="benefit-desc">Build theo nhu cầu</span>
-        </div>
-    </div>
+                <div
+                    class="hero-actions"
+                    role="group"
+                    aria-label="Lọc nhanh PC theo mức giá"
+                >
+                    <button
+                        class="hero-action hero-action--primary is-active"
+                        type="button"
+                        data-pc-price-filter="all"
+                        aria-pressed="true"
+                    >
+                        Xem tất cả PC
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </button>
 
-</div>
-</section>
-</section>
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-pc-price-filter="under-20"
+                        aria-pressed="false"
+                    >
+                        Dưới 20 triệu
+                        <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                    </button>
 
-
-        <section class="category-toolbar">
-            <div class="category-sort">
-                <select>
-                    <option>Sắp xếp mặc định</option>
-                    <option>Giá tăng dần</option>
-                    <option>Giá giảm dần</option>
-                    <option>Cấu hình mạnh nhất</option>
-                </select>
+                    <button
+                        class="hero-action"
+                        type="button"
+                        data-pc-price-filter="from-20"
+                        aria-pressed="false"
+                    >
+                        Từ 20 triệu
+                        <i class="fa-solid fa-coins" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
+
         <section class="category-layout">
-            <aside class="category-filter">
-                <h3>Bộ lọc</h3>
+            <div class="category-controls">
+                <aside class="category-filter">
+                    <h3>Bộ lọc</h3>
 
-                <div class="filter-group">
-                    <h4>CPU</h4>
-                    <label><input type="checkbox"> Intel Core i5</label>
-                    <label><input type="checkbox"> Intel Core i7</label>
-                    <label><input type="checkbox"> AMD Ryzen 5</label>
-                    <label><input type="checkbox"> AMD Ryzen 7</label>
-                </div>
+                    <div class="filter-group">
+                        <h4>CPU</h4>
+                        <label><input type="checkbox"> Intel Core i5</label>
+                        <label><input type="checkbox"> Intel Core i7</label>
+                        <label><input type="checkbox"> AMD Ryzen 5</label>
+                        <label><input type="checkbox"> AMD Ryzen 7</label>
+                    </div>
 
-                <div class="filter-group">
-                    <h4>Card đồ họa</h4>
-                    <label><input type="checkbox"> GTX Series</label>
-                    <label><input type="checkbox"> RTX 3060</label>
-                    <label><input type="checkbox"> RTX 4060</label>
-                    <label><input type="checkbox"> RTX 4070</label>
-                </div>
+                    <div class="filter-group">
+                        <h4>Card đồ họa</h4>
+                        <label><input type="checkbox"> GTX Series</label>
+                        <label><input type="checkbox"> RTX 3060</label>
+                        <label><input type="checkbox"> RTX 4060</label>
+                        <label><input type="checkbox"> RTX 4070</label>
+                    </div>
 
-                <div class="filter-group">
-                    <h4>Mức giá</h4>
-                    <label><input type="checkbox"> Dưới 20 triệu</label>
-                    <label><input type="checkbox"> 20 - 35 triệu</label>
-                    <label><input type="checkbox"> Trên 35 triệu</label>
+                    <div class="filter-group">
+                        <h4>Mức giá</h4>
+                        <label><input type="checkbox"> Dưới 20 triệu</label>
+                        <label><input type="checkbox"> 20 - 35 triệu</label>
+                        <label><input type="checkbox"> Trên 35 triệu</label>
+                    </div>
+                </aside>
+
+                <div class="category-toolbar">
+                    <div class="category-sort">
+                        <select aria-label="Sắp xếp sản phẩm">
+                            <option>Sắp xếp mặc định</option>
+                            <option>Giá tăng dần</option>
+                            <option>Giá giảm dần</option>
+                            <option>Cấu hình mạnh nhất</option>
+                        </select>
+                    </div>
                 </div>
-            </aside>
+            </div>
 
             <div class="product-grid">
                 <div class="products-empty-state">Đang tải sản phẩm...</div>

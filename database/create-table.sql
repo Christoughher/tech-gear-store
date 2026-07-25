@@ -14,6 +14,7 @@ DROP FUNCTION IF EXISTS public.create_product_review(UUID, INT, TEXT);
 DROP FUNCTION IF EXISTS public.get_admin_category_sales();
 DROP FUNCTION IF EXISTS public.get_admin_monthly_metrics(INTEGER);
 DROP FUNCTION IF EXISTS public.get_admin_dashboard_kpis();
+DROP FUNCTION IF EXISTS public.advance_order_status(UUID, TEXT);
 DROP TABLE IF EXISTS public.product_reviews CASCADE;
 DROP TABLE IF EXISTS public.order_items CASCADE;
 DROP TABLE IF EXISTS public.orders CASCADE;
@@ -85,7 +86,7 @@ CREATE TABLE public.products (
   brand VARCHAR,
   subcategory VARCHAR,
   image_urls TEXT[] DEFAULT '{}',
-  stock INT DEFAULT 0,
+  stock INT NOT NULL DEFAULT 0,
   status VARCHAR NOT NULL DEFAULT 'active',
   specifications JSONB NOT NULL DEFAULT '{}'::jsonb,
   source_url TEXT,
@@ -129,7 +130,7 @@ CREATE TABLE public.carts (
 
 CREATE TABLE public.cart_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  cart_id UUID NOT NULL REFERENCES public.carts(id) ON DELETE CASCADE,
+  cart_id UUID NOT NULL REFERENCES public.carts(id) ON DELETE RESTRICT,
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE RESTRICT,
   quantity INT NOT NULL DEFAULT 1,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -156,6 +157,9 @@ CREATE TABLE public.orders (
   total_price DECIMAL(12,2) NOT NULL,
   status VARCHAR NOT NULL DEFAULT 'pending',
   note TEXT,
+  inventory_deducted_at TIMESTAMP WITH TIME ZONE,
+  inventory_restored_at TIMESTAMP WITH TIME ZONE,
+  cancelled_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
 
@@ -235,6 +239,8 @@ CREATE INDEX idx_orders_user_id ON public.orders(user_id);
 -- UNIQUE(cart_id) đã tự tạo index cho quan hệ carts 1 - 0..1 orders.
 CREATE INDEX idx_orders_status ON public.orders(status);
 CREATE INDEX idx_orders_created_at ON public.orders(created_at DESC);
+CREATE INDEX idx_orders_user_created_at
+ON public.orders(user_id, created_at DESC, id DESC);
 
 CREATE INDEX idx_order_items_order_id ON public.order_items(order_id);
 CREATE INDEX idx_order_items_product_id ON public.order_items(product_id);
@@ -274,6 +280,64 @@ FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER set_cart_items_updated_at
 BEFORE UPDATE ON public.cart_items
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- Mọi thay đổi cart_items phải giữ khóa trên cart cha. Checkout cũng khóa cùng
+-- dòng cart trước tiên, nhờ đó nội dung giỏ không thể đổi giữa lúc tạo snapshot.
+CREATE OR REPLACE FUNCTION public.guard_active_cart_item_write()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+DECLARE
+  target_cart_id UUID;
+  target_cart_status VARCHAR;
+BEGIN
+  IF TG_OP = 'UPDATE' AND NEW.cart_id IS DISTINCT FROM OLD.cart_id THEN
+    RAISE EXCEPTION 'Moving an item to another cart is not allowed';
+  END IF;
+
+  target_cart_id := CASE
+    WHEN TG_OP = 'DELETE' THEN OLD.cart_id
+    ELSE NEW.cart_id
+  END;
+
+  -- Backend service_role được dùng cho seed/cleanup có kiểm soát.
+  IF auth.role() = 'service_role' THEN
+    IF TG_OP = 'DELETE' THEN
+      RETURN OLD;
+    END IF;
+
+    RETURN NEW;
+  END IF;
+
+  SELECT status
+  INTO target_cart_status
+  FROM public.carts
+  WHERE id = target_cart_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cart % does not exist', target_cart_id;
+  END IF;
+
+  IF target_cart_status <> 'active' THEN
+    RAISE EXCEPTION 'Only an active cart can be modified';
+  END IF;
+
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.guard_active_cart_item_write() FROM PUBLIC;
+
+CREATE TRIGGER guard_active_cart_item_write
+BEFORE INSERT OR UPDATE OR DELETE ON public.cart_items
+FOR EACH ROW EXECUTE FUNCTION public.guard_active_cart_item_write();
 
 CREATE TRIGGER set_orders_updated_at
 BEFORE UPDATE ON public.orders
@@ -345,6 +409,34 @@ CREATE TRIGGER mark_cart_checked_out_after_order
 AFTER INSERT ON public.orders
 FOR EACH ROW EXECUTE FUNCTION public.mark_cart_checked_out();
 
+-- Lớp tương thích cho mọi phiên checkout: chỉ order được tạo dưới JWT của
+-- chính người mua mới được đánh dấu là đã trừ kho. Seed service_role không có
+-- auth.uid() người mua nên giữ NULL và không thể hoàn kho nhầm.
+CREATE OR REPLACE FUNCTION public.mark_authenticated_checkout_inventory()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NEW.inventory_deducted_at IS NULL
+      AND auth.uid() IS NOT NULL
+      AND NEW.user_id = auth.uid() THEN
+    NEW.inventory_deducted_at := statement_timestamp();
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.mark_authenticated_checkout_inventory()
+FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER mark_authenticated_checkout_inventory
+BEFORE INSERT ON public.orders
+FOR EACH ROW
+EXECUTE FUNCTION public.mark_authenticated_checkout_inventory();
+
 -- Checkout nguyên tử: client không được tự ghi giá vào orders/order_items.
 DROP FUNCTION IF EXISTS public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT);
 DROP FUNCTION IF EXISTS public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR);
@@ -377,14 +469,6 @@ BEGIN
     RAISE EXCEPTION 'Authentication required';
   END IF;
 
-  IF NULLIF(btrim(p_shipping_address), '') IS NULL THEN
-    RAISE EXCEPTION 'Shipping address is required';
-  END IF;
-
-  IF normalized_shipping_method NOT IN ('Tiêu chuẩn', 'Hỏa tốc') THEN
-    RAISE EXCEPTION 'Shipping method must be Tiêu chuẩn or Hỏa tốc';
-  END IF;
-
   -- Khóa cart để hai request đồng thời không thể tạo hai order.
   SELECT status
   INTO current_cart_status
@@ -406,6 +490,28 @@ BEGIN
 
   IF existing_order_id IS NOT NULL THEN
     RETURN existing_order_id;
+  END IF;
+
+  IF char_length(COALESCE(btrim(p_receiver_name), '')) NOT BETWEEN 2 AND 120 THEN
+    RAISE EXCEPTION 'Receiver name is invalid';
+  END IF;
+
+  IF char_length(COALESCE(btrim(p_receiver_phone), '')) > 30
+      OR char_length(regexp_replace(COALESCE(p_receiver_phone, ''), '\D', '', 'g'))
+      NOT BETWEEN 9 AND 15 THEN
+    RAISE EXCEPTION 'Receiver phone is invalid';
+  END IF;
+
+  IF char_length(COALESCE(btrim(p_shipping_address), '')) NOT BETWEEN 5 AND 500 THEN
+    RAISE EXCEPTION 'Shipping address is invalid';
+  END IF;
+
+  IF char_length(COALESCE(btrim(p_note), '')) > 1000 THEN
+    RAISE EXCEPTION 'Order note is too long';
+  END IF;
+
+  IF normalized_shipping_method NOT IN ('Tiêu chuẩn', 'Hỏa tốc') THEN
+    RAISE EXCEPTION 'Shipping method must be Tiêu chuẩn or Hỏa tốc';
   END IF;
 
   IF current_cart_status <> 'active' THEN
@@ -433,7 +539,11 @@ BEGIN
     FROM public.cart_items AS item
     JOIN public.products AS product ON product.id = item.product_id
     WHERE item.cart_id = p_cart_id
-      AND (product.status <> 'active' OR product.stock < item.quantity)
+      AND (
+        product.status <> 'active'
+        OR product.stock IS NULL
+        OR product.stock < item.quantity
+      )
   ) THEN
     RAISE EXCEPTION 'Cart contains an unavailable or insufficient-stock product';
   END IF;
@@ -444,6 +554,10 @@ BEGIN
   JOIN public.products AS product ON product.id = item.product_id
   WHERE item.cart_id = p_cart_id;
 
+  IF calculated_total IS NULL THEN
+    RAISE EXCEPTION 'Cannot checkout an empty cart';
+  END IF;
+
   INSERT INTO public.orders (
     user_id,
     cart_id,
@@ -453,7 +567,8 @@ BEGIN
     shipping_method,
     total_price,
     status,
-    note
+    note,
+    inventory_deducted_at
   )
   VALUES (
     current_user_id,
@@ -464,7 +579,8 @@ BEGIN
     normalized_shipping_method,
     calculated_total,
     'pending',
-    NULLIF(btrim(p_note), '')
+    NULLIF(btrim(p_note), ''),
+    statement_timestamp()
   )
   RETURNING id INTO new_order_id;
 
@@ -505,6 +621,181 @@ $$;
 REVOKE ALL ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR) FROM anon;
 GRANT EXECUTE ON FUNCTION public.checkout_cart(UUID, VARCHAR, VARCHAR, TEXT, TEXT, VARCHAR) TO authenticated;
+
+-- Mọi chuyển trạng thái đi qua state machine này. Nhánh pending -> cancelled
+-- hoàn tồn kho từ order_items và ghi dấu để không thể hoàn hai lần.
+CREATE OR REPLACE FUNCTION public.guard_order_status_and_restore_inventory()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  expected_product_count INT := 0;
+  restored_product_count INT := 0;
+BEGIN
+  IF NEW.status IS NOT DISTINCT FROM OLD.status THEN
+    RETURN NEW;
+  END IF;
+
+  IF OLD.status = 'pending' AND NEW.status = 'cancelled' THEN
+    IF OLD.inventory_deducted_at IS NULL THEN
+      RAISE EXCEPTION 'Cannot cancel: inventory deduction for this order cannot be verified';
+    END IF;
+
+    IF OLD.inventory_restored_at IS NOT NULL THEN
+      RAISE EXCEPTION 'Order inventory was already restored';
+    END IF;
+
+    SELECT COUNT(DISTINCT item.product_id)::INT
+    INTO expected_product_count
+    FROM public.order_items AS item
+    WHERE item.order_id = OLD.id;
+
+    IF expected_product_count = 0 THEN
+      RAISE EXCEPTION 'Order has no inventory snapshot';
+    END IF;
+
+    -- Cùng thứ tự khóa với checkout để tránh oversell/deadlock.
+    PERFORM product.id
+    FROM public.products AS product
+    JOIN (
+      SELECT DISTINCT item.product_id
+      FROM public.order_items AS item
+      WHERE item.order_id = OLD.id
+    ) AS ordered_product ON ordered_product.product_id = product.id
+    ORDER BY product.id
+    FOR UPDATE OF product;
+
+    UPDATE public.products AS product
+    SET
+      stock = product.stock + restored.quantity,
+      status = CASE
+        WHEN product.status = 'out_of_stock'
+          AND product.stock + restored.quantity > 0
+        THEN 'active'
+        ELSE product.status
+      END
+    FROM (
+      SELECT
+        item.product_id,
+        SUM(item.quantity)::INT AS quantity
+      FROM public.order_items AS item
+      WHERE item.order_id = OLD.id
+      GROUP BY item.product_id
+    ) AS restored
+    WHERE product.id = restored.product_id;
+
+    GET DIAGNOSTICS restored_product_count = ROW_COUNT;
+
+    IF restored_product_count <> expected_product_count THEN
+      RAISE EXCEPTION
+        'Inventory restore mismatch: expected %, restored %',
+        expected_product_count,
+        restored_product_count;
+    END IF;
+
+    NEW.cancelled_at := COALESCE(NEW.cancelled_at, statement_timestamp());
+    NEW.inventory_restored_at := statement_timestamp();
+    RETURN NEW;
+  END IF;
+
+  IF OLD.status = 'pending' AND NEW.status = 'processing' THEN
+    RETURN NEW;
+  END IF;
+
+  IF OLD.status = 'processing' AND NEW.status = 'completed' THEN
+    RETURN NEW;
+  END IF;
+
+  RAISE EXCEPTION
+    'Illegal order status transition: % -> %',
+    OLD.status,
+    NEW.status;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.guard_order_status_and_restore_inventory()
+FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER guard_order_status_and_restore_inventory
+BEFORE UPDATE OF status ON public.orders
+FOR EACH ROW
+EXECUTE FUNCTION public.guard_order_status_and_restore_inventory();
+
+-- Khách hàng chỉ có thể hủy order của chính mình khi còn pending. Trigger phía
+-- trên chịu trách nhiệm hoàn kho và khóa state transition trong cùng transaction.
+DROP FUNCTION IF EXISTS public.cancel_pending_order(UUID);
+
+CREATE OR REPLACE FUNCTION public.cancel_pending_order(p_order_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  current_user_id UUID := auth.uid();
+  current_order_status VARCHAR;
+  deducted_at TIMESTAMP WITH TIME ZONE;
+  restored_units BIGINT := 0;
+BEGIN
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  IF p_order_id IS NULL THEN
+    RAISE EXCEPTION 'Order id is required';
+  END IF;
+
+  SELECT status, inventory_deducted_at
+  INTO current_order_status, deducted_at
+  FROM public.orders
+  WHERE id = p_order_id
+    AND user_id = current_user_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Order does not exist or does not belong to current user';
+  END IF;
+
+  IF current_order_status = 'cancelled' THEN
+    RETURN jsonb_build_object(
+      'order_id', p_order_id,
+      'status', 'cancelled',
+      'restored_units', 0,
+      'already_cancelled', true
+    );
+  END IF;
+
+  IF current_order_status <> 'pending' THEN
+    RAISE EXCEPTION 'Only a pending order can be cancelled';
+  END IF;
+
+  IF deducted_at IS NULL THEN
+    RAISE EXCEPTION 'Cannot cancel: inventory deduction for this order cannot be verified';
+  END IF;
+
+  SELECT COALESCE(SUM(item.quantity), 0)::BIGINT
+  INTO restored_units
+  FROM public.order_items AS item
+  WHERE item.order_id = p_order_id;
+
+  UPDATE public.orders
+  SET status = 'cancelled'
+  WHERE id = p_order_id;
+
+  RETURN jsonb_build_object(
+    'order_id', p_order_id,
+    'status', 'cancelled',
+    'restored_units', restored_units,
+    'already_cancelled', false
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.cancel_pending_order(UUID)
+FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.cancel_pending_order(UUID) TO authenticated;
 
 -- =========================================================
 -- 12. AUTO CREATE PROFILE WHEN SIGN UP
@@ -565,7 +856,82 @@ AS $$
 $$;
 
 -- =========================================================
--- 13A. ADMIN DASHBOARD AGGREGATES
+-- 13A. ADMIN ORDER STATUS TRANSITION
+-- Frontend admin không được UPDATE status trực tiếp.
+-- =========================================================
+
+CREATE OR REPLACE FUNCTION public.advance_order_status(
+  p_order_id UUID,
+  p_expected_status TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  current_order_status VARCHAR;
+  next_order_status VARCHAR;
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION USING
+      ERRCODE = '42501',
+      MESSAGE = 'Admin role required';
+  END IF;
+
+  IF p_order_id IS NULL THEN
+    RAISE EXCEPTION 'Order id is required';
+  END IF;
+
+  SELECT status
+  INTO current_order_status
+  FROM public.orders
+  WHERE id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Order does not exist';
+  END IF;
+
+  IF p_expected_status IS NULL
+      OR current_order_status IS DISTINCT FROM p_expected_status THEN
+    RAISE EXCEPTION
+      'Order status changed: expected %, current %',
+      p_expected_status,
+      current_order_status;
+  END IF;
+
+  next_order_status := CASE current_order_status
+    WHEN 'pending' THEN 'processing'
+    WHEN 'processing' THEN 'completed'
+    ELSE NULL
+  END;
+
+  IF next_order_status IS NULL THEN
+    RAISE EXCEPTION
+      'Order cannot be advanced from status %',
+      current_order_status;
+  END IF;
+
+  UPDATE public.orders
+  SET status = next_order_status
+  WHERE id = p_order_id;
+
+  RETURN jsonb_build_object(
+    'order_id', p_order_id,
+    'previous_status', current_order_status,
+    'status', next_order_status
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.advance_order_status(UUID, TEXT)
+FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.advance_order_status(UUID, TEXT)
+TO authenticated;
+
+-- =========================================================
+-- 13B. ADMIN DASHBOARD AGGREGATES
 -- Ngưỡng sắp hết hàng: stock từ 1 đến 50.
 -- Chỉ admin được gọi; tính trong database để không bị giới hạn 1.000 dòng.
 -- =========================================================
@@ -875,12 +1241,6 @@ WITH CHECK (
   OR public.is_admin()
 );
 
-CREATE POLICY "Users can delete own open carts or admin can delete carts"
-ON public.carts
-FOR DELETE
-TO authenticated
-USING ((user_id = auth.uid() AND status <> 'checked_out') OR public.is_admin());
-
 -- =========================================================
 -- 19. RLS POLICIES - CART ITEMS
 -- =========================================================
@@ -1128,9 +1488,10 @@ GRANT EXECUTE ON FUNCTION public.create_product_review(UUID, INT, TEXT) TO authe
 REVOKE ALL ON public.carts, public.cart_items, public.orders, public.order_items FROM anon;
 REVOKE ALL ON public.carts, public.cart_items, public.orders, public.order_items FROM authenticated;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.carts, public.cart_items TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.carts TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.cart_items TO authenticated;
 GRANT SELECT ON public.orders, public.order_items TO authenticated;
-GRANT UPDATE (status, note) ON public.orders TO authenticated;
+GRANT UPDATE (note) ON public.orders TO authenticated;
 
 REVOKE ALL ON public.product_reviews FROM anon, authenticated;
 

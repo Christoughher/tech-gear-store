@@ -121,7 +121,9 @@ function renderCart() {
 
 function updateCartSummary() {
     const subtotal = window.shopCart.getTotal();
-    const shipping = subtotal === 0 || subtotal > 1000000 ? 0 : 30000;
+    // checkout_cart hiện lưu total_price bằng tổng giá sản phẩm.
+    // Giữ phí vận chuyển bằng 0 để số tiền trên UI khớp tuyệt đối với database.
+    const shipping = 0;
     const total = subtotal + shipping;
     const cartItems = window.shopCart.getCart();
     const canCheckout = cartItems.length > 0
@@ -177,6 +179,46 @@ function closeCheckoutModal() {
     form?.reset();
 }
 
+function setCheckoutSubmitting(form, isSubmitting) {
+    if (!form) return;
+
+    form.querySelectorAll('input, textarea, button').forEach(control => {
+        control.disabled = isSubmitting;
+    });
+
+    const checkoutButton = document.getElementById('checkout-btn');
+    if (isSubmitting) {
+        setCartControlsDisabled(true);
+        if (checkoutButton) {
+            checkoutButton.disabled = true;
+        }
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.innerHTML = isSubmitting
+            ? '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo đơn...'
+            : 'Xác nhận';
+    }
+
+    const modalCloseButton = document.getElementById('checkout-modal-close');
+    if (modalCloseButton) {
+        modalCloseButton.disabled = isSubmitting;
+    }
+}
+
+function showCheckoutSuccess(order) {
+    const shortOrderId = String(order?.id || '').slice(0, 8).toUpperCase();
+    const totalPrice = formatCartCurrency(order?.total_price);
+    const message = `Đặt hàng thành công. Mã đơn #${shortOrderId} — Tổng tiền ${totalPrice}.`;
+
+    showCartEmptyState(message, 'Xem đơn hàng', '/pages/profile.html#orders');
+
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, 'success', 'Đặt hàng thành công');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('cart-items-container');
     const checkoutButton = document.getElementById('checkout-btn');
@@ -184,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeButton = document.getElementById('checkout-modal-close');
     const cancelButton = document.getElementById('checkout-cancel-btn');
     const form = document.getElementById('checkout-form');
+    let checkoutInProgress = false;
 
     renderCart();
     await window.shopCart.ready;
@@ -226,20 +269,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelButton?.addEventListener('click', closeCheckoutModal);
 
     modal?.addEventListener('click', event => {
-        if (event.target === modal) {
+        if (!checkoutInProgress && event.target === modal) {
             closeCheckoutModal();
         }
     });
 
     document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && modal && modal.hidden === false) {
+        if (!checkoutInProgress && event.key === 'Escape' && modal && modal.hidden === false) {
             closeCheckoutModal();
         }
     });
 
-    form?.addEventListener('submit', event => {
+    form?.addEventListener('submit', async event => {
         event.preventDefault();
-        alert('Bạn đã đặt hàng thành công !');
-        closeCheckoutModal();
+
+        if (checkoutInProgress || !form.reportValidity()) {
+            return;
+        }
+
+        const formData = new FormData(form);
+        checkoutInProgress = true;
+        setCheckoutSubmitting(form, true);
+
+        try {
+            const order = await window.shopCart.checkout({
+                receiverName: formData.get('fullName'),
+                receiverPhone: formData.get('phone'),
+                shippingAddress: formData.get('address'),
+                note: formData.get('note'),
+                shippingMethod: formData.get('deliveryMethod')
+            });
+
+            closeCheckoutModal();
+            renderCart();
+            showCheckoutSuccess(order);
+        } catch (error) {
+            console.error('Không thể tạo đơn hàng:', error);
+
+            if (
+                error?.code === 'CHECKOUT_ITEM_UNAVAILABLE'
+                || /hết hàng|đủ số lượng/i.test(error?.message || '')
+            ) {
+                await window.shopCart.refresh().catch(refreshError => {
+                    console.error('Không thể tải lại giỏ hàng sau lỗi checkout:', refreshError);
+                });
+            }
+
+            // Tạo lại controls để khôi phục đúng trạng thái disabled theo stock hiện tại.
+            renderCart();
+
+            const knownOrderId = String(error?.orderId || '').slice(0, 8).toUpperCase();
+            const message = knownOrderId
+                ? `${error.message} Mã đơn: #${knownOrderId}.`
+                : (error.message || 'Không thể tạo đơn hàng. Vui lòng thử lại.');
+
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, 'error', 'Không thể tạo đơn hàng');
+            } else {
+                alert(message);
+            }
+        } finally {
+            checkoutInProgress = false;
+            setCheckoutSubmitting(form, false);
+        }
     });
 });

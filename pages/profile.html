@@ -7,6 +7,7 @@
     
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/index.css">
+    <link rel="stylesheet" href="../assets/css/profile-orders.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -253,36 +254,123 @@
             </div>
 
             <div class="profile-main-content">
-                <h2>Thông Tin Tài Khoản</h2>
-                
-                <div id="profile-alert" class="alert-message"></div>
-
-                <form id="form-customer-profile" onsubmit="event.preventDefault();">
-                    
-                    <div class="form-profile-group">
-                        <label for="profile-email">Địa chỉ Email</label>
-                        <input type="email" id="profile-email" disabled>
-                    </div>
-
-                    <div class="form-profile-group">
-                        <label for="profile-display-name">Tên hiển thị</label>
-                        <input type="text" id="profile-display-name" placeholder="Nhập tên hiển thị mới của bạn" required>
-                    </div>
-
-                    <div class="form-profile-group">
-                        <label for="profile-phone">Số điện thoại</label>
-                        <input type="text" id="profile-phone" placeholder="Nhập số điện thoại liên hệ">
-                    </div>
-
-                    <div class="form-profile-group">
-                        <label for="profile-address">Địa chỉ nhận hàng</label>
-                        <textarea id="profile-address" placeholder="Nhập địa chỉ giao nhận hàng chi tiết của bạn"></textarea>
-                    </div>
-
-                    <button type="submit" id="btn-save-profile" class="btn-update-profile">
-                        <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                <div class="profile-section-tabs" role="tablist" aria-label="Khu vực hồ sơ">
+                    <button
+                        id="profile-account-tab"
+                        class="profile-section-tab is-active"
+                        type="button"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="profile-account-panel"
+                        data-profile-tab="account"
+                    >
+                        <i class="fa-solid fa-user"></i>
+                        Thông tin tài khoản
                     </button>
-                </form>
+                    <button
+                        id="profile-orders-tab"
+                        class="profile-section-tab"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="profile-orders-panel"
+                        data-profile-tab="orders"
+                    >
+                        <i class="fa-solid fa-box"></i>
+                        Đơn hàng đã đặt
+                    </button>
+                </div>
+
+                <section
+                    id="profile-account-panel"
+                    class="profile-tab-panel"
+                    role="tabpanel"
+                    aria-labelledby="profile-account-tab"
+                    data-profile-panel="account"
+                >
+                    <h2>Thông Tin Tài Khoản</h2>
+
+                    <div id="profile-alert" class="alert-message"></div>
+
+                    <form id="form-customer-profile" onsubmit="event.preventDefault();">
+
+                        <div class="form-profile-group">
+                            <label for="profile-email">Địa chỉ Email</label>
+                            <input type="email" id="profile-email" disabled>
+                        </div>
+
+                        <div class="form-profile-group">
+                            <label for="profile-display-name">Tên hiển thị</label>
+                            <input type="text" id="profile-display-name" placeholder="Nhập tên hiển thị mới của bạn" required>
+                        </div>
+
+                        <div class="form-profile-group">
+                            <label for="profile-phone">Số điện thoại</label>
+                            <input type="text" id="profile-phone" placeholder="Nhập số điện thoại liên hệ">
+                        </div>
+
+                        <div class="form-profile-group">
+                            <label for="profile-address">Địa chỉ nhận hàng</label>
+                            <textarea id="profile-address" placeholder="Nhập địa chỉ giao nhận hàng chi tiết của bạn"></textarea>
+                        </div>
+
+                        <button type="submit" id="btn-save-profile" class="btn-update-profile">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                        </button>
+                    </form>
+                </section>
+
+                <section
+                    id="profile-orders-panel"
+                    class="profile-tab-panel"
+                    role="tabpanel"
+                    aria-labelledby="profile-orders-tab"
+                    data-profile-panel="orders"
+                    hidden
+                >
+                    <div class="profile-orders-heading">
+                        <div>
+                            <h2>Đơn Hàng Đã Đặt</h2>
+                            <p>Theo dõi trạng thái, xem chi tiết và hủy đơn còn chờ xác nhận.</p>
+                        </div>
+                        <button id="profile-orders-refresh" class="orders-refresh-btn" type="button">
+                            <i class="fa-solid fa-rotate"></i>
+                            Làm mới
+                        </button>
+                    </div>
+
+                    <div id="profile-orders-alert" class="orders-alert" role="status" hidden></div>
+
+                    <div class="profile-orders-toolbar">
+                        <label for="profile-orders-status">Trạng thái</label>
+                        <select id="profile-orders-status">
+                            <option value="">Tất cả đơn hàng</option>
+                            <option value="pending">Chờ xác nhận</option>
+                            <option value="processing">Đang xử lý</option>
+                            <option value="completed">Hoàn thành</option>
+                            <option value="cancelled">Đã hủy</option>
+                        </select>
+                        <span id="profile-orders-count" class="profile-orders-count">Đang tải...</span>
+                    </div>
+
+                    <div
+                        id="profile-orders-list"
+                        class="profile-orders-list"
+                        aria-live="polite"
+                        aria-busy="true"
+                    >
+                        <div class="orders-state-card">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <p>Đang tải đơn hàng từ database...</p>
+                        </div>
+                    </div>
+
+                    <nav
+                        id="profile-orders-pagination"
+                        class="profile-orders-pagination"
+                        aria-label="Phân trang đơn hàng"
+                    ></nav>
+                </section>
             </div>
 
         </div>
@@ -470,5 +558,6 @@
             });
         });
     </script>
+    <script src="../assets/js/profile-orders.js"></script>
 </body>
 </html>

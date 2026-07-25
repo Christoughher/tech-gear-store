@@ -190,10 +190,16 @@ SET image_urls = ARRAY['https://cdn.tgdd.vn/Products/Images/7077/344764/apple-wa
 WHERE sku = 'TGDD-ACC-APPLE-WATCH-ULTRA-3';
 
 -- Samsung Galaxy Watch8 40mm day silicone
--- Source: https://www.thegioididong.com/dong-ho-thong-minh/samsung-galaxy-watch8-40mm-day-silicone
--- Thumbnail: 1, gallery images: 0
+-- Source: https://www.thegioididong.com/dong-ho-thong-minh/samsung-galaxy-watch8
+-- Thumbnail: 1, gallery images: 4
 UPDATE public.products
-SET image_urls = ARRAY['https://cdn.tgdd.vn/2026/06/timerseo/338265.jpg']::TEXT[]
+SET image_urls = ARRAY[
+    'https://cdn.tgdd.vn/2026/06/timerseo/338265.jpg',
+    'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-1-639087500464157953.jpg',
+    'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-2-639087500471714490.jpg',
+    'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-3-639087500479804716.jpg',
+    'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-4-639087500485548189.jpg'
+]::TEXT[]
 WHERE sku = 'TGDD-ACC-SAMSUNG-WATCH8-40';
 
 -- Xiaomi Mi Band 10 vien nhom day TPU
@@ -428,3 +434,12 @@ SET image_urls = ARRAY['https://cdn.tgdd.vn/Products/Images/7077/367947/amazfit-
 WHERE sku = 'TGDD2-ACC-AMAZFIT-BIP-MAX';
 
 COMMIT;
+
+-- Với bộ seed 60 sản phẩm chuẩn, products_with_gallery phải bằng 33.
+SELECT
+  COUNT(*) AS total_active_products,
+  COUNT(*) FILTER (
+    WHERE COALESCE(cardinality(image_urls), 0) > 1
+  ) AS products_with_gallery
+FROM public.products
+WHERE status = 'active';

@@ -69,22 +69,22 @@
                 <form id="checkout-form" class="checkout-form">
                     <label class="checkout-field">
                         <span>Họ tên người nhận</span>
-                        <input type="text" name="fullName" required>
+                        <input type="text" name="fullName" minlength="2" maxlength="120" autocomplete="name" required>
                     </label>
 
                     <label class="checkout-field">
                         <span>Số điện thoại</span>
-                        <input type="tel" name="phone" required>
+                        <input type="tel" name="phone" minlength="9" maxlength="30" inputmode="tel" autocomplete="tel" required>
                     </label>
 
                     <label class="checkout-field">
                         <span>Địa chỉ giao hàng</span>
-                        <textarea name="address" rows="3" required></textarea>
+                        <textarea name="address" rows="3" minlength="5" maxlength="500" autocomplete="street-address" required></textarea>
                     </label>
 
                     <label class="checkout-field">
                         <span>Ghi chú đơn hàng</span>
-                        <textarea name="note" rows="3" placeholder="Ví dụ: Giao trước 10h sáng..."></textarea>
+                        <textarea name="note" rows="3" maxlength="1000" placeholder="Ví dụ: Giao trước 10h sáng..."></textarea>
                     </label>
 
                     <div class="checkout-field">

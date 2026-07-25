@@ -109,6 +109,48 @@ const productSpecificationTemplates = {
     ]
 };
 
+const genericProductSpecificationTemplate = [
+    ['brand', 'Hãng'],
+    ['model', 'Dòng sản phẩm'],
+    ['origin', 'Xuất xứ'],
+    ['warranty', 'Bảo hành']
+];
+
+const accessoryProductSpecificationSubcategories = Object.freeze([
+    { value: 'airpods', label: 'Tai nghe / AirPods', templateKey: 'audio' },
+    { value: 'dong-ho', label: 'Đồng hồ thông minh', templateKey: 'watch' },
+    { value: 'camera', label: 'Camera', templateKey: 'camera' },
+    { value: 'sac', label: 'Sạc / Pin dự phòng', templateKey: 'charger' },
+    { value: 'loa', label: 'Loa', templateKey: 'speaker' }
+]);
+
+const accessoryProductSpecificationTemplateMap = Object.freeze(
+    Object.fromEntries(
+        accessoryProductSpecificationSubcategories.map((item) => [item.value, item.templateKey])
+    )
+);
+
+window.techNoProductSpecificationConfig = Object.freeze({
+    templates: productSpecificationTemplates,
+    categoryTemplateKeys: Object.freeze({
+        phone: 'phone',
+        laptop: 'laptop',
+        pc: 'pc'
+    }),
+    accessorySubcategories: accessoryProductSpecificationSubcategories,
+    accessoryTemplateKeys: accessoryProductSpecificationTemplateMap,
+    fallbackTemplate: genericProductSpecificationTemplate
+});
+
+const productGalleryFallbacks = Object.freeze({
+    'TGDD-ACC-SAMSUNG-WATCH8-40': [
+        'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-1-639087500464157953.jpg',
+        'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-2-639087500471714490.jpg',
+        'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-3-639087500479804716.jpg',
+        'https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/7077/338265/samsung-galaxy-watch8-40mm-trang-4-639087500485548189.jpg'
+    ]
+});
+
 const categoryDisplayOrder = ['phone', 'laptop', 'pc', 'phukien'];
 const brandContainer = document.getElementById('brand-filter-container');
 const productSection = document.querySelector('.products-section');
@@ -122,6 +164,9 @@ let currentProductList = [];
 let currentProductPage = 1;
 let currentSearchKeyword = '';
 let currentCategoryFilterGroups = [];
+let currentLaptopPriceFilter = 'all';
+let currentPcPriceFilter = 'all';
+let currentAccessoryPriceFilter = 'all';
 let currentEmptyProductMessage = DEFAULT_EMPTY_PRODUCT_MESSAGE;
 let productDetailSwiper = null;
 
@@ -286,8 +331,15 @@ function applyProductSearch(page = 1) {
         : [...currentBaseProductList];
 
     filteredProducts = applyCategoryFilterGroups(filteredProducts);
+    filteredProducts = applyLaptopHeroPriceFilter(filteredProducts);
+    filteredProducts = applyPcHeroPriceFilter(filteredProducts);
+    filteredProducts = applyAccessoryHeroPriceFilter(filteredProducts);
     currentProductList = filteredProducts;
-    currentEmptyProductMessage = keyword || hasActiveCategoryFilters()
+    currentEmptyProductMessage = keyword
+        || hasActiveCategoryFilters()
+        || currentLaptopPriceFilter !== 'all'
+        || currentPcPriceFilter !== 'all'
+        || currentAccessoryPriceFilter !== 'all'
         ? `Không tìm thấy sản phẩm phù hợp với "${currentSearchKeyword.trim() || 'bộ lọc đã chọn'}".`
         : DEFAULT_EMPTY_PRODUCT_MESSAGE;
 
@@ -298,13 +350,18 @@ function productMatchesSearch(product, normalizedKeyword) {
     const searchTokens = normalizedKeyword.split(' ').filter(Boolean);
     if (!searchTokens.length) return true;
 
+    const specificationValues = Object.values(getProductSpecifications(product))
+        .filter((value) => ['string', 'number'].includes(typeof value))
+        .join(' ');
     const searchableText = normalizeProductKey([
         product.name,
         product.brand,
         product.category_id,
         product.subcategory,
+        product.short_description,
         product.description,
-        product.sku
+        product.sku,
+        specificationValues
     ].filter(Boolean).join(' '));
 
     return searchTokens.every(token => searchableText.includes(token));
@@ -323,6 +380,72 @@ function applyCategoryFilterGroups(products) {
 
 function hasActiveCategoryFilters() {
     return currentCategoryFilterGroups.some(group => group.values.length > 0);
+}
+
+function applyLaptopHeroPriceFilter(products) {
+    if (currentCategoryPage !== 'laptop' || currentLaptopPriceFilter === 'all') {
+        return products;
+    }
+
+    const priceBoundary = 20_000_000;
+
+    return products.filter(product => {
+        const price = Number(product.price || 0);
+
+        if (currentLaptopPriceFilter === 'under-20') {
+            return price < priceBoundary;
+        }
+
+        if (currentLaptopPriceFilter === 'from-20') {
+            return price >= priceBoundary;
+        }
+
+        return true;
+    });
+}
+
+function applyPcHeroPriceFilter(products) {
+    if (currentCategoryPage !== 'pc' || currentPcPriceFilter === 'all') {
+        return products;
+    }
+
+    const priceBoundary = 20_000_000;
+
+    return products.filter(product => {
+        const price = Number(product.price || 0);
+
+        if (currentPcPriceFilter === 'under-20') {
+            return price < priceBoundary;
+        }
+
+        if (currentPcPriceFilter === 'from-20') {
+            return price >= priceBoundary;
+        }
+
+        return true;
+    });
+}
+
+function applyAccessoryHeroPriceFilter(products) {
+    if (currentCategoryPage !== 'phukien' || currentAccessoryPriceFilter === 'all') {
+        return products;
+    }
+
+    const priceBoundary = 2_000_000;
+
+    return products.filter(product => {
+        const price = Number(product.price || 0);
+
+        if (currentAccessoryPriceFilter === 'under-2') {
+            return price < priceBoundary;
+        }
+
+        if (currentAccessoryPriceFilter === 'from-2') {
+            return price >= priceBoundary;
+        }
+
+        return true;
+    });
 }
 
 function productMatchesCategoryFilter(product, groupTitle, value) {
@@ -842,11 +965,17 @@ function getProductDetailUrl(product) {
 }
 
 function getProductImage(product) {
-    if (Array.isArray(product.image_urls) && product.image_urls.length > 0) {
-        return product.image_urls[0];
-    }
+    return normalizeProductImageUrls(product?.image_urls)[0] || '';
+}
 
-    return '';
+function normalizeProductImageUrls(imageUrls) {
+    if (!Array.isArray(imageUrls)) return [];
+
+    return [...new Set(
+        imageUrls
+            .map(imageUrl => String(imageUrl || '').trim())
+            .filter(imageUrl => /^https?:\/\//i.test(imageUrl) || imageUrl.startsWith('/'))
+    )];
 }
 
 function handleProductImageError(image) {
@@ -965,7 +1094,7 @@ function getCartProductFromButton(button) {
 }
 
 // Hiển thị toast nhỏ ở cuối màn hình để không che thanh điều hướng.
-function showNotification(message, type = 'success') {
+function showNotification(message, type = 'success', customTitle = '') {
     const normalizedType = type === 'error' ? 'error' : 'success';
     const duration = normalizedType === 'error' ? 5000 : 3600;
     let notificationStack = document.querySelector('.cart-notification-stack');
@@ -998,9 +1127,11 @@ function showNotification(message, type = 'success') {
 
     const title = document.createElement('strong');
     title.className = 'cart-notification__title';
-    title.textContent = normalizedType === 'error'
-        ? 'Không thể thêm sản phẩm'
-        : 'Đã thêm vào giỏ hàng';
+    title.textContent = customTitle || (
+        normalizedType === 'error'
+            ? 'Không thể thêm sản phẩm'
+            : 'Đã thêm vào giỏ hàng'
+    );
 
     const messageElement = document.createElement('p');
     messageElement.className = 'cart-notification__message';
@@ -1051,6 +1182,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Thiết lập sự kiện cho nút "Thêm giỏ"
     setupAddToCartButtons();
     setupCategoryFilterGroups();
+    setupLaptopHeroPriceFilters();
+    setupPcHeroPriceFilters();
+    setupAccessoryHeroPriceFilters();
 
     await navbarReady;
     setupNavbarSearch();
@@ -1120,9 +1254,29 @@ async function renderProductDetail(product) {
     const descriptionElement = document.getElementById('product-detail-description');
     const priceElement = document.getElementById('product-detail-price');
     const addToCartButton = document.getElementById('product-detail-add-cart');
+    const addToCartLabel = document.getElementById('product-detail-add-cart-label');
+    const categoryElement = document.getElementById('product-detail-category');
+    const breadcrumbCategory = document.getElementById('product-detail-breadcrumb-category');
+    const brandElement = document.getElementById('product-detail-brand');
+    const skuElement = document.getElementById('product-detail-sku');
+    const stockElement = document.getElementById('product-detail-stock');
+    const shortDescriptionElement = document.getElementById('product-detail-short-description');
+    const metaDescription = document.getElementById('product-meta-description');
 
     const productImages = getProductImages(product);
     const primaryImage = getProductImage(product) || productImages[0] || '';
+    const stock = Math.max(0, Number(product.stock) || 0);
+    const isAvailable = product.status === 'active' && stock > 0;
+    const categoryLabel = getCategoryDisplayName(product.category_id);
+    const brandLabel = filterLabelMap[product.brand] || product.brand || 'Đang cập nhật';
+    const productSummary = String(
+        product.short_description
+        || product.description
+        || 'Thông tin nổi bật của sản phẩm đang được cập nhật.'
+    ).trim();
+    const compactSummary = productSummary.length > 220
+        ? `${productSummary.slice(0, 217).trim()}...`
+        : productSummary;
 
     document.title = `${product.name} - Tech.no`;
     productNameElement.textContent = product.name;
@@ -1131,8 +1285,8 @@ async function renderProductDetail(product) {
     specsElement.innerHTML = buildProductDetailSpecs(product)
         .map(([label, value]) => `
             <li>
-                <span>${escapeHtml(label)}:</span>
-                ${escapeHtml(value)}
+                <span>${escapeHtml(label)}</span>
+                <strong>${escapeHtml(value)}</strong>
             </li>
         `).join('');
 
@@ -1140,28 +1294,79 @@ async function renderProductDetail(product) {
         descriptionElement.textContent = product.description || 'Thông tin sản phẩm đang được cập nhật.';
     }
 
-    priceElement.innerHTML = `${formatCurrency(product.price)}<sup><u>đ</u></sup>`;
+    renderProductDetailPrice(product, priceElement);
+
+    if (categoryElement) categoryElement.textContent = categoryLabel;
+    if (breadcrumbCategory) breadcrumbCategory.textContent = categoryLabel;
+    if (brandElement) brandElement.textContent = brandLabel;
+    if (skuElement) skuElement.textContent = product.sku || 'Chưa cập nhật';
+    if (shortDescriptionElement) shortDescriptionElement.textContent = compactSummary;
+    if (metaDescription) metaDescription.content = compactSummary;
+
+    if (stockElement) {
+        stockElement.classList.remove('is-loading', 'is-out-of-stock');
+        stockElement.textContent = isAvailable
+            ? `Còn ${stock.toLocaleString('vi-VN')} sản phẩm`
+            : 'Tạm hết hàng';
+        stockElement.classList.toggle('is-out-of-stock', !isAvailable);
+    }
 
     if (addToCartButton) {
         addToCartButton.dataset.productId = product.id || product.sku || product.name;
         addToCartButton.dataset.productName = product.name;
         addToCartButton.dataset.productPrice = Number(product.price || 0);
         addToCartButton.dataset.productImage = primaryImage;
-        addToCartButton.disabled = false;
+        addToCartButton.disabled = !isAvailable;
+    }
+    if (addToCartLabel) {
+        addToCartLabel.textContent = isAvailable ? 'Thêm vào giỏ hàng' : 'Sản phẩm tạm hết hàng';
     }
 
     await renderProductDetailGallery(product, galleryElement);
     setupProductDetailTabs();
 }
 
+function renderProductDetailPrice(product, priceElement) {
+    if (!priceElement) return;
+
+    const price = Math.max(0, Number(product.price) || 0);
+    const originalPrice = Math.max(0, Number(product.original_price) || 0);
+    const discountPercent = Math.max(0, Number(product.discount_percent) || 0);
+    const hasDiscount = originalPrice > price;
+    const effectiveDiscount = discountPercent > 0
+        ? Math.round(discountPercent)
+        : (hasDiscount ? Math.round((1 - price / originalPrice) * 100) : 0);
+
+    priceElement.innerHTML = `
+        <span class="product-price-current">
+            ${formatCurrency(price)}<span class="product-price-currency">đ</span>
+        </span>
+        ${hasDiscount ? `
+            <span class="product-price-original">${formatCurrency(originalPrice)}đ</span>
+        ` : ''}
+        ${hasDiscount && effectiveDiscount > 0 ? `
+            <span class="product-price-discount">-${effectiveDiscount}%</span>
+        ` : ''}
+    `;
+}
+
 function buildProductDetailSpecs(product) {
     const specifications = getProductSpecifications(product);
     const template = getProductSpecificationTemplate(product);
 
-    return template.map(([key, label]) => [
-        label,
-        getSpecificationValue(specifications, key, product)
-    ]);
+    const rows = template
+        .map(([key, label]) => [
+            label,
+            getSpecificationValue(specifications, key, product)
+        ])
+        .filter(([, value]) => value !== UNKNOWN_SPEC_VALUE);
+
+    if (rows.length) return rows;
+
+    return [
+        ['Thương hiệu', filterLabelMap[product.brand] || product.brand || 'Đang cập nhật'],
+        ['Mã sản phẩm', product.sku || 'Đang cập nhật']
+    ];
 }
 
 function getProductSpecifications(product) {
@@ -1183,27 +1388,19 @@ function getProductSpecifications(product) {
 }
 
 function getProductSpecificationTemplate(product) {
-    if (product.category_id === 'phone') return productSpecificationTemplates.phone;
-    if (product.category_id === 'laptop') return productSpecificationTemplates.laptop;
-    if (product.category_id === 'pc') return productSpecificationTemplates.pc;
+    const directTemplateKey = window.techNoProductSpecificationConfig
+        .categoryTemplateKeys[product.category_id];
+    if (directTemplateKey) return productSpecificationTemplates[directTemplateKey];
 
     if (product.category_id === 'phukien') {
-        if (product.subcategory === 'airpods' || product.subcategory === 'tai-nghe') {
-            return productSpecificationTemplates.audio;
-        }
-
-        if (product.subcategory === 'dong-ho') return productSpecificationTemplates.watch;
-        if (product.subcategory === 'camera') return productSpecificationTemplates.camera;
-        if (product.subcategory === 'sac') return productSpecificationTemplates.charger;
-        if (product.subcategory === 'loa') return productSpecificationTemplates.speaker;
+        const accessoryTemplateKey = product.subcategory === 'tai-nghe'
+            ? 'audio'
+            : window.techNoProductSpecificationConfig
+                .accessoryTemplateKeys[product.subcategory];
+        if (accessoryTemplateKey) return productSpecificationTemplates[accessoryTemplateKey];
     }
 
-    return [
-        ['brand', 'Hãng'],
-        ['model', 'Dòng sản phẩm'],
-        ['origin', 'Xuất xứ'],
-        ['warranty', 'Bảo hành']
-    ];
+    return genericProductSpecificationTemplate;
 }
 
 function getSpecificationValue(specifications, key, product) {
@@ -1224,21 +1421,42 @@ function setupProductDetailTabs() {
     const tabs = [...document.querySelectorAll('[data-product-tab]')];
     if (!tabs.length) return;
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.dataset.productTab;
+    const activateTab = tab => {
+        const target = tab.dataset.productTab;
 
-            tabs.forEach(item => {
-                const isActive = item === tab;
-                item.classList.toggle('is-active', isActive);
-                item.setAttribute('aria-selected', String(isActive));
-            });
+        tabs.forEach(item => {
+            const isActive = item === tab;
+            item.classList.toggle('is-active', isActive);
+            item.setAttribute('aria-selected', String(isActive));
+            item.tabIndex = isActive ? 0 : -1;
+        });
 
-            document.querySelectorAll('.product-detail-panel').forEach(panel => {
-                const isActive = panel.id === `product-${target}-panel`;
-                panel.classList.toggle('is-active', isActive);
-                panel.hidden = !isActive;
-            });
+        document.querySelectorAll('.product-detail-panel').forEach(panel => {
+            const isActive = panel.id === `product-${target}-panel`;
+            panel.classList.toggle('is-active', isActive);
+            panel.hidden = !isActive;
+        });
+    };
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activateTab(tab));
+        tab.addEventListener('keydown', event => {
+            let targetIndex = null;
+
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                targetIndex = (index - 1 + tabs.length) % tabs.length;
+            } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                targetIndex = (index + 1) % tabs.length;
+            } else if (event.key === 'Home') {
+                targetIndex = 0;
+            } else if (event.key === 'End') {
+                targetIndex = tabs.length - 1;
+            }
+
+            if (targetIndex === null) return;
+            event.preventDefault();
+            activateTab(tabs[targetIndex]);
+            tabs[targetIndex].focus();
         });
     });
 }
@@ -1250,6 +1468,13 @@ function renderProductDetailError(message) {
     const descriptionElement = document.getElementById('product-detail-description');
     const priceElement = document.getElementById('product-detail-price');
     const addToCartButton = document.getElementById('product-detail-add-cart');
+    const addToCartLabel = document.getElementById('product-detail-add-cart-label');
+    const categoryElement = document.getElementById('product-detail-category');
+    const breadcrumbCategory = document.getElementById('product-detail-breadcrumb-category');
+    const brandElement = document.getElementById('product-detail-brand');
+    const skuElement = document.getElementById('product-detail-sku');
+    const stockElement = document.getElementById('product-detail-stock');
+    const shortDescriptionElement = document.getElementById('product-detail-short-description');
 
     if (productNameElement) {
         productNameElement.textContent = message;
@@ -1260,7 +1485,7 @@ function renderProductDetailError(message) {
     }
 
     if (specsElement) {
-        specsElement.innerHTML = '<li><span>Trạng thái:</span> Không có dữ liệu để hiển thị.</li>';
+        specsElement.innerHTML = '<li><span>Trạng thái</span><strong>Không có dữ liệu để hiển thị.</strong></li>';
     }
 
     if (descriptionElement) {
@@ -1274,28 +1499,46 @@ function renderProductDetailError(message) {
     if (addToCartButton) {
         addToCartButton.disabled = true;
     }
+    if (addToCartLabel) addToCartLabel.textContent = 'Không thể thêm vào giỏ hàng';
+    if (categoryElement) categoryElement.textContent = 'Không có dữ liệu';
+    if (breadcrumbCategory) breadcrumbCategory.textContent = 'Sản phẩm';
+    if (brandElement) brandElement.textContent = 'Không có dữ liệu';
+    if (skuElement) skuElement.textContent = 'Không có dữ liệu';
+    if (stockElement) {
+        stockElement.textContent = 'Không khả dụng';
+        stockElement.classList.remove('is-loading');
+        stockElement.classList.add('is-out-of-stock');
+    }
+    if (shortDescriptionElement) {
+        shortDescriptionElement.textContent = 'Không có thông tin sản phẩm để hiển thị.';
+    }
 }
 
 function getProductImages(product) {
-    if (Array.isArray(product?.image_urls)) {
-        const images = product.image_urls.filter(Boolean);
-        return images.length ? images : [];
-    }
+    const databaseImages = normalizeProductImageUrls(product?.image_urls);
 
-    return getProductImage(product) ? [getProductImage(product)] : [];
+    if (databaseImages.length > 1) return databaseImages;
+
+    const fallbackImages = normalizeProductImageUrls(productGalleryFallbacks[product?.sku] || []);
+    return [...new Set([...databaseImages, ...fallbackImages])];
 }
 
-async function renderProductDetailGallery(product, galleryElement) {
-    const imageUrls = await getLoadableProductImages(product);
+function renderProductDetailGallery(product, galleryElement) {
+    const primaryImage = getProductImage(product);
+    const imageUrls = [...new Set(
+        [primaryImage, ...getProductImages(product)].filter(Boolean)
+    )].slice(0, 8);
 
     galleryElement.innerHTML = imageUrls.length
-        ? imageUrls.map(imageUrl => `
+        ? imageUrls.map((imageUrl, index) => `
             <div class="swiper-slide">
                 <img
                     src="${escapeHtml(imageUrl)}"
-                    alt="${escapeHtml(product.name)}"
+                    alt="${escapeHtml(product.name)} - ảnh ${index + 1}"
                     referrerpolicy="no-referrer"
-                    data-fallback-src="${escapeHtml(getProductImage(product))}"
+                    loading="${index === 0 ? 'eager' : 'lazy'}"
+                    fetchpriority="${index === 0 ? 'high' : 'auto'}"
+                    decoding="async"
                     onerror="handleDetailImageError(this);"
                 >
             </div>
@@ -1303,51 +1546,6 @@ async function renderProductDetailGallery(product, galleryElement) {
         : '<div class="swiper-slide product-detail-image-empty">TECH.NO</div>';
 
     initProductDetailSwiper();
-}
-
-async function getLoadableProductImages(product, timeoutMs = 2800) {
-    const primaryImage = getProductImage(product);
-    const candidates = [...new Set([primaryImage, ...getProductImages(product)].filter(Boolean))].slice(0, 8);
-
-    // Preload first so broken or slow TGDD gallery links do not create blank slides.
-    const checkedImages = await Promise.all(
-        candidates.map(async imageUrl => ({
-            imageUrl,
-            canLoad: await canLoadImage(imageUrl, timeoutMs)
-        }))
-    );
-
-    const loadableImages = checkedImages
-        .filter(({ canLoad }) => canLoad)
-        .map(({ imageUrl }) => imageUrl)
-        .slice(0, 4);
-
-    return loadableImages.length ? loadableImages : (primaryImage ? [primaryImage] : []);
-}
-
-function canLoadImage(imageUrl, timeoutMs = 2800) {
-    return new Promise(resolve => {
-        if (!imageUrl) {
-            resolve(false);
-            return;
-        }
-
-        const image = new Image();
-        let settled = false;
-        const timeoutId = window.setTimeout(() => done(false), timeoutMs);
-
-        function done(canLoad) {
-            if (settled) return;
-            settled = true;
-            window.clearTimeout(timeoutId);
-            resolve(canLoad);
-        }
-
-        image.onload = () => done(Boolean(image.naturalWidth && image.naturalHeight));
-        image.onerror = () => done(false);
-        image.referrerPolicy = 'no-referrer';
-        image.src = imageUrl;
-    });
 }
 
 function initProductDetailSwiper() {
@@ -1360,30 +1558,52 @@ function initProductDetailSwiper() {
     const slideCount = document.querySelectorAll('.mySwiper .swiper-slide').length;
 
     productDetailSwiper = new Swiper('.mySwiper', {
-        loop: slideCount > 1,
+        loop: false,
+        rewind: slideCount > 1,
+        allowTouchMove: slideCount > 1,
+        grabCursor: slideCount > 1,
+        watchOverflow: true,
+        keyboard: {
+            enabled: true,
+            onlyInViewport: true
+        },
         navigation: {
             nextEl: '.swiper-button-next',
             prevEl: '.swiper-button-prev'
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true
         }
     });
 }
 
 function handleDetailImageError(image) {
     image.onerror = null;
-    const fallbackSrc = image.dataset.fallbackSrc;
+    const slide = image.closest('.swiper-slide');
+    const gallery = document.getElementById('product-detail-gallery');
+    const slides = gallery ? [...gallery.children] : [];
+    const slideIndex = slide ? slides.indexOf(slide) : -1;
 
-    if (fallbackSrc && image.src !== fallbackSrc) {
-        image.src = fallbackSrc;
+    if (slide && slides.length > 1) {
+        if (productDetailSwiper && slideIndex >= 0 && typeof productDetailSwiper.removeSlide === 'function') {
+            productDetailSwiper.removeSlide(slideIndex);
+            productDetailSwiper.update();
+            productDetailSwiper.navigation?.update();
+        } else {
+            slide.remove();
+        }
+
         return;
     }
 
-    const slide = image.closest('.swiper-slide');
-    if (slide) {
-        slide.classList.add('product-detail-image-empty');
-        slide.textContent = 'TECH.NO';
+    if (!slide) {
+        image.remove();
+        return;
     }
 
-    image.remove();
+    slide.classList.add('product-detail-image-empty');
+    slide.textContent = 'TECH.NO';
 }
 
 function focusOnSearchBar() {
@@ -1512,6 +1732,78 @@ function setupCategoryFilterGroups() {
     });
 
     updateCategoryFilterGroups(false);
+}
+
+function setupLaptopHeroPriceFilters() {
+    const buttons = [...document.querySelectorAll('[data-laptop-price-filter]')];
+    if (currentCategoryPage !== 'laptop' || !buttons.length) return;
+
+    const updateButtonState = () => {
+        buttons.forEach(button => {
+            const isActive = button.dataset.laptopPriceFilter === currentLaptopPriceFilter;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
+        });
+    };
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            currentLaptopPriceFilter = button.dataset.laptopPriceFilter || 'all';
+            updateButtonState();
+            applyProductSearch(1);
+            scrollToProductList();
+        });
+    });
+
+    updateButtonState();
+}
+
+function setupPcHeroPriceFilters() {
+    const buttons = [...document.querySelectorAll('[data-pc-price-filter]')];
+    if (currentCategoryPage !== 'pc' || !buttons.length) return;
+
+    const updateButtonState = () => {
+        buttons.forEach(button => {
+            const isActive = button.dataset.pcPriceFilter === currentPcPriceFilter;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
+        });
+    };
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            currentPcPriceFilter = button.dataset.pcPriceFilter || 'all';
+            updateButtonState();
+            applyProductSearch(1);
+            scrollToProductList();
+        });
+    });
+
+    updateButtonState();
+}
+
+function setupAccessoryHeroPriceFilters() {
+    const buttons = [...document.querySelectorAll('[data-accessory-price-filter]')];
+    if (currentCategoryPage !== 'phukien' || !buttons.length) return;
+
+    const updateButtonState = () => {
+        buttons.forEach(button => {
+            const isActive = button.dataset.accessoryPriceFilter === currentAccessoryPriceFilter;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', String(isActive));
+        });
+    };
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            currentAccessoryPriceFilter = button.dataset.accessoryPriceFilter || 'all';
+            updateButtonState();
+            applyProductSearch(1);
+            scrollToProductList();
+        });
+    });
+
+    updateButtonState();
 }
 
 function updateCategoryFilterGroups(shouldRender = true) {

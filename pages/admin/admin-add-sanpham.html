@@ -60,6 +60,37 @@
             margin-bottom: 18px;
         }
 
+        .form-section-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .form-section-heading .form-section-title {
+            margin-bottom: 5px;
+        }
+
+        .form-section-heading p {
+            max-width: 680px;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .category-field-badge {
+            flex: 0 0 auto;
+            padding: 6px 10px;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -103,6 +134,45 @@
             min-height: 130px;
             resize: vertical;
             line-height: 1.5;
+        }
+
+        .form-group textarea.specification-textarea {
+            min-height: 84px;
+        }
+
+        .form-group textarea.compact-textarea {
+            min-height: 88px;
+        }
+
+        .specification-subcategory {
+            margin-bottom: 18px;
+            padding: 16px;
+            border: 1px solid #dbeafe;
+            border-radius: 9px;
+            background: #f8fbff;
+        }
+
+        .specification-grid {
+            align-items: start;
+        }
+
+        .dynamic-fields-empty {
+            grid-column: 1 / -1;
+            margin: 0;
+            padding: 18px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 9px;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .field-helper {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
         }
 
         .form-group input:focus,
@@ -285,6 +355,10 @@
             .form-group.full {
                 grid-column: auto;
             }
+
+            .form-section-heading {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -337,11 +411,76 @@
                                         <option value="">Đang tải danh mục...</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label for="productBrand">Thương hiệu <span class="required-mark">*</span></label>
+                                    <input
+                                        type="text"
+                                        id="productBrand"
+                                        list="productBrandOptions"
+                                        maxlength="100"
+                                        placeholder="VD: hp, asus, samsung"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                    <datalist id="productBrandOptions"></datalist>
+                                    <span class="field-helper">Thương hiệu sẽ được chuẩn hóa thành chữ thường để khớp bộ lọc.</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="productSourceUrl">Trang thông tin tham khảo</label>
+                                    <input
+                                        type="url"
+                                        id="productSourceUrl"
+                                        maxlength="2048"
+                                        placeholder="https://..."
+                                    >
+                                </div>
+                                <div class="form-group full">
+                                    <label for="productShortDescription">Mô tả ngắn</label>
+                                    <textarea
+                                        id="productShortDescription"
+                                        class="compact-textarea"
+                                        maxlength="500"
+                                        placeholder="Nội dung ngắn hiển thị trên thẻ sản phẩm."
+                                    ></textarea>
+                                </div>
                                 <div class="form-group full">
                                     <label for="productDescription">Mô tả sản phẩm</label>
                                     <textarea id="productDescription" placeholder="Nhập mô tả, cấu hình nổi bật, bảo hành..."></textarea>
                                 </div>
                             </div>
+                        </section>
+
+                        <section class="form-section" id="productSpecificationSection">
+                            <div class="form-section-heading">
+                                <div>
+                                    <h3 class="form-section-title" id="productSpecificationTitle">Thông số theo loại sản phẩm</h3>
+                                    <p id="productSpecificationHint">
+                                        Chọn danh mục để form hiển thị đúng các trường được lưu trong specifications.
+                                    </p>
+                                </div>
+                                <span class="category-field-badge" id="productSpecificationBadge">Chưa chọn danh mục</span>
+                            </div>
+
+                            <div class="form-grid specification-subcategory" id="productSubcategoryGroup" hidden>
+                                <div class="form-group full">
+                                    <label for="productSubcategory">
+                                        Loại phụ kiện <span class="required-mark">*</span>
+                                    </label>
+                                    <select id="productSubcategory">
+                                        <option value="">Chọn loại phụ kiện</option>
+                                    </select>
+                                    <span class="field-helper">
+                                        Loại phụ kiện quyết định bộ thông số và bộ lọc trên website.
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="form-grid specification-grid" id="productSpecificationFields">
+                                <p class="dynamic-fields-empty">Chọn danh mục sản phẩm để bắt đầu nhập thông số.</p>
+                            </div>
+                            <p class="form-note">
+                                Database cho phép để trống thông số, nhưng nên nhập để trang chi tiết và bộ lọc hiển thị đầy đủ.
+                            </p>
                         </section>
 
                         <section class="form-section">
