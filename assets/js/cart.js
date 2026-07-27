@@ -654,5 +654,62 @@ class ShoppingCart {
     }
 }
 
+function normalizeCartBadgeCount(value) {
+    const numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) {
+        return 0;
+    }
+
+    return Math.max(0, Math.floor(numericValue));
+}
+
+function updateNavbarCartBadge(itemCount = 0) {
+    if (typeof document === 'undefined') return;
+
+    const cartLink = document.querySelector('[data-cart-nav-link]');
+    const badge = document.querySelector('[data-cart-count]');
+
+    if (!cartLink || !badge) return;
+
+    const normalizedCount = normalizeCartBadgeCount(itemCount);
+    const hasItems = normalizedCount > 0;
+
+    badge.textContent = String(normalizedCount);
+    badge.hidden = !hasItems;
+    cartLink.classList.toggle('has-items', hasItems);
+    cartLink.setAttribute(
+        'aria-label',
+        hasItems
+            ? `Giỏ hàng, ${normalizedCount} sản phẩm`
+            : 'Giỏ hàng'
+    );
+}
+
+async function syncNavbarCartBadge() {
+    const cart = window.shopCart;
+
+    if (!cart) {
+        updateNavbarCartBadge(0);
+        return;
+    }
+
+    try {
+        await cart.ready;
+        updateNavbarCartBadge(cart.getItemCount());
+    } catch (error) {
+        updateNavbarCartBadge(0);
+    }
+}
+
 window.ShoppingCart = ShoppingCart;
+window.updateNavbarCartBadge = updateNavbarCartBadge;
+
+if (typeof window.addEventListener === 'function') {
+    window.addEventListener('cartUpdated', event => {
+        updateNavbarCartBadge(event?.detail?.itemCount);
+    });
+    window.addEventListener('navbarLoaded', syncNavbarCartBadge);
+}
+
 window.shopCart = new ShoppingCart();

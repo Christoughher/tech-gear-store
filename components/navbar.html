@@ -29,9 +29,87 @@
             <li><a href="/pages/laptop.html">Laptop</a></li>
             <li><a href="/pages/pc.html">PC</a></li>
             <li><a href="/pages/phu-kien.html">Phụ kiện</a></li>
-            <li><a href="/pages/gio-hang.html">Giỏ hàng</a></li>
+            <li>
+                <a
+                    href="/pages/gio-hang.html"
+                    class="nav-cart-link"
+                    data-cart-nav-link
+                    aria-label="Giỏ hàng"
+                >
+                    Giỏ hàng
+                    <span
+                        class="nav-cart-badge"
+                        data-cart-count
+                        aria-hidden="true"
+                        hidden
+                    >0</span>
+                </a>
+            </li>
             <li id="auth-status">
                 <a href="/pages/login.html" class="login-btn">Đăng nhập</a>
+            </li>
+            <li id="notification-nav" class="notification-nav" hidden>
+                <div class="notification-center">
+                    <button
+                        type="button"
+                        class="notification-trigger"
+                        data-notification-trigger
+                        aria-label="Thông báo"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="notification-panel"
+                    >
+                        <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                        <span
+                            class="notification-unread-dot"
+                            data-notification-dot
+                            aria-hidden="true"
+                            hidden
+                        ></span>
+                        <span
+                            class="notification-visually-hidden"
+                            data-notification-status
+                        >Không có thông báo mới</span>
+                    </button>
+
+                    <section
+                        id="notification-panel"
+                        class="notification-panel"
+                        data-notification-panel
+                        aria-label="Danh sách thông báo"
+                        hidden
+                    >
+                        <header class="notification-panel__header">
+                            <div>
+                                <p class="notification-panel__eyebrow">Tài khoản</p>
+                                <h2>Thông báo</h2>
+                            </div>
+                            <button
+                                type="button"
+                                class="notification-mark-all"
+                                data-notification-mark-all
+                                hidden
+                            >Đánh dấu đã đọc</button>
+                        </header>
+
+                        <div
+                            class="notification-list"
+                            data-notification-list
+                            aria-live="polite"
+                            aria-busy="true"
+                        >
+                            <p class="notification-state">Đang tải thông báo...</p>
+                        </div>
+
+                        <a
+                            class="notification-panel__footer"
+                            href="/pages/profile.html#orders"
+                        >
+                            Xem đơn hàng của tôi
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </section>
+                </div>
             </li>
         </ul>
     </nav>

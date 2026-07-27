@@ -852,6 +852,14 @@
     background-image: url("../images/banner6.png");
 }
 
+/* Giãn nhóm lọc nhanh của banner Điện thoại: 48px = 6 lần khoảng cách gốc 8px. */
+@media (min-width: 901px) {
+    .phone-hero .hero-actions {
+        gap: 48px;
+        flex-wrap: nowrap;
+    }
+}
+
 /* Banner Laptop dùng đúng tỷ lệ ảnh gốc và chừa vùng an toàn giữa chữ với ảnh. */
 @media (min-width: 901px) {
     .laptop-hero {
