@@ -11,6 +11,10 @@ const frontend = fs.readFileSync(
     path.join(root, 'assets', 'js', 'main.js'),
     'utf8'
 );
+const stylesheet = fs.readFileSync(
+    path.join(root, 'assets', 'css', 'chitiet-sanpham.css'),
+    'utf8'
+);
 const productSeed = fs.readFileSync(
     path.join(root, 'database', 'seed-techno-products-tgdd-60.sql'),
     'utf8'
@@ -115,5 +119,15 @@ assert.match(
     /image_urls = CASE[\s\S]*cardinality\(products\.image_urls\)[\s\S]*THEN products\.image_urls[\s\S]*ELSE EXCLUDED\.image_urls/,
     'Product seed must preserve an existing multi-image gallery.'
 );
+assert.match(
+    stylesheet,
+    /\.product-gallery-card \.swiper-slide \{[\s\S]*?position:\s*relative;[\s\S]*?overflow:\s*hidden;[\s\S]*?\}/,
+    'Every gallery slide must establish a fixed clipping context.'
+);
+assert.match(
+    stylesheet,
+    /\.product-gallery-card \.swiper-slide img \{[\s\S]*?position:\s*absolute;[\s\S]*?inset:\s*0;[\s\S]*?width:\s*100%;[\s\S]*?height:\s*100%;[\s\S]*?object-fit:\s*contain;/,
+    'Gallery images must fit the actual slide dimensions without overflowing vertically.'
+);
 
-console.log('product-detail-contract: 30 checks passed');
+console.log('product-detail-contract: 32 checks passed');

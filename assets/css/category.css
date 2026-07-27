@@ -186,6 +186,10 @@
     box-shadow: none;
 }
 
+.category-filter:has(.filter-group--brands[data-logo-set="pc"]) {
+    grid-template-columns: max-content repeat(4, max-content);
+}
+
 .category-filter h3 {
     display: inline-flex;
     align-items: center;
@@ -298,6 +302,73 @@
     border-color: #288ad6;
     background-color: #edf7ff;
     box-shadow: 0 3px 8px rgba(40, 138, 214, 0.18);
+}
+
+.filter-group--brands .filter-options {
+    grid-template-columns: repeat(4, 92px);
+    gap: 10px;
+    padding-top: 4px;
+}
+
+.filter-group label.brand-filter-option {
+    position: relative;
+    width: 92px;
+    height: 46px;
+    min-height: 46px;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    overflow: hidden;
+    border-color: #dfe6ee;
+    background: #ffffff;
+}
+
+.brand-filter-option img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 76px;
+    max-height: 26px;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+.brand-filter-option:hover img,
+.brand-filter-option:has(input:checked) img {
+    transform: scale(1.04);
+}
+
+.filter-group--brands .brand-filter-option input {
+    position: absolute;
+    display: block;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    clip-path: inset(50%);
+}
+
+.brand-filter-option:focus-within {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+@media (max-width: 576px) {
+    .filter-group--brands .filter-options {
+        grid-template-columns: repeat(3, 80px);
+    }
+
+    .filter-group label.brand-filter-option {
+        width: 80px;
+    }
+}
+
+@media (max-width: 390px) {
+    .filter-group--brands .filter-options {
+        grid-template-columns: repeat(2, 88px);
+    }
+
+    .filter-group label.brand-filter-option {
+        width: 88px;
+    }
 }
 
 .product-grid {

@@ -140,6 +140,16 @@ khác ngoài danh sách 60 SKU mẫu và không ghi đè gallery nhiều ảnh �
 Nếu bảng đã có thêm sản phẩm ngoài seed, các
 card vẫn tính toàn bộ dữ liệu thật trong bảng.
 
+## Thêm 30 màn hình, chuột và bàn phím TGDD
+
+Với database đang có dữ liệu, chỉ chạy `seed-tgdd-accessories-30.sql`. File này thêm hoặc
+cập nhật theo SKU, không chạy `DROP`, `TRUNCATE` hay `DELETE`, không đặt lại tồn kho của sản
+phẩm đã tồn tại và có kiểm tra số lượng `users`/`orders` trước khi commit.
+
+Kết quả cuối file phải trả về đúng ba nhóm `man-hinh`, `chuot`, `ban-phim`, mỗi nhóm 10 sản
+phẩm và mỗi sản phẩm có từ 2 đến 7 ảnh gallery. Không chạy lại `create-table.sql`, seed 60 sản
+phẩm hoặc demo seed chỉ để cài ba nhóm phụ kiện này.
+
 ## Dữ liệu demo cho dashboard
 
 Muốn tạo 200 tài khoản Auth và 400 đơn hàng giả lập có quan hệ đầy đủ, xem
