@@ -2,7 +2,7 @@ const brandData = {
     laptop: ['asus', 'hp', 'dell', 'acer', 'macbook', 'lenovo', 'msi', 'gigabyte'],
     phone: ['iphone', 'samsung', 'oppo', 'xiaomi', 'realme', 'vivo'],
     pc: ['asus', 'msi', 'gigabyte'],
-    phukien: ['airpods', 'loa', 'camera', 'sac', 'dong-ho']
+    phukien: ['airpods', 'loa', 'camera', 'sac', 'dong-ho', 'man-hinh', 'chuot', 'ban-phim']
 };
 
 const filterLabelMap = {
@@ -20,11 +20,23 @@ const filterLabelMap = {
     lenovo: 'Lenovo',
     msi: 'MSI',
     gigabyte: 'Gigabyte',
+    rosa: 'ROSA',
+    singpc: 'SingPC',
+    apple: 'Apple',
+    razer: 'Razer',
+    logitech: 'Logitech',
+    rapoo: 'Rapoo',
+    akko: 'Akko',
+    hyperx: 'HyperX',
+    dareu: 'DareU',
     airpods: 'TAI NGHE',
     loa: 'LOA',
     camera: 'CAMERA',
     sac: 'SẠC',
-    'dong-ho': 'ĐỒNG HỒ'
+    'dong-ho': 'ĐỒNG HỒ',
+    'man-hinh': 'MÀN HÌNH',
+    chuot: 'CHUỘT',
+    'ban-phim': 'BÀN PHÍM'
 };
 
 const filterModeByCategory = {
@@ -106,6 +118,31 @@ const productSpecificationTemplates = {
         ['connection', 'Kết nối'],
         ['dimensions', 'Kích thước'],
         ['weight', 'Khối lượng']
+    ],
+    monitor: [
+        ['monitor_type', 'Loại màn hình'],
+        ['screen_size', 'Kích thước màn'],
+        ['resolution', 'Độ phân giải'],
+        ['touchscreen', 'Màn hình cảm ứng'],
+        ['panel', 'Tấm nền'],
+        ['refresh_rate', 'Tần số quét'],
+        ['display_technology', 'Công nghệ màn hình']
+    ],
+    mouse: [
+        ['mouse_type', 'Loại chuột'],
+        ['compatibility', 'Tương thích'],
+        ['sensor', 'Cảm biến'],
+        ['max_resolution', 'Độ phân giải tối đa'],
+        ['cable_length', 'Độ dài dây'],
+        ['connection', 'Cách kết nối']
+    ],
+    keyboard: [
+        ['compatibility', 'Tương thích'],
+        ['connection', 'Cách kết nối'],
+        ['cable_length', 'Độ dài dây'],
+        ['switch_type', 'Loại switch'],
+        ['keycap_material', 'Chất liệu keycaps'],
+        ['led', 'Đèn LED']
     ]
 };
 
@@ -121,7 +158,10 @@ const accessoryProductSpecificationSubcategories = Object.freeze([
     { value: 'dong-ho', label: 'Đồng hồ thông minh', templateKey: 'watch' },
     { value: 'camera', label: 'Camera', templateKey: 'camera' },
     { value: 'sac', label: 'Sạc / Pin dự phòng', templateKey: 'charger' },
-    { value: 'loa', label: 'Loa', templateKey: 'speaker' }
+    { value: 'loa', label: 'Loa', templateKey: 'speaker' },
+    { value: 'man-hinh', label: 'Màn hình', templateKey: 'monitor' },
+    { value: 'chuot', label: 'Chuột', templateKey: 'mouse' },
+    { value: 'ban-phim', label: 'Bàn phím', templateKey: 'keyboard' }
 ]);
 
 const accessoryProductSpecificationTemplateMap = Object.freeze(
@@ -268,7 +308,8 @@ async function loadProductsByFilter(category, filterValue, page = 1) {
         .from('products')
         .select('*')
         .eq('status', 'active')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .order('sku', { ascending: true });
 
     if (category) {
         query = query.eq('category_id', category);
@@ -289,7 +330,9 @@ async function loadProductsByFilter(category, filterValue, page = 1) {
 
     const products = removeDuplicateProducts(data || []);
     const arrangedProducts = category || filterValue ? products : mixProductsByCategoryForPages(products);
-    currentBaseProductList = spreadSimilarProductsAcrossPages(arrangedProducts);
+    currentBaseProductList = currentCategoryPage
+        ? arrangedProducts
+        : spreadSimilarProductsAcrossPages(arrangedProducts);
     applyProductSearch(page);
 }
 
@@ -337,7 +380,9 @@ function applyProductSearch(page = 1) {
     filteredProducts = applyLaptopHeroPriceFilter(filteredProducts);
     filteredProducts = applyPcHeroPriceFilter(filteredProducts);
     filteredProducts = applyAccessoryHeroPriceFilter(filteredProducts);
-    currentProductList = filteredProducts;
+    currentProductList = currentCategoryPage
+        ? spreadSimilarProductsAcrossPages(filteredProducts)
+        : filteredProducts;
     currentEmptyProductMessage = keyword
         || hasActiveCategoryFilters()
         || currentPhonePriceFilter !== 'all'
@@ -480,6 +525,10 @@ function productMatchesCategoryFilter(product, groupTitle, value, field = '') {
     const normalizedGroupTitle = normalizeProductKey(groupTitle);
     const normalizedValue = normalizeProductKey(value);
 
+    if (field === 'brand') {
+        return normalizeProductKey(product.brand) === normalizedValue;
+    }
+
     if (field === 'subcategory') {
         const productSubcategory = normalizeProductKey(product.subcategory);
 
@@ -524,78 +573,140 @@ function productMatchesPriceFilter(product, normalizedValue) {
 }
 
 function spreadSimilarProductsAcrossPages(products) {
-    if (!Array.isArray(products) || products.length <= PRODUCTS_PER_PAGE) {
+    if (!Array.isArray(products) || products.length <= 1) {
         return products || [];
     }
 
-    const arrangedProducts = [...products];
-    const totalPages = Math.ceil(arrangedProducts.length / PRODUCTS_PER_PAGE);
+    const remainingProducts = products.map((product, sourceIndex) => ({
+        product,
+        sourceIndex
+    }));
+    const arrangedProducts = [];
 
-    for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
-        const pageStart = pageIndex * PRODUCTS_PER_PAGE;
-        const pageEnd = Math.min(pageStart + PRODUCTS_PER_PAGE, arrangedProducts.length);
-        const seenFamilies = new Set();
+    while (remainingProducts.length) {
+        let bestCandidateIndex = 0;
+        let bestCandidateScore = null;
 
-        for (let itemIndex = pageStart; itemIndex < pageEnd; itemIndex += 1) {
-            const familyKey = getProductFamilyKey(arrangedProducts[itemIndex]);
-
-            if (!familyKey) continue;
-
-            if (!seenFamilies.has(familyKey)) {
-                seenFamilies.add(familyKey);
-                continue;
-            }
-
-            const swapIndex = findSafeSwapIndex(
+        remainingProducts.forEach((candidate, candidateIndex) => {
+            const score = getProductPlacementScore(
+                candidate,
                 arrangedProducts,
-                itemIndex,
-                pageEnd,
-                familyKey,
-                seenFamilies
+                remainingProducts
             );
 
-            if (swapIndex === -1) continue;
-
-            const swapProduct = arrangedProducts[swapIndex];
-            arrangedProducts[swapIndex] = arrangedProducts[itemIndex];
-            arrangedProducts[itemIndex] = swapProduct;
-
-            const swapFamilyKey = getProductFamilyKey(swapProduct);
-            if (swapFamilyKey) {
-                seenFamilies.add(swapFamilyKey);
+            if (
+                !bestCandidateScore
+                || compareProductPlacementScores(score, bestCandidateScore) < 0
+            ) {
+                bestCandidateIndex = candidateIndex;
+                bestCandidateScore = score;
             }
+        });
+
+        const [selectedCandidate] = remainingProducts.splice(bestCandidateIndex, 1);
+        if (selectedCandidate?.product) {
+            arrangedProducts.push(selectedCandidate.product);
         }
     }
 
     return arrangedProducts;
 }
 
-function findSafeSwapIndex(products, duplicateIndex, searchStart, duplicateFamilyKey, currentPageFamilies) {
-    for (let candidateIndex = searchStart; candidateIndex < products.length; candidateIndex += 1) {
-        const candidateFamilyKey = getProductFamilyKey(products[candidateIndex]);
+function getProductPlacementScore(candidate, arrangedProducts, remainingProducts) {
+    const product = candidate.product;
+    const familyKey = getProductFamilyKey(product);
+    const visualGroupKey = getProductVisualGroupKey(product);
+    const brandKey = normalizeProductKey(product?.brand || '');
+    const previousProduct = arrangedProducts[arrangedProducts.length - 1];
+    const sameVisualGroup = Boolean(
+        previousProduct
+        && visualGroupKey
+        && visualGroupKey === getProductVisualGroupKey(previousProduct)
+    );
+    const sameBrand = Boolean(
+        previousProduct
+        && brandKey
+        && brandKey === normalizeProductKey(previousProduct.brand || '')
+    );
+    const sameFamily = Boolean(
+        previousProduct
+        && familyKey
+        && familyKey === getProductFamilyKey(previousProduct)
+    );
+    const remainingVisualGroupCount = remainingProducts.filter(
+        item => getProductVisualGroupKey(item.product) === visualGroupKey
+    ).length;
+    const remainingBrandCount = brandKey
+        ? remainingProducts.filter(
+            item => normalizeProductKey(item.product?.brand || '') === brandKey
+        ).length
+        : 0;
 
-        if (!candidateFamilyKey || candidateFamilyKey === duplicateFamilyKey) continue;
-        if (currentPageFamilies.has(candidateFamilyKey)) continue;
-        if (pageContainsFamily(products, candidateIndex, duplicateFamilyKey)) continue;
-
-        return candidateIndex;
-    }
-
-    return -1;
+    return [
+        Number(sameVisualGroup) + Number(sameBrand),
+        Number(sameVisualGroup),
+        Number(sameFamily),
+        -remainingVisualGroupCount,
+        -remainingBrandCount,
+        candidate.sourceIndex
+    ];
 }
 
-function pageContainsFamily(products, candidateIndex, familyKey) {
-    const pageStart = Math.floor(candidateIndex / PRODUCTS_PER_PAGE) * PRODUCTS_PER_PAGE;
-    const pageEnd = Math.min(pageStart + PRODUCTS_PER_PAGE, products.length);
+function compareProductPlacementScores(leftScore, rightScore) {
+    const scoreLength = Math.max(leftScore.length, rightScore.length);
 
-    for (let itemIndex = pageStart; itemIndex < pageEnd; itemIndex += 1) {
-        if (itemIndex === candidateIndex) continue;
-        if (getProductFamilyKey(products[itemIndex]) === familyKey) {
-            return true;
+    for (let scoreIndex = 0; scoreIndex < scoreLength; scoreIndex += 1) {
+        const difference = (leftScore[scoreIndex] || 0) - (rightScore[scoreIndex] || 0);
+        if (difference !== 0) {
+            return difference;
         }
     }
 
-    return false;
+    return 0;
+}
+
+function getProductVisualGroupKey(product) {
+    if (!product) return '';
+
+    const category = normalizeProductKey(product.category_id || 'other');
+    const explicitSubcategory = normalizeProductKey(product.subcategory || '');
+
+    if (category !== 'pc') {
+        return `${category}:${explicitSubcategory || 'general'}`;
+    }
+
+    if (explicitSubcategory) {
+        if (explicitSubcategory.includes('mini')) {
+            return 'pc:mini-pc';
+        }
+
+        if (
+            explicitSubcategory.includes('all-in-one')
+            || explicitSubcategory.includes('aio')
+        ) {
+            return 'pc:all-in-one';
+        }
+
+        return 'pc:desktop';
+    }
+
+    const normalizedName = normalizeProductKey(product.name)
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+
+    if (/\b(aio|all in one|imac)\b/.test(normalizedName)) {
+        return 'pc:all-in-one';
+    }
+
+    if (/\b(minipc|mini pc|mac mini|cubi|nuc)\b/.test(normalizedName)) {
+        return 'pc:mini-pc';
+    }
+
+    if (/\b(gaming|rosa|rezo|rtx|gtx)\b/.test(normalizedName)) {
+        return 'pc:desktop';
+    }
+
+    return 'pc:desktop';
 }
 
 function getProductFamilyKey(product) {
@@ -1404,8 +1515,7 @@ function buildProductDetailSpecs(product) {
         .map(([key, label]) => [
             label,
             getSpecificationValue(specifications, key, product)
-        ])
-        .filter(([, value]) => value !== UNKNOWN_SPEC_VALUE);
+        ]);
 
     if (rows.length) return rows;
 
