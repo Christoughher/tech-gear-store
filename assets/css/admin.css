@@ -111,7 +111,42 @@ body {
 
 .header-right {
     display: flex;
+    align-items: flex-start;
     gap: 12px; 
+}
+
+.admin-export-control {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.admin-export-status {
+    min-height: 16px;
+    max-width: 320px;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.35;
+    text-align: right;
+}
+
+.admin-export-status[data-type="success"] {
+    color: #15803d;
+}
+
+.admin-export-status[data-type="warning"] {
+    color: #b45309;
+}
+
+.admin-export-status[data-type="error"] {
+    color: #dc2626;
+}
+
+#exportAdminExcel[aria-busy="true"],
+#exportAdminExcel:disabled {
+    cursor: wait;
+    opacity: 0.72;
 }
 
 .header-icon {
