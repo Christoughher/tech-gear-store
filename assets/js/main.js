@@ -194,12 +194,13 @@ const productGalleryFallbacks = Object.freeze({
 const categoryDisplayOrder = ['phone', 'laptop', 'pc', 'phukien'];
 const FEATURED_SLIDER_LIMIT = 8;
 const FEATURED_SLIDER_INTERVAL_MS = 5000;
+const FEATURED_IMAGE_WHITE_TOLERANCE = 238;
 const FEATURED_PRODUCT_SKUS = Object.freeze([
+    'TGDD-ACC-MONITOR-368265',
+    'TGDD-PHN-IPHONE-16E-512',
     'TGDD-LAP-MSI-KATANA-15-HX',
     'TGDD-PHN-OPPO-RENO13-256',
     'TGDD-PC-EXTRA-ROSA-ASUS-I120-358731',
-    'TGDD-ACC-MONITOR-368265',
-    'TGDD-PHN-IPHONE-16E-512',
     'TGDD-ACC-MOUSE-357677',
     'TGDD2-LAP-ASUS-VIVOBOOK-16-A1607QA',
     'TGDD-PC-EXTRA-APPLE-IMAC-M4-331480'
@@ -570,6 +571,7 @@ function renderFeaturedProductSlider(products) {
                             data-fallback-index="0"
                             data-fallback-sources="${escapeHtml(imageUrls.join('|'))}"
                             onerror="handleProductImageError(this);"
+                            onload="processFeaturedSlideImage(this);"
                         >
                     </a>
                 </div>
@@ -630,6 +632,7 @@ function renderFeaturedProductSlider(products) {
     featuredProductSlider.dataset.slideCount = String(featuredProducts.length);
     featuredProductSlider.dataset.autoplayInterval = String(FEATURED_SLIDER_INTERVAL_MS);
     featuredProductSliderController = setupFeaturedProductSlider(featuredProductSlider, featuredProducts);
+    setupFeaturedSlideImages(featuredProductSlider);
 }
 
 function renderFeaturedProductSliderFallback() {
@@ -1718,6 +1721,110 @@ function normalizeProductImageUrls(imageUrls) {
     )];
 }
 
+function canProcessImageWithCanvas(image) {
+    const source = String(image.currentSrc || image.src || '').trim();
+    if (!source) return false;
+
+    try {
+        const imageUrl = new URL(source, window.location.href);
+        return imageUrl.origin === window.location.origin;
+    } catch (error) {
+        return false;
+    }
+}
+
+function markFeaturedSlideImageFallback(image) {
+    image.classList.add('featured-slide__image--blend-fallback');
+    image.closest('.featured-slide__image-link')?.classList.add('featured-slide__image-link--blend-fallback');
+}
+
+function stripNearWhiteBackgroundFromImage(image) {
+    if (!image?.naturalWidth || !image?.naturalHeight) return false;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return false;
+
+    context.drawImage(image, 0, 0);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    const tolerance = FEATURED_IMAGE_WHITE_TOLERANCE;
+    const featherStart = tolerance - 18;
+
+    for (let index = 0; index < pixels.length; index += 4) {
+        const red = pixels[index];
+        const green = pixels[index + 1];
+        const blue = pixels[index + 2];
+        const minimumChannel = Math.min(red, green, blue);
+
+        if (minimumChannel >= tolerance) {
+            pixels[index + 3] = 0;
+            continue;
+        }
+
+        if (minimumChannel >= featherStart) {
+            const fadeRatio = (tolerance - minimumChannel) / (tolerance - featherStart);
+            pixels[index + 3] = Math.round(pixels[index + 3] * fadeRatio);
+        }
+    }
+
+    context.putImageData(imageData, 0, 0);
+    image.src = canvas.toDataURL('image/png');
+    return true;
+}
+
+function processFeaturedSlideImage(image) {
+    if (!image?.classList?.contains('featured-slide__image')) return;
+    if (image.dataset.whiteBgProcessed === 'true') return;
+
+    const applyCssFallback = () => {
+        markFeaturedSlideImageFallback(image);
+        image.dataset.whiteBgProcessed = 'fallback';
+    };
+
+    const runProcessing = () => {
+        if (!image.naturalWidth) {
+            applyCssFallback();
+            return;
+        }
+
+        if (!canProcessImageWithCanvas(image)) {
+            applyCssFallback();
+            return;
+        }
+
+        try {
+            const processed = stripNearWhiteBackgroundFromImage(image);
+            if (!processed) {
+                applyCssFallback();
+                return;
+            }
+
+            image.classList.add('featured-slide__image--processed');
+            image.dataset.whiteBgProcessed = 'true';
+        } catch (error) {
+            console.warn('Không thể xóa nền trắng ảnh slider, dùng CSS fallback.', error);
+            applyCssFallback();
+        }
+    };
+
+    if (image.complete) {
+        runProcessing();
+        return;
+    }
+
+    image.addEventListener('load', runProcessing, { once: true });
+}
+
+function setupFeaturedSlideImages(sliderRoot) {
+    if (!sliderRoot) return;
+
+    sliderRoot.querySelectorAll('.featured-slide__image').forEach(processFeaturedSlideImage);
+}
+
 function handleProductImageError(image) {
     const fallbackSources = String(image.dataset.fallbackSources || '')
         .split('|')
@@ -1728,6 +1835,12 @@ function handleProductImageError(image) {
 
     if (fallbackSources[nextFallbackIndex]) {
         image.dataset.fallbackIndex = String(nextFallbackIndex);
+        image.dataset.whiteBgProcessed = 'false';
+        image.classList.remove(
+            'featured-slide__image--processed',
+            'featured-slide__image--blend-fallback'
+        );
+        image.closest('.featured-slide__image-link')?.classList.remove('featured-slide__image-link--blend-fallback');
         image.src = fallbackSources[nextFallbackIndex];
         return;
     }
