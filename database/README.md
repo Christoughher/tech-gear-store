@@ -94,6 +94,28 @@ admin, khóa order và yêu cầu trạng thái mà giao diện vừa đọc cò
 chuyển `pending -> processing -> completed`; profile khách hàng tự làm mới trạng
 thái từ database.
 
+## Trung tâm thông báo trên navbar
+
+Với database đang sử dụng, chạy `enable-notifications.sql` một lần trong Supabase
+SQL Editor. Migration chỉ thêm bảng, trigger, RPC, RLS và Realtime dành cho thông
+báo; không reset schema, không backfill đơn cũ và không thay đổi users, orders,
+carts hay tồn kho. Có thể chạy lại migration an toàn.
+
+Checkout thật tạo thông báo `order_created` cho khách và `admin_new_order` cho
+quản trị viên. Các chuyển trạng thái hợp lệ tiếp tục phát `order_approved`,
+`order_completed`, `order_cancelled` và `admin_order_cancelled`. Khóa
+`(user_id, dedupe_key)` ngăn một sự kiện bị tạo trùng khi retry.
+
+Loại `payment_succeeded` đã được dự phòng cho tích hợp thanh toán sau này nhưng
+chưa được phát từ checkout. Dự án hiện chưa có bảng giao dịch hoặc webhook xác
+minh thanh toán, vì vậy checkout chỉ được gọi đúng nghĩa là “Đặt hàng thành công”.
+Chỉ webhook/backend đáng tin cậy mới được phép tạo thông báo thanh toán thật.
+
+Client chỉ có quyền đọc thông báo của tài khoản hiện tại. Việc đánh dấu một hoặc
+tất cả thông báo đã đọc phải đi qua các RPC `mark_my_notification_read` và
+`mark_all_my_notifications_read`; trình duyệt không có quyền tự thêm, sửa hay xóa
+dòng thông báo.
+
 ## Đánh giá sản phẩm
 
 Schema mới trong `create-table.sql` đã có đầy đủ bảng, RLS và hai RPC đánh giá:
@@ -149,6 +171,17 @@ phẩm đã tồn tại và có kiểm tra số lượng `users`/`orders` trư�
 Kết quả cuối file phải trả về đúng ba nhóm `man-hinh`, `chuot`, `ban-phim`, mỗi nhóm 10 sản
 phẩm và mỗi sản phẩm có từ 2 đến 7 ảnh gallery. Không chạy lại `create-table.sql`, seed 60 sản
 phẩm hoặc demo seed chỉ để cài ba nhóm phụ kiện này.
+
+## Chuẩn hóa dấu tiếng Việt cho mô tả sản phẩm
+
+Với database hiện tại, chạy `fix-product-descriptions-vietnamese.sql` một lần trong
+Supabase SQL Editor. Migration chỉ cập nhật cột `description` theo đúng 60 SKU TGDD
+đang có; không thêm hoặc xóa sản phẩm, không thay đổi tồn kho và không tác động đến
+users, carts hay orders. Có thể chạy lại file an toàn.
+
+Không cần chạy lại `create-table.sql` hoặc seed dữ liệu chỉ để áp dụng phần sửa dấu.
+File `seed-techno-products-tgdd-60.sql` cũng đã được đồng bộ để các lần seed mới giữ
+nguyên mô tả tiếng Việt có dấu.
 
 ## Dữ liệu demo cho dashboard
 

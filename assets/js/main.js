@@ -192,9 +192,48 @@ const productGalleryFallbacks = Object.freeze({
 });
 
 const categoryDisplayOrder = ['phone', 'laptop', 'pc', 'phukien'];
+const FEATURED_SLIDER_LIMIT = 8;
+const FEATURED_SLIDER_INTERVAL_MS = 5000;
+const FEATURED_PRODUCT_SKUS = Object.freeze([
+    'TGDD-LAP-MSI-KATANA-15-HX',
+    'TGDD-PHN-OPPO-RENO13-256',
+    'TGDD-PC-EXTRA-ROSA-ASUS-I120-358731',
+    'TGDD-ACC-MONITOR-368265',
+    'TGDD-PHN-IPHONE-16E-512',
+    'TGDD-ACC-MOUSE-357677',
+    'TGDD2-LAP-ASUS-VIVOBOOK-16-A1607QA',
+    'TGDD-PC-EXTRA-APPLE-IMAC-M4-331480'
+]);
+const featuredSliderCategoryMeta = Object.freeze({
+    phone: {
+        label: 'Điện thoại',
+        path: '/pages/phone.html',
+        icon: 'fa-mobile-screen-button',
+        description: 'Thiết kế hiện đại, trải nghiệm mượt mà và kết nối linh hoạt.'
+    },
+    laptop: {
+        label: 'Laptop',
+        path: '/pages/laptop.html',
+        icon: 'fa-laptop',
+        description: 'Hiệu năng sẵn sàng cho học tập, làm việc và giải trí.'
+    },
+    pc: {
+        label: 'PC',
+        path: '/pages/pc.html',
+        icon: 'fa-desktop',
+        description: 'Cấu hình mạnh mẽ, tối ưu cho công việc và gaming.'
+    },
+    phukien: {
+        label: 'Phụ kiện',
+        path: '/pages/phu-kien.html',
+        icon: 'fa-gamepad',
+        description: 'Hoàn thiện góc máy với trải nghiệm chính xác và sống động.'
+    }
+});
 const brandContainer = document.getElementById('brand-filter-container');
 const productSection = document.querySelector('.products-section');
 const categoryProductGrid = document.querySelector('.product-grid');
+const featuredProductSlider = document.querySelector('[data-featured-slider]');
 const currentCategoryPage = getCurrentCategoryPage();
 const isProductDetailPage = window.location.pathname.toLowerCase().endsWith('/pages/chitiet-sanpham.html');
 const PRODUCTS_PER_PAGE = 12;
@@ -211,6 +250,7 @@ let currentPcPriceFilter = 'all';
 let currentAccessoryPriceFilter = 'all';
 let currentEmptyProductMessage = DEFAULT_EMPTY_PRODUCT_MESSAGE;
 let productDetailSwiper = null;
+let featuredProductSliderController = null;
 
 function getProductListContainer() {
     return productSection || (currentCategoryPage ? categoryProductGrid : null);
@@ -300,7 +340,13 @@ function renderBrands(category) {
 
 async function loadProductsByFilter(category, filterValue, page = 1) {
     const productListContainer = getProductListContainer();
-    if (!productListContainer || !window.supabaseClient) return;
+    const shouldInitializeHomeSlider = Boolean(featuredProductSlider && !category && !filterValue);
+    if (!productListContainer || !window.supabaseClient) {
+        if (shouldInitializeHomeSlider) {
+            renderFeaturedProductSliderFallback();
+        }
+        return;
+    }
 
     productListContainer.innerHTML = '<div class="products-empty-state">Đang tải sản phẩm...</div>';
     renderPagination(0, 1);
@@ -326,10 +372,16 @@ async function loadProductsByFilter(category, filterValue, page = 1) {
     if (error) {
         console.error('Không thể tải sản phẩm từ Supabase:', error.message);
         productListContainer.innerHTML = '<div class="products-empty-state">Không thể tải sản phẩm. Vui lòng kiểm tra database hoặc kết nối Supabase.</div>';
+        if (shouldInitializeHomeSlider) {
+            renderFeaturedProductSliderFallback();
+        }
         return;
     }
 
     const products = removeDuplicateProducts(data || []);
+    if (shouldInitializeHomeSlider) {
+        renderFeaturedProductSlider(products);
+    }
     const arrangedProducts = category || filterValue ? products : mixProductsByCategoryForPages(products);
     currentBaseProductList = currentCategoryPage
         ? arrangedProducts
@@ -359,6 +411,485 @@ function removeDuplicateProducts(products) {
 
         return true;
     });
+}
+
+function selectFeaturedProducts(products) {
+    const availableProducts = (Array.isArray(products) ? products : [])
+        .filter(product => (
+            product?.status === 'active'
+            && Math.max(0, Number(product.stock) || 0) > 0
+            && Boolean(getProductImage(product))
+        ));
+    const availableBySku = new Map(
+        availableProducts.map(product => [String(product.sku || ''), product])
+    );
+    const selectedProducts = FEATURED_PRODUCT_SKUS
+        .map(sku => availableBySku.get(sku))
+        .filter(Boolean);
+    const selectedSkus = new Set(selectedProducts.map(product => product.sku));
+
+    if (selectedProducts.length < FEATURED_SLIDER_LIMIT) {
+        const fallbackProducts = availableProducts
+            .filter(product => !selectedSkus.has(product.sku))
+            .sort((firstProduct, secondProduct) => (
+                normalizeProductImageUrls(secondProduct.image_urls).length
+                - normalizeProductImageUrls(firstProduct.image_urls).length
+                || Number(secondProduct.discount_percent || 0) - Number(firstProduct.discount_percent || 0)
+                || Number(secondProduct.stock || 0) - Number(firstProduct.stock || 0)
+                || normalizeProductKey(firstProduct.name).localeCompare(
+                    normalizeProductKey(secondProduct.name),
+                    'vi',
+                    { numeric: true, sensitivity: 'base' }
+                )
+            ));
+
+        for (const fallbackProduct of fallbackProducts) {
+            selectedProducts.push(fallbackProduct);
+            selectedSkus.add(fallbackProduct.sku);
+
+            if (selectedProducts.length >= FEATURED_SLIDER_LIMIT) break;
+        }
+    }
+
+    return selectedProducts.slice(0, FEATURED_SLIDER_LIMIT);
+}
+
+function getFeaturedSliderCategoryMeta(categoryId) {
+    return featuredSliderCategoryMeta[categoryId] || {
+        label: 'Sản phẩm',
+        path: '#products',
+        icon: 'fa-star',
+        description: 'Sản phẩm công nghệ nổi bật được lựa chọn tại TECH.NO.'
+    };
+}
+
+function renderFeaturedProductSlider(products) {
+    if (!featuredProductSlider) return;
+
+    const featuredProducts = selectFeaturedProducts(products);
+    if (!featuredProducts.length) {
+        renderFeaturedProductSliderFallback();
+        return;
+    }
+
+    featuredProductSliderController?.destroy();
+
+    const slidesMarkup = featuredProducts.map((product, index) => {
+        const categoryMeta = getFeaturedSliderCategoryMeta(product.category_id);
+        const detailUrl = getProductDetailUrl(product);
+        const imageUrls = normalizeProductImageUrls(product.image_urls);
+        const imageUrl = imageUrls[0] || '';
+        const price = Math.max(0, Number(product.price) || 0);
+        const originalPrice = Math.max(0, Number(product.original_price) || 0);
+        const discountPercent = Math.max(0, Number(product.discount_percent) || 0);
+        const stock = Math.max(0, Number(product.stock) || 0);
+        const isActive = index === 0;
+
+        return `
+            <article
+                class="featured-slide ${isActive ? 'is-active' : ''}"
+                data-featured-slide
+                data-category="${escapeHtml(product.category_id)}"
+                role="group"
+                aria-roledescription="slide"
+                aria-label="${index + 1} trên ${featuredProducts.length}: ${escapeHtml(product.name)}"
+                aria-hidden="${isActive ? 'false' : 'true'}"
+            >
+                <div class="featured-slide__content">
+                    <span class="featured-slide__eyebrow">
+                        <i class="fa-solid ${escapeHtml(categoryMeta.icon)}" aria-hidden="true"></i>
+                        Sản phẩm nổi bật · ${escapeHtml(categoryMeta.label)}
+                    </span>
+
+                    <h2 class="featured-slide__title">
+                        <a href="${escapeHtml(detailUrl)}" tabindex="${isActive ? '0' : '-1'}">
+                            ${escapeHtml(product.name)}
+                        </a>
+                    </h2>
+
+                    <p class="featured-slide__description">${escapeHtml(categoryMeta.description)}</p>
+
+                    <div class="featured-slide__benefits" aria-label="Quyền lợi">
+                        <span class="featured-slide__benefit">
+                            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                            Chính hãng 100%
+                        </span>
+                        <span class="featured-slide__benefit">
+                            <i class="fa-solid fa-truck-fast" aria-hidden="true"></i>
+                            Giao hàng toàn quốc
+                        </span>
+                        <span class="featured-slide__benefit">
+                            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                            Còn ${stock.toLocaleString('vi-VN')} sản phẩm
+                        </span>
+                    </div>
+
+                    <div class="featured-slide__commerce">
+                        <strong class="featured-slide__price">${formatCurrency(price)}đ</strong>
+                        ${originalPrice > price ? `
+                            <del class="featured-slide__original-price">${formatCurrency(originalPrice)}đ</del>
+                        ` : ''}
+                        ${discountPercent > 0 ? `
+                            <span class="featured-slide__discount">-${discountPercent}%</span>
+                        ` : ''}
+                    </div>
+
+                    <div class="featured-slide__actions">
+                        <a
+                            class="featured-slide__cta featured-slide__cta--primary"
+                            href="${escapeHtml(detailUrl)}"
+                            tabindex="${isActive ? '0' : '-1'}"
+                        >
+                            Xem chi tiết
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a
+                            class="featured-slide__cta"
+                            href="${escapeHtml(categoryMeta.path)}"
+                            tabindex="${isActive ? '0' : '-1'}"
+                        >
+                            Xem ${escapeHtml(categoryMeta.label.toLowerCase())}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="featured-slide__visual">
+                    <a
+                        class="featured-slide__image-link"
+                        href="${escapeHtml(detailUrl)}"
+                        aria-label="Xem ${escapeHtml(product.name)}"
+                        tabindex="${isActive ? '0' : '-1'}"
+                    >
+                        <img
+                            class="featured-slide__image"
+                            src="${escapeHtml(imageUrl)}"
+                            alt="${escapeHtml(product.name)}"
+                            ${index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
+                            decoding="async"
+                            referrerpolicy="no-referrer"
+                            data-fallback-index="0"
+                            data-fallback-sources="${escapeHtml(imageUrls.join('|'))}"
+                            onerror="handleProductImageError(this);"
+                        >
+                    </a>
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    const controlsMarkup = featuredProducts.length > 1 ? `
+        <button
+            class="featured-slider__arrow featured-slider__arrow--previous"
+            type="button"
+            data-featured-previous
+            aria-label="Sản phẩm trước"
+        >
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button
+            class="featured-slider__arrow featured-slider__arrow--next"
+            type="button"
+            data-featured-next
+            aria-label="Sản phẩm tiếp theo"
+        >
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </button>
+        <div class="featured-slider__footer">
+            <div class="featured-slider__dots" role="group" aria-label="Chọn sản phẩm nổi bật">
+                ${featuredProducts.map((product, index) => `
+                    <button
+                        class="featured-slider__dot"
+                        type="button"
+                        data-featured-dot="${index}"
+                        aria-label="Đi đến sản phẩm ${index + 1}: ${escapeHtml(product.name)}"
+                        aria-current="${index === 0 ? 'true' : 'false'}"
+                    ></button>
+                `).join('')}
+            </div>
+            <button
+                class="featured-slider__autoplay"
+                type="button"
+                data-featured-autoplay
+                aria-label="Tạm dừng tự động chuyển"
+                aria-pressed="false"
+            >
+                <i class="fa-solid fa-pause" aria-hidden="true"></i>
+            </button>
+        </div>
+        <p class="featured-slider__status" data-featured-status aria-live="polite"></p>
+    ` : '';
+
+    featuredProductSlider.innerHTML = `
+        <div class="featured-slider__viewport">
+            <div class="featured-slider__track" data-featured-track aria-live="off">
+                ${slidesMarkup}
+            </div>
+        </div>
+        ${controlsMarkup}
+    `;
+    featuredProductSlider.dataset.slideCount = String(featuredProducts.length);
+    featuredProductSlider.dataset.autoplayInterval = String(FEATURED_SLIDER_INTERVAL_MS);
+    featuredProductSliderController = setupFeaturedProductSlider(featuredProductSlider, featuredProducts);
+}
+
+function renderFeaturedProductSliderFallback() {
+    if (!featuredProductSlider) return;
+
+    featuredProductSliderController?.destroy();
+    featuredProductSliderController = null;
+    featuredProductSlider.removeAttribute('data-slide-count');
+    featuredProductSlider.dataset.autoplayState = 'stopped';
+    featuredProductSlider.innerHTML = `
+        <div class="featured-slider__fallback" role="status">
+            <strong>Chưa thể tải sản phẩm nổi bật</strong>
+            <span>Bạn vẫn có thể khám phá toàn bộ sản phẩm đang có tại TECH.NO.</span>
+            <a class="featured-slider__fallback-link" href="#products">Xem tất cả sản phẩm</a>
+        </div>
+    `;
+}
+
+function setupFeaturedProductSlider(sliderRoot, products) {
+    const track = sliderRoot.querySelector('[data-featured-track]');
+    const slides = [...sliderRoot.querySelectorAll('[data-featured-slide]')];
+    const previousButton = sliderRoot.querySelector('[data-featured-previous]');
+    const nextButton = sliderRoot.querySelector('[data-featured-next]');
+    const autoplayButton = sliderRoot.querySelector('[data-featured-autoplay]');
+    const dots = [...sliderRoot.querySelectorAll('[data-featured-dot]')];
+    const statusElement = sliderRoot.querySelector('[data-featured-status]');
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let activeIndex = 0;
+    let timerId = null;
+    let isHovered = false;
+    let hasFocusWithin = false;
+    let isTouching = false;
+    let isInViewport = true;
+    let userPaused = false;
+    let touchStartX = null;
+    let touchStartY = null;
+
+    const stopAutoplay = () => {
+        if (timerId !== null) {
+            window.clearInterval(timerId);
+            timerId = null;
+        }
+        sliderRoot.dataset.autoplayState = 'paused';
+    };
+
+    const canAutoplay = () => (
+        slides.length > 1
+        && !reducedMotionQuery.matches
+        && !userPaused
+        && !isHovered
+        && !hasFocusWithin
+        && !isTouching
+        && isInViewport
+        && !document.hidden
+    );
+
+    const startAutoplay = () => {
+        stopAutoplay();
+        if (!canAutoplay()) return;
+
+        timerId = window.setInterval(() => {
+            updateActiveSlide(activeIndex + 1);
+        }, FEATURED_SLIDER_INTERVAL_MS);
+        sliderRoot.dataset.autoplayState = 'running';
+    };
+
+    const updateAutoplayButton = () => {
+        if (!autoplayButton) return;
+
+        const autoplayDisabled = reducedMotionQuery.matches;
+        autoplayButton.disabled = autoplayDisabled;
+        autoplayButton.setAttribute('aria-pressed', String(userPaused));
+        autoplayButton.setAttribute(
+            'aria-label',
+            autoplayDisabled
+                ? 'Tự động chuyển đã tắt theo cài đặt giảm chuyển động'
+                : userPaused
+                    ? 'Tiếp tục tự động chuyển'
+                    : 'Tạm dừng tự động chuyển'
+        );
+        autoplayButton.innerHTML = `
+            <i class="fa-solid ${userPaused ? 'fa-play' : 'fa-pause'}" aria-hidden="true"></i>
+        `;
+    };
+
+    const updateActiveSlide = (nextIndex, announce = false) => {
+        activeIndex = (nextIndex + slides.length) % slides.length;
+        track.style.transform = `translate3d(-${activeIndex * 100}%, 0, 0)`;
+        sliderRoot.dataset.activeIndex = String(activeIndex);
+
+        slides.forEach((slide, index) => {
+            const isActive = index === activeIndex;
+            slide.classList.toggle('is-active', isActive);
+            slide.setAttribute('aria-hidden', String(!isActive));
+
+            if ('inert' in slide) {
+                slide.inert = !isActive;
+            }
+
+            slide.querySelectorAll('a, button').forEach(element => {
+                element.tabIndex = isActive ? 0 : -1;
+            });
+        });
+
+        dots.forEach((dot, index) => {
+            dot.setAttribute('aria-current', String(index === activeIndex));
+        });
+
+        const activeSlide = slides[activeIndex];
+        const activeCategory = activeSlide?.dataset.category || 'phone';
+        const activeMeta = getFeaturedSliderCategoryMeta(activeCategory);
+        sliderRoot.style.setProperty(
+            '--featured-accent',
+            getComputedStyle(activeSlide).getPropertyValue('--featured-accent').trim() || '#2563eb'
+        );
+
+        if (announce && statusElement) {
+            statusElement.textContent = `Đang xem sản phẩm ${activeIndex + 1} trên ${slides.length}: ${products[activeIndex].name}`;
+        }
+
+        sliderRoot.setAttribute(
+            'aria-label',
+            `Sản phẩm nổi bật · ${activeMeta.label} · ${activeIndex + 1} trên ${slides.length}`
+        );
+    };
+
+    const moveManually = (nextIndex) => {
+        updateActiveSlide(nextIndex, true);
+        startAutoplay();
+    };
+
+    const handlePrevious = () => moveManually(activeIndex - 1);
+    const handleNext = () => moveManually(activeIndex + 1);
+    const handleAutoplayToggle = () => {
+        userPaused = !userPaused;
+        updateAutoplayButton();
+        startAutoplay();
+    };
+    const handleMouseEnter = () => {
+        isHovered = true;
+        stopAutoplay();
+    };
+    const handleMouseLeave = () => {
+        isHovered = false;
+        startAutoplay();
+    };
+    const handleFocusIn = () => {
+        hasFocusWithin = true;
+        stopAutoplay();
+    };
+    const handleFocusOut = () => {
+        window.setTimeout(() => {
+            hasFocusWithin = sliderRoot.contains(document.activeElement);
+            startAutoplay();
+        }, 0);
+    };
+    const handleVisibilityChange = () => {
+        startAutoplay();
+    };
+    const handleReducedMotionChange = () => {
+        if (reducedMotionQuery.matches) stopAutoplay();
+        updateAutoplayButton();
+        startAutoplay();
+    };
+    const handleKeyDown = (event) => {
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            moveManually(activeIndex - 1);
+        } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            moveManually(activeIndex + 1);
+        } else if (event.key === 'Home') {
+            event.preventDefault();
+            moveManually(0);
+        } else if (event.key === 'End') {
+            event.preventDefault();
+            moveManually(slides.length - 1);
+        }
+    };
+    const handleTouchStart = (event) => {
+        const touch = event.touches[0];
+        if (!touch) return;
+
+        isTouching = true;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        stopAutoplay();
+    };
+    const handleTouchEnd = (event) => {
+        const touch = event.changedTouches[0];
+        const horizontalDistance = touch && touchStartX !== null ? touch.clientX - touchStartX : 0;
+        const verticalDistance = touch && touchStartY !== null ? touch.clientY - touchStartY : 0;
+
+        isTouching = false;
+        touchStartX = null;
+        touchStartY = null;
+
+        if (Math.abs(horizontalDistance) >= 48 && Math.abs(horizontalDistance) > Math.abs(verticalDistance)) {
+            moveManually(activeIndex + (horizontalDistance < 0 ? 1 : -1));
+        } else {
+            startAutoplay();
+        }
+    };
+
+    previousButton?.addEventListener('click', handlePrevious);
+    nextButton?.addEventListener('click', handleNext);
+    autoplayButton?.addEventListener('click', handleAutoplayToggle);
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => moveManually(index));
+    });
+    sliderRoot.addEventListener('mouseenter', handleMouseEnter);
+    sliderRoot.addEventListener('mouseleave', handleMouseLeave);
+    sliderRoot.addEventListener('focusin', handleFocusIn);
+    sliderRoot.addEventListener('focusout', handleFocusOut);
+    sliderRoot.addEventListener('keydown', handleKeyDown);
+    sliderRoot.addEventListener('touchstart', handleTouchStart, { passive: true });
+    sliderRoot.addEventListener('touchend', handleTouchEnd, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (typeof reducedMotionQuery.addEventListener === 'function') {
+        reducedMotionQuery.addEventListener('change', handleReducedMotionChange);
+    } else {
+        reducedMotionQuery.addListener(handleReducedMotionChange);
+    }
+
+    const viewportObserver = typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(([entry]) => {
+            isInViewport = Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.35);
+            startAutoplay();
+        }, { threshold: [0, 0.35] })
+        : null;
+    viewportObserver?.observe(sliderRoot);
+
+    updateActiveSlide(0);
+    updateAutoplayButton();
+    startAutoplay();
+
+    return {
+        destroy() {
+            stopAutoplay();
+            previousButton?.removeEventListener('click', handlePrevious);
+            nextButton?.removeEventListener('click', handleNext);
+            autoplayButton?.removeEventListener('click', handleAutoplayToggle);
+            sliderRoot.removeEventListener('mouseenter', handleMouseEnter);
+            sliderRoot.removeEventListener('mouseleave', handleMouseLeave);
+            sliderRoot.removeEventListener('focusin', handleFocusIn);
+            sliderRoot.removeEventListener('focusout', handleFocusOut);
+            sliderRoot.removeEventListener('keydown', handleKeyDown);
+            sliderRoot.removeEventListener('touchstart', handleTouchStart);
+            sliderRoot.removeEventListener('touchend', handleTouchEnd);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            viewportObserver?.disconnect();
+
+            if (typeof reducedMotionQuery.removeEventListener === 'function') {
+                reducedMotionQuery.removeEventListener('change', handleReducedMotionChange);
+            } else {
+                reducedMotionQuery.removeListener(handleReducedMotionChange);
+            }
+        }
+    };
 }
 
 function normalizeProductKey(value) {
@@ -1188,12 +1719,29 @@ function normalizeProductImageUrls(imageUrls) {
 }
 
 function handleProductImageError(image) {
+    const fallbackSources = String(image.dataset.fallbackSources || '')
+        .split('|')
+        .map(source => source.trim())
+        .filter(Boolean);
+    const currentFallbackIndex = Math.max(0, Number(image.dataset.fallbackIndex) || 0);
+    const nextFallbackIndex = currentFallbackIndex + 1;
+
+    if (fallbackSources[nextFallbackIndex]) {
+        image.dataset.fallbackIndex = String(nextFallbackIndex);
+        image.src = fallbackSources[nextFallbackIndex];
+        return;
+    }
+
     image.onerror = null;
     image.style.display = 'none';
 
-    const wrapper = image.closest('.product-img');
+    const wrapper = image.closest('.product-img, .featured-slide__visual');
     if (wrapper) {
-        wrapper.classList.add('product-img--missing');
+        wrapper.classList.add(
+            wrapper.classList.contains('featured-slide__visual')
+                ? 'is-image-missing'
+                : 'product-img--missing'
+        );
     }
 }
 
@@ -1208,6 +1756,48 @@ function escapeHtml(value) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+let notificationCenterScriptPromise = null;
+
+function loadNotificationCenterScript() {
+    if (!document.getElementById('navbar-container')) {
+        return Promise.resolve(null);
+    }
+
+    if (window.TechnoNotifications) {
+        return Promise.resolve(window.TechnoNotifications);
+    }
+
+    if (notificationCenterScriptPromise) {
+        return notificationCenterScriptPromise;
+    }
+
+    notificationCenterScriptPromise = new Promise((resolve) => {
+        const existingScript = document.querySelector('script[data-techno-notifications]');
+
+        const handleReady = () => resolve(window.TechnoNotifications || null);
+        const handleError = () => {
+            console.error('Không thể tải trung tâm thông báo.');
+            resolve(null);
+        };
+
+        if (existingScript) {
+            existingScript.addEventListener('load', handleReady, { once: true });
+            existingScript.addEventListener('error', handleError, { once: true });
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = '/assets/js/notifications.js';
+        script.dataset.technoNotifications = 'true';
+        script.async = true;
+        script.addEventListener('load', handleReady, { once: true });
+        script.addEventListener('error', handleError, { once: true });
+        document.head.appendChild(script);
+    });
+
+    return notificationCenterScriptPromise;
 }
 
 // Hàm để load một file HTML vào một phần tử có ID cho trước
@@ -1388,6 +1978,7 @@ function showNotification(message, type = 'success', customTitle = '') {
 
 // Chạy khi trang web tải xong
 document.addEventListener('DOMContentLoaded', async () => {
+    const notificationCenterReady = loadNotificationCenterScript();
     const navbarReady = loadComponent('navbar-container', 'navbar.html');
     const paginationReady = loadComponent('pagination-container', 'pagination.html');
     loadComponent('footer-container', 'footer.html'); 
@@ -1402,7 +1993,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPcHeroPriceFilters();
     setupAccessoryHeroPriceFilters();
 
-    await navbarReady;
+    await Promise.all([navbarReady, notificationCenterReady]);
+    await window.TechnoNotifications?.init?.();
     setupNavbarSearch();
 
     await paginationReady;

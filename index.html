@@ -13,17 +13,23 @@
     <div id="navbar-container"></div>
 
     <main class="container">
-        <section class="banner-section">
-            <a href="pages/chitiet-sanpham.html">
-                <img src="assets/images/banner1.png" alt="Banner sản phẩm 1">
-            </a>
-
-            <a href="pages/chitiet-sanpham.html">
-                <img src="assets/images/banner2.png" alt="Banner sản phẩm 2">
-            </a>
+        <section
+            class="featured-slider"
+            data-featured-slider
+            aria-label="Sản phẩm nổi bật"
+            aria-roledescription="carousel"
+            tabindex="0"
+        >
+            <div class="featured-slider__loading" role="status" aria-live="polite">
+                <span class="featured-slider__loading-shimmer" aria-hidden="true"></span>
+                <span>Đang tải sản phẩm nổi bật...</span>
+            </div>
+            <noscript>
+                <a class="featured-slider__fallback-link" href="#products">Khám phá sản phẩm tại TECH.NO</a>
+            </noscript>
         </section>
 
-        <section class="shop-section">
+        <section class="shop-section" id="products">
             <div class="filter-section">
                 <button class="btn-filter-main">
                     <i class="fa-solid fa-filter"></i> Lọc
@@ -229,4 +235,3 @@
     <script src="assets/js/main.js"></script>
 </body>
 </html>
-    
