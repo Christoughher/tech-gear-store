@@ -25,9 +25,23 @@
                 </div>
             </div>
             <div class="header-right">
-                <button class="btn btn-secondary">
-                    <i class="fa-solid fa-download"></i> Xuất file
-                </button>
+                <div class="admin-export-control">
+                    <button
+                        class="btn btn-secondary"
+                        id="exportAdminExcel"
+                        type="button"
+                        aria-describedby="adminExportStatus"
+                    >
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>Xuất báo cáo Excel</span>
+                    </button>
+                    <span
+                        class="admin-export-status"
+                        id="adminExportStatus"
+                        role="status"
+                        aria-live="polite"
+                    ></span>
+                </div>
                 <a class="btn btn-primary" href="admin-add-sanpham.html" style="text-decoration: none;">
                     <i class="fa-solid fa-plus"></i> Thêm sản phẩm
                 </a>
@@ -113,8 +127,10 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/vendor/exceljs.min.js"></script>
     <script src="../../assets/js/supabase-config.js"></script>
     <script src="/assets/js/main.js"></script>
     <script src="/assets/js/admin-data.js"></script>
+    <script src="/assets/js/admin-export.js"></script>
 </body>
 </html>

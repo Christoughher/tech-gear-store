@@ -203,6 +203,7 @@ let currentBaseProductList = [];
 let currentProductList = [];
 let currentProductPage = 1;
 let currentSearchKeyword = '';
+let currentProductSort = 'default';
 let currentCategoryFilterGroups = [];
 let currentPhonePriceFilter = 'all';
 let currentLaptopPriceFilter = 'all';
@@ -369,6 +370,59 @@ function normalizeProductKey(value) {
         .replace(/\s+/g, ' ');
 }
 
+function normalizeProductSortMode(value) {
+    const supportedModes = new Set(['default', 'price-asc', 'price-desc', 'newest']);
+    return supportedModes.has(value) ? value : 'default';
+}
+
+function getProductSortPrice(product) {
+    const price = Number(product?.price);
+    return Number.isFinite(price) ? price : 0;
+}
+
+function getProductCreatedTime(product) {
+    const createdTime = Date.parse(product?.created_at || '');
+    return Number.isFinite(createdTime) ? createdTime : 0;
+}
+
+function compareProductIdentity(firstProduct, secondProduct) {
+    const firstIdentity = `${normalizeProductKey(firstProduct?.name)} ${normalizeProductKey(firstProduct?.sku)}`;
+    const secondIdentity = `${normalizeProductKey(secondProduct?.name)} ${normalizeProductKey(secondProduct?.sku)}`;
+
+    return firstIdentity.localeCompare(secondIdentity, 'vi', {
+        numeric: true,
+        sensitivity: 'base'
+    });
+}
+
+function sortProducts(products, sortMode = 'default') {
+    const sortedProducts = Array.isArray(products) ? [...products] : [];
+    const normalizedMode = normalizeProductSortMode(sortMode);
+
+    if (normalizedMode === 'price-asc') {
+        return sortedProducts.sort((firstProduct, secondProduct) => (
+            getProductSortPrice(firstProduct) - getProductSortPrice(secondProduct)
+            || compareProductIdentity(firstProduct, secondProduct)
+        ));
+    }
+
+    if (normalizedMode === 'price-desc') {
+        return sortedProducts.sort((firstProduct, secondProduct) => (
+            getProductSortPrice(secondProduct) - getProductSortPrice(firstProduct)
+            || compareProductIdentity(firstProduct, secondProduct)
+        ));
+    }
+
+    if (normalizedMode === 'newest') {
+        return sortedProducts.sort((firstProduct, secondProduct) => (
+            getProductCreatedTime(secondProduct) - getProductCreatedTime(firstProduct)
+            || compareProductIdentity(firstProduct, secondProduct)
+        ));
+    }
+
+    return sortedProducts;
+}
+
 function applyProductSearch(page = 1) {
     const keyword = normalizeProductKey(currentSearchKeyword);
     let filteredProducts = keyword
@@ -380,9 +434,13 @@ function applyProductSearch(page = 1) {
     filteredProducts = applyLaptopHeroPriceFilter(filteredProducts);
     filteredProducts = applyPcHeroPriceFilter(filteredProducts);
     filteredProducts = applyAccessoryHeroPriceFilter(filteredProducts);
-    currentProductList = currentCategoryPage
-        ? spreadSimilarProductsAcrossPages(filteredProducts)
-        : filteredProducts;
+    if (currentCategoryPage && currentProductSort === 'default') {
+        currentProductList = spreadSimilarProductsAcrossPages(filteredProducts);
+    } else if (currentCategoryPage) {
+        currentProductList = sortProducts(filteredProducts, currentProductSort);
+    } else {
+        currentProductList = filteredProducts;
+    }
     currentEmptyProductMessage = keyword
         || hasActiveCategoryFilters()
         || currentPhonePriceFilter !== 'all'
@@ -1337,6 +1395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Thiết lập sự kiện cho nút "Thêm giỏ"
     setupAddToCartButtons();
+    setupCategoryProductSort();
     setupCategoryFilterGroups();
     setupPhoneHeroPriceFilters();
     setupLaptopHeroPriceFilters();
@@ -1890,6 +1949,21 @@ function setupCategoryFilterGroups() {
     updateCategoryFilterGroups(false);
 }
 
+function setupCategoryProductSort() {
+    const sortSelect = document.querySelector('[data-product-sort]');
+    if (!sortSelect || !currentCategoryPage) return;
+
+    currentProductSort = normalizeProductSortMode(sortSelect.value);
+    sortSelect.value = currentProductSort;
+
+    sortSelect.addEventListener('change', () => {
+        currentProductSort = normalizeProductSortMode(sortSelect.value);
+        sortSelect.value = currentProductSort;
+        applyProductSearch(1);
+        scrollToProductList();
+    });
+}
+
 function setupPhoneHeroPriceFilters() {
     const buttons = [...document.querySelectorAll('[data-phone-price-filter]')];
     if (currentCategoryPage !== 'phone' || !buttons.length) return;
@@ -2021,11 +2095,6 @@ function updateCategoryFilterGroups(shouldRender = true) {
 // =========================================================================
 
 window.addEventListener('navbarLoaded', async () => {
-    // Chỉ chạy redirect admin một lần duy nhất (nếu đã chạy rồi thì bỏ qua)
-    if (sessionStorage.getItem('adminRedirectProcessed')) {
-        return;
-    }
-    
     // 1. Truy cập vào các phần tử HTML cần can thiệp trên navbar vừa nạp
     const adminNavLink = document.getElementById('admin-nav-link');
     const authStatusContainer = document.getElementById('auth-status');
@@ -2086,7 +2155,7 @@ window.addEventListener('navbarLoaded', async () => {
 
         // 5. Kiểm tra giá trị cột role từ cơ sở dữ liệu đổ về để quyết định ẩn/hiện nút Admin công khai
         if (userProfile && userProfile.role === 'admin') {
-            console.log("Xác thực thành công: Người dùng hiện tại có quyền hạn Admin! Chuyển hướng đến trang admin...");
+            console.log("Xác thực thành công: hiển thị lối tắt về trang tổng quan Admin.");
             console.log("userProfile.role =", userProfile.role);
             adminNavLink.style.display = 'none'; // Ẩn nút Admin cũ
             
@@ -2103,22 +2172,6 @@ window.addEventListener('navbarLoaded', async () => {
                 }
             }
             
-            // Mark that we've processed admin redirect logic (prevent repeat on other pages)
-            sessionStorage.setItem('adminRedirectProcessed', 'true');
-            
-            // Nếu người dùng là admin và không phải đang ở trang admin, redirect ngay
-            const currentPath = window.location.pathname.toLowerCase();
-            const params = new URLSearchParams(window.location.search);
-            const isViewingAsAdmin = params.get('viewing_as_admin');
-            
-            if (!currentPath.includes('/pages/admin/') && !isViewingAsAdmin) {
-                window.location.href = '/pages/admin/admin-tongquan.html';
-            }
-            
-            // Xóa param sau khi sử dụng để khi reload trang sẽ redirect bình thường
-            if (isViewingAsAdmin) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
         } else {
             console.log("Xác thực: Tài khoản này là khách hàng thành viên (customer), ẩn nút Admin.");
             adminNavLink.style.display = 'none'; // Người dùng thông thường không được thấy nút này
@@ -2134,7 +2187,6 @@ window.addEventListener('navbarLoaded', async () => {
                     
                     const { error: signOutError } = await thucTheSupabaseActive.auth.signOut();
                     if (!signOutError) {
-                        sessionStorage.removeItem('adminRedirectProcessed');
                         // Restore home link
                         const homeNavLink = document.getElementById('home-nav-link');
                         if (homeNavLink) {
@@ -2178,7 +2230,6 @@ async function setupAdminLogout() {
         try {
             const { error: signOutError } = await window.supabaseClient.auth.signOut();
             if (!signOutError) {
-                sessionStorage.removeItem('adminRedirectProcessed');
                 // Restore home link in navbar
                 const homeNavLink = document.getElementById('home-nav-link');
                 if (homeNavLink) {

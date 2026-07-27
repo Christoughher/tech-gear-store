@@ -150,8 +150,18 @@ assert.match(
 );
 assert.match(
     frontend,
-    /currentProductList = currentCategoryPage\s*\?\s*spreadSimilarProductsAcrossPages\(filteredProducts\)\s*:\s*filteredProducts/,
-    'Category search and filter results must be rearranged before pagination.'
+    /currentCategoryPage && currentProductSort === 'default'/,
+    'Category search and filter results must be visually rearranged only in the default sort mode.'
+);
+assert.match(
+    frontend,
+    /currentProductList = spreadSimilarProductsAcrossPages\(filteredProducts\)/,
+    'Default category results must still be visually rearranged before pagination.'
+);
+assert.match(
+    frontend,
+    /currentProductList = sortProducts\(filteredProducts, currentProductSort\)/,
+    'An explicit product sort must take precedence over visual rearrangement.'
 );
 
 console.log(`product-spread-contract: ${arranged.length} PC products interleaved deterministically`);
