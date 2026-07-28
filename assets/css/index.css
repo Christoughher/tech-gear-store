@@ -15,8 +15,8 @@
     --featured-surface-end: #e8f1ff;
     position: relative;
     width: 100%;
-    height: clamp(420px, 32vw, 460px);
-    margin-top: 60px;
+    height: clamp(420px, 25vw, 460px);
+    margin-top: 20px;
     overflow: hidden;
     border: 1px solid rgba(148, 163, 184, 0.24);
     border-radius: 20px;
@@ -777,10 +777,10 @@
 
 .products-section {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 16px;
     padding: 12px;
-}
+}   
 
 .products-empty-state {
     grid-column: 1 / -1;
@@ -808,6 +808,15 @@
     transform: translateY(-4px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+.product-desc {
+    color: #6b7280;
+    min-height: 36px;
+    font-size: 12px;
+    line-height: 1.45;
+    margin-bottom: 10px;
+}
+
 
 .product-img {
     width: 100%;    
