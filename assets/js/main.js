@@ -1599,7 +1599,7 @@ function renderProducts(products) {
         const imageMarkup = imageUrl
             ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" referrerpolicy="no-referrer" onerror="handleProductImageError(this);">`
             : '';
-
+        const description = product.short_description || product.description;
         return `
             <div class="product-item">
                 <div class="product-img ${imageUrl ? '' : 'product-img--missing'}">
@@ -1611,7 +1611,7 @@ function renderProducts(products) {
                         <a href="${escapeHtml(detailUrl)}">${escapeHtml(product.name)}</a>
                     </h3>
                 </div>
-
+                <p class="product-desc">${escapeHtml(description)}</p>
                 <div class="product-price">
                     <span class="price-amount">${formatCurrency(product.price)}<sup><u>đ</u></sup></span>
                     ${discount > 0 ? `
